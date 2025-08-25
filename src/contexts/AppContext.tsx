@@ -74,101 +74,16 @@ interface AppActions {
 
 const AppContext = createContext<(AppState & AppActions) | undefined>(undefined);
 
-// Initial mock data
-const initialCampaigns: Campaign[] = [
-  {
-    id: "1",
-    title: "Ladda upp bild → få 20% rabatt",
-    discount: 20,
-    validUntil: "2024-12-31",
-    submissions: 47,
-    couponsIssued: 32,
-    status: "active",
-    auto_approval: true,
-    createdAt: "2024-11-01"
-  },
-  {
-    id: "2", 
-    title: "Vinterkampanj - Visa din style",
-    discount: 15,
-    validUntil: "2025-01-15",
-    submissions: 23,
-    couponsIssued: 18,
-    status: "active",
-    auto_approval: false,
-    createdAt: "2024-11-15"
-  },
-  {
-    id: "3",
-    title: "Sommarerbjudande 2024",
-    discount: 25,
-    validUntil: "2024-08-30",
-    submissions: 89,
-    couponsIssued: 67,
-    status: "expired",
-    auto_approval: true,
-    createdAt: "2024-06-01"
-  }
-];
-
-const initialUploads: Upload[] = [
-  {
-    id: "1",
-    customerName: "Anna Andersson",
-    email: "anna@example.com",
-    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop&crop=face",
-    message: "Älskar er nya kollektion! Här är min favorit look.",
-    campaignId: "1",
-    campaign: "Ladda upp bild → få 20% rabatt",
-    submittedAt: "2024-12-20T12:30:00Z",
-    status: "pending"
-  },
-  {
-    id: "2",
-    customerName: "Erik Svensson", 
-    email: "erik@example.com",
-    image: "https://images.unsplash.com/photo-1566492031773-4f4e44671d66?w=300&h=300&fit=crop&crop=face",
-    message: "Fantastisk service och snabb leverans!",
-    campaignId: "2",
-    campaign: "Vinterkampanj - Visa din style",
-    submittedAt: "2024-12-20T07:30:00Z",
-    status: "approved"
-  },
-  {
-    id: "3",
-    customerName: "Maria Johansson",
-    email: "maria@example.com", 
-    image: "https://images.unsplash.com/photo-1494790108755-2616b612b977?w=300&h=300&fit=crop&crop=face",
-    message: "Perfekt kvalitet och snabb leverans!",
-    campaignId: "1",
-    campaign: "Ladda upp bild → få 20% rabatt",
-    submittedAt: "2024-12-19T14:20:00Z",
-    status: "pending"
-  }
-];
-
-const initialCoupons: Coupon[] = [
-  {
-    id: "SAVE15-DEF456",
-    customerName: "Erik Svensson",
-    email: "erik@example.com",
-    campaignId: "2", 
-    campaign: "Vinterkampanj - Visa din style",
-    discount: 15,
-    issuedAt: "2024-12-20T07:35:00Z",
-    expiresAt: "2025-01-15T23:59:59Z",
-    status: "used",
-    used: true,
-    usedAt: "2024-12-20T16:45:00Z",
-    uploadId: "2"
-  }
-];
+// Clean initial data - no hardcoded test data
+const initialCampaigns: Campaign[] = [];
+const initialUploads: Upload[] = [];
+const initialCoupons: Coupon[] = [];
 
 const initialCompany: Company = {
-  id: "123e4567-e89b-12d3-a456-426614174000", // Match the UUID from database
-  name: "ACME Corp", // Match the database name
+  id: "",
+  name: "",
   logoUrl: undefined,
-  createdAt: "2024-01-01T00:00:00Z"
+  createdAt: new Date().toISOString()
 };
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {

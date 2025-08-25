@@ -7,68 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Users, Mail, Phone, Eye, Gift } from "lucide-react";
 
-const customers = [
-  {
-    id: "1",
-    name: "Anna Andersson",
-    email: "anna.andersson@email.com",
-    phone: "+46 70 123 4567",
-    totalSubmissions: 3,
-    totalCoupons: 2,
-    lastActivity: "2 dagar sedan",
-    status: "active",
-    joinDate: "2024-01-15",
-    avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop&crop=face"
-  },
-  {
-    id: "2", 
-    name: "Erik Svensson",
-    email: "erik.svensson@email.com",
-    phone: "+46 70 234 5678",
-    totalSubmissions: 5,
-    totalCoupons: 4,
-    lastActivity: "5 dagar sedan", 
-    status: "active",
-    joinDate: "2023-11-20",
-    avatar: "https://images.unsplash.com/photo-1566492031773-4f4e44671d66?w=100&h=100&fit=crop&crop=face"
-  },
-  {
-    id: "3",
-    name: "Maria Johansson",
-    email: "maria.j@email.com", 
-    phone: "+46 70 345 6789",
-    totalSubmissions: 7,
-    totalCoupons: 6,
-    lastActivity: "1 dag sedan",
-    status: "vip",
-    joinDate: "2023-08-10",
-    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b977?w=100&h=100&fit=crop&crop=face"
-  },
-  {
-    id: "4",
-    name: "Lars Nilsson", 
-    email: "lars.nilsson@email.com",
-    phone: "+46 70 456 7890",
-    totalSubmissions: 1,
-    totalCoupons: 0,
-    lastActivity: "2 veckor sedan",
-    status: "inactive",
-    joinDate: "2024-03-05",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face"
-  },
-  {
-    id: "5",
-    name: "Sofia Lindberg",
-    email: "sofia.lindberg@email.com",
-    phone: "+46 70 567 8901", 
-    totalSubmissions: 12,
-    totalCoupons: 11,
-    lastActivity: "Idag",
-    status: "vip",
-    joinDate: "2023-06-12",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face"
-  }
-];
+const customers: any[] = [];
 
 const Customers = () => {
   const getStatusColor = (status: string) => {

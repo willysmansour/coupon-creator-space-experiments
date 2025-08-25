@@ -134,17 +134,17 @@ const Settings = () => {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="firstName">Förnamn</Label>
-                          <Input id="firstName" defaultValue="Anna" />
+                          <Input id="firstName" placeholder="Ditt förnamn" />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="lastName">Efternamn</Label>
-                          <Input id="lastName" defaultValue="Bergström" />
+                          <Input id="lastName" placeholder="Ditt efternamn" />
                         </div>
                       </div>
                       
                       <div className="space-y-2">
                         <Label htmlFor="email">E-post</Label>
-                        <Input id="email" type="email" defaultValue="anna.bergstrom@donezo.se" />
+                        <Input id="email" type="email" placeholder="din.email@exempel.se" />
                       </div>
                       
                         <div className="space-y-2">
@@ -339,16 +339,18 @@ const Settings = () => {
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="space-y-2">
-                        <Label>Nuvarande API-nyckel</Label>
+                        <Label>API-nyckel</Label>
                         <div className="flex gap-2">
-                          <Input value="sk_live_****************************" readOnly />
-                          <Button variant="outline">Kopiera</Button>
+                          <Input placeholder="Ingen API-nyckel genererad" readOnly />
+                          <Button variant="outline" disabled>Kopiera</Button>
                         </div>
+                        <p className="text-sm text-muted-foreground">
+                          Generera en API-nyckel för att integrera med externa system.
+                        </p>
                       </div>
                       
                       <div className="flex gap-2">
                         <Button variant="outline">Generera ny nyckel</Button>
-                        <Button variant="destructive">Återkalla nyckel</Button>
                       </div>
                       
                       <Separator />
