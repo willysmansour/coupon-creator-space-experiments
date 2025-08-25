@@ -9,6 +9,9 @@ import Uploads from "./pages/Uploads";
 import Coupons from "./pages/Coupons";
 import Analytics from "./pages/Analytics";
 import Customers from "./pages/Customers";
+import Settings from "./pages/Settings";
+import Help from "./pages/Help";
+import Logout from "./pages/Logout";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +29,9 @@ const App = () => (
           <Route path="/coupons" element={<Coupons />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/customers" element={<Customers />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/help" element={<Help />} />
+          <Route path="/logout" element={<Logout />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
