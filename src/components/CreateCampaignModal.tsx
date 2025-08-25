@@ -12,6 +12,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Calendar, Gift, Percent } from "lucide-react";
+import { useApp } from "@/contexts/AppContext";
+import { useToast } from "@/components/ui/use-toast";
 
 interface CreateCampaignModalProps {
   open: boolean;
@@ -23,12 +25,28 @@ export function CreateCampaignModal({ open, onOpenChange }: CreateCampaignModalP
   const [discount, setDiscount] = useState("");
   const [validUntil, setValidUntil] = useState("");
   const [description, setDescription] = useState("");
+  const { addCampaign } = useApp();
+  const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Handle campaign creation
-    console.log({ title, discount, validUntil, description });
+    
+    // Add campaign to global state
+    addCampaign({
+      title,
+      discount: parseInt(discount),
+      validUntil,
+      description,
+      status: "active"
+    });
+
+    toast({
+      title: "Kampanj skapad!",
+      description: `${title} har skapats och är nu aktiv.`
+    });
+
     onOpenChange(false);
+    
     // Reset form
     setTitle("");
     setDiscount("");

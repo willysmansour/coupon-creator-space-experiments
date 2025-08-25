@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { ModernSidebar } from "@/components/ModernSidebar";
 import { ModernHeader } from "@/components/ModernHeader";
 import { ModernMetricCard } from "@/components/ModernMetricCard";
@@ -7,74 +6,33 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, X, Clock, Eye, Upload, Users } from "lucide-react";
+import { useApp } from "@/contexts/AppContext";
+import { useToast } from "@/components/ui/use-toast";
 
 const Uploads = () => {
-  const [submissions, setSubmissions] = useState<Array<{
-    id: string;
-    customerName: string;
-    email: string;
-    image: string;
-    message: string;
-    campaign: string;
-    submittedAt: string;
-    status: "pending" | "approved" | "rejected";
-  }>>([
-    {
-      id: "1",
-      customerName: "Anna Andersson",
-      email: "anna@example.com",
-      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop&crop=face",
-      message: "Älskar er nya kollektion! Här är min favorit look.",
-      campaign: "Sommardeal 2024",
-      submittedAt: "2 tim sedan",
-      status: "pending" as const
-    },
-    {
-      id: "2", 
-      customerName: "Erik Svensson",
-      email: "erik@example.com",
-      image: "https://images.unsplash.com/photo-1566492031773-4f4e44671d66?w=300&h=300&fit=crop&crop=face",
-      message: "Fantastisk service och snabb leverans!",
-      campaign: "Vinter Sale",
-      submittedAt: "5 tim sedan",
-      status: "approved" as const
-    },
-    {
-      id: "3",
-      customerName: "Maria Johansson", 
-      email: "maria@example.com",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b977?w=300&h=300&fit=crop&crop=face",
-      message: "Perfekt kvalitet och snabb leverans!",
-      campaign: "Höstrea",
-      submittedAt: "1 dag sedan", 
-      status: "pending" as const
-    },
-    {
-      id: "4",
-      customerName: "Lars Nilsson",
-      email: "lars@example.com", 
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face",
-      message: "Bra produkter, kommer köpa igen!",
-      campaign: "Black Friday",
-      submittedAt: "2 dagar sedan",
-      status: "rejected" as const
-    }
-  ]);
+  const { uploads, approveUpload, rejectUpload } = useApp();
+  const { toast } = useToast();
 
   const handleApprove = (id: string) => {
-    setSubmissions(prev => 
-      prev.map(sub => 
-        sub.id === id ? { ...sub, status: "approved" as const } : sub
-      )
-    );
+    const upload = uploads.find(u => u.id === id);
+    if (upload) {
+      approveUpload(id);
+      toast({
+        title: "Bild godkänd!",
+        description: `${upload.customerName}s bild har godkänts och en kupong har skapats.`
+      });
+    }
   };
 
   const handleReject = (id: string) => {
-    setSubmissions(prev => 
-      prev.map(sub => 
-        sub.id === id ? { ...sub, status: "rejected" as const } : sub
-      )
-    );
+    const upload = uploads.find(u => u.id === id);
+    if (upload) {
+      rejectUpload(id);
+      toast({
+        title: "Bild avvisad",
+        description: `${upload.customerName}s bild har avvisats.`
+      });
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -103,9 +61,9 @@ const Uploads = () => {
     }
   };
 
-  const pendingCount = submissions.filter(s => s.status === "pending").length;
-  const approvedCount = submissions.filter(s => s.status === "approved").length;
-  const rejectedCount = submissions.filter(s => s.status === "rejected").length;
+  const pendingCount = uploads.filter(s => s.status === "pending").length;
+  const approvedCount = uploads.filter(s => s.status === "approved").length;
+  const rejectedCount = uploads.filter(s => s.status === "rejected").length;
 
   return (
     <SidebarProvider>
@@ -128,8 +86,8 @@ const Uploads = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <ModernMetricCard
                 title="Totala uppladdningar"
-                value={submissions.length.toString()}
-                change="Senaste veckan"
+                value={uploads.length.toString()}
+                change="Från alla kampanjer"
                 variant="primary"
               />
               <ModernMetricCard
@@ -141,20 +99,20 @@ const Uploads = () => {
               <ModernMetricCard
                 title="Godkända"
                 value={approvedCount.toString()}
-                change={`${Math.round((approvedCount / submissions.length) * 100)}% av totalt`}
+                change={`${uploads.length > 0 ? Math.round((approvedCount / uploads.length) * 100) : 0}% av totalt`}
                 variant="secondary"
               />
               <ModernMetricCard
                 title="Avvisade"
                 value={rejectedCount.toString()}
-                change={`${Math.round((rejectedCount / submissions.length) * 100)}% av totalt`}
+                change={`${uploads.length > 0 ? Math.round((rejectedCount / uploads.length) * 100) : 0}% av totalt`}
                 variant="secondary"
               />
             </div>
 
             {/* Submissions List */}
             <div className="space-y-4">
-              {submissions.map(submission => (
+              {uploads.map(submission => (
                 <Card key={submission.id} className="p-4 hover:shadow-sm transition-shadow">
                   <div className="flex gap-4">
                     {/* Image */}
@@ -177,7 +135,7 @@ const Uploads = () => {
                       </div>
                       
                       <p className="text-sm text-muted-foreground mb-2">
-                        {submission.campaign} • {submission.submittedAt}
+                        {submission.campaign} • {new Date(submission.submittedAt).toLocaleDateString('sv-SE')}
                       </p>
                       
                       {submission.message && (
@@ -219,7 +177,7 @@ const Uploads = () => {
                 </Card>
               ))}
               
-              {submissions.length === 0 && (
+              {uploads.length === 0 && (
                 <div className="text-center py-12">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
                     <Upload className="h-8 w-8 text-muted-foreground" />

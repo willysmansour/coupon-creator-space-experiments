@@ -6,56 +6,10 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Gift, CheckCircle, Clock, Eye, Download } from "lucide-react";
-
-const coupons = [
-  {
-    id: "SAVE20-ABC123",
-    customerName: "Anna Andersson",
-    email: "anna@example.com",
-    campaign: "Sommardeal 2024",
-    discount: 20,
-    issuedAt: "2024-12-20 14:30",
-    expiresAt: "2024-12-31 23:59",
-    status: "active",
-    used: false
-  },
-  {
-    id: "WINTER15-DEF456",
-    customerName: "Erik Svensson",
-    email: "erik@example.com", 
-    campaign: "Vinter Sale",
-    discount: 15,
-    issuedAt: "2024-12-19 10:15",
-    expiresAt: "2025-01-15 23:59",
-    status: "used",
-    used: true,
-    usedAt: "2024-12-20 16:45"
-  },
-  {
-    id: "AUTUMN25-GHI789",
-    customerName: "Maria Johansson",
-    email: "maria@example.com",
-    campaign: "Höstrea", 
-    discount: 25,
-    issuedAt: "2024-12-18 09:20",
-    expiresAt: "2024-12-25 23:59",
-    status: "active",
-    used: false
-  },
-  {
-    id: "BLACK30-JKL012",
-    customerName: "Lars Nilsson",
-    email: "lars@example.com",
-    campaign: "Black Friday",
-    discount: 30,
-    issuedAt: "2024-11-25 12:00",
-    expiresAt: "2024-11-30 23:59", 
-    status: "expired",
-    used: false
-  }
-];
+import { useApp } from "@/contexts/AppContext";
 
 const Coupons = () => {
+  const { coupons } = useApp();
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
@@ -169,12 +123,12 @@ const Coupons = () => {
                         </p>
                         
                         <p className="text-sm text-muted-foreground">
-                          {coupon.campaign} • Utfärdad {coupon.issuedAt}
+                          {coupon.campaign} • Utfärdad {new Date(coupon.issuedAt).toLocaleDateString('sv-SE')}
                         </p>
                         
                         {coupon.used && coupon.usedAt && (
                           <p className="text-sm text-success font-medium mt-1">
-                            ✓ Använd {coupon.usedAt}
+                            ✓ Använd {new Date(coupon.usedAt).toLocaleDateString('sv-SE')}
                           </p>
                         )}
                       </div>
@@ -185,7 +139,7 @@ const Coupons = () => {
                         {coupon.discount}%
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        Utgår: {coupon.expiresAt.split(' ')[0]}
+                        Utgår: {new Date(coupon.expiresAt).toLocaleDateString('sv-SE')}
                       </div>
                       {coupon.status === "active" && (
                         <div className="flex items-center gap-1 text-xs text-success mt-1">

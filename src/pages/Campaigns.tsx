@@ -1,52 +1,18 @@
+import { useState } from "react";
 import { ModernSidebar } from "@/components/ModernSidebar";
 import { ModernHeader } from "@/components/ModernHeader";
 import { ModernMetricCard } from "@/components/ModernMetricCard";
+import { CreateCampaignModal } from "@/components/CreateCampaignModal";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Edit, Gift, Users, Calendar, TrendingUp } from "lucide-react";
-
-const campaigns = [
-  {
-    id: "1",
-    title: "Ladda upp bild → få 20% rabatt",
-    discount: 20,
-    validUntil: "31 Dec 2024",
-    submissions: 47,
-    couponsIssued: 32,
-    status: "active" as const
-  },
-  {
-    id: "2",
-    title: "Vinterkampanj - Visa din style",
-    discount: 15,
-    validUntil: "15 Jan 2025", 
-    submissions: 23,
-    couponsIssued: 18,
-    status: "active" as const
-  },
-  {
-    id: "3",
-    title: "Sommarerbjudande 2024",
-    discount: 25,
-    validUntil: "30 Aug 2024",
-    submissions: 89,
-    couponsIssued: 67,
-    status: "expired" as const
-  },
-  {
-    id: "4",
-    title: "Black Friday Special",
-    discount: 30,
-    validUntil: "30 Nov 2024",
-    submissions: 156,
-    couponsIssued: 124,
-    status: "active" as const
-  }
-];
+import { Eye, Edit, Gift, Users, Calendar, TrendingUp, Plus } from "lucide-react";
+import { useApp } from "@/contexts/AppContext";
 
 const Campaigns = () => {
+  const { campaigns } = useApp();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
@@ -83,37 +49,43 @@ const Campaigns = () => {
           
           <main className="p-6 space-y-6">
             {/* Page Header */}
-            <div className="mb-8">
-              <h1 className="text-2xl font-bold text-foreground mb-2">Kampanjer</h1>
-              <p className="text-muted-foreground">
-                Hantera alla dina marknadsföringskampanjer och följ deras prestanda.
-              </p>
+            <div className="mb-8 flex justify-between items-start">
+              <div>
+                <h1 className="text-2xl font-bold text-foreground mb-2">Kampanjer</h1>
+                <p className="text-muted-foreground">
+                  Hantera alla dina marknadsföringskampanjer och följ deras prestanda.
+                </p>
+              </div>
+              <Button onClick={() => setIsCreateModalOpen(true)} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Skapa kampanj
+              </Button>
             </div>
 
             {/* Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <ModernMetricCard
                 title="Totala kampanjer"
-                value="4"
-                change="+1 denna månad"
+                value={campaigns.length.toString()}
+                change={`${campaigns.filter(c => c.status === 'active').length} aktiva`}
                 variant="primary"
               />
               <ModernMetricCard
                 title="Aktiva kampanjer"
-                value="3"
-                change="75% av totala"
+                value={campaigns.filter(c => c.status === 'active').length.toString()}
+                change={`${Math.round((campaigns.filter(c => c.status === 'active').length / campaigns.length) * 100)}% av totala`}
                 variant="secondary"
               />
               <ModernMetricCard
                 title="Totala uppladdningar"
-                value="315"
-                change="+45 denna vecka"
+                value={campaigns.reduce((sum, c) => sum + c.submissions, 0).toString()}
+                change="Från alla kampanjer"
                 variant="secondary"
               />
               <ModernMetricCard
-                title="Inlösningsgrad"
-                value="76%"
-                change="Över genomsnitt"
+                title="Utfärdade kuponger"
+                value={campaigns.reduce((sum, c) => sum + c.couponsIssued, 0).toString()}
+                change="Totalt utfärdade"
                 variant="accent"
               />
             </div>
@@ -157,7 +129,7 @@ const Campaigns = () => {
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                         <div>
                           <p className="text-muted-foreground">Giltig till</p>
-                          <p className="font-semibold text-foreground">{campaign.validUntil}</p>
+                          <p className="font-semibold text-foreground">{new Date(campaign.validUntil).toLocaleDateString('sv-SE')}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -188,6 +160,11 @@ const Campaigns = () => {
           </main>
         </div>
       </div>
+      
+      <CreateCampaignModal 
+        open={isCreateModalOpen} 
+        onOpenChange={setIsCreateModalOpen}
+      />
     </SidebarProvider>
   );
 };
