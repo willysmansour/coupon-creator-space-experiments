@@ -3,16 +3,20 @@ import { ModernSidebar } from "@/components/ModernSidebar";
 import { ModernHeader } from "@/components/ModernHeader";
 import { ModernMetricCard } from "@/components/ModernMetricCard";
 import { CreateCampaignModal } from "@/components/CreateCampaignModal";
+import { ViewCampaignModal } from "@/components/ViewCampaignModal";
+import { EditCampaignModal } from "@/components/EditCampaignModal";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Eye, Edit, Gift, Users, Calendar, TrendingUp, Plus } from "lucide-react";
-import { useApp } from "@/contexts/AppContext";
+import { useApp, Campaign } from "@/contexts/AppContext";
 
 const Campaigns = () => {
   const { campaigns } = useApp();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [viewCampaign, setViewCampaign] = useState<Campaign | null>(null);
+  const [editCampaign, setEditCampaign] = useState<Campaign | null>(null);
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
@@ -144,11 +148,21 @@ const Campaigns = () => {
                     </div>
                     
                     <div className="flex gap-2 pt-2">
-                      <Button variant="outline" size="sm" className="flex-1 gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1 gap-2"
+                        onClick={() => setViewCampaign(campaign)}
+                      >
                         <Eye className="h-4 w-4" />
                         Visa
                       </Button>
-                      <Button variant="outline" size="sm" className="flex-1 gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1 gap-2"
+                        onClick={() => setEditCampaign(campaign)}
+                      >
                         <Edit className="h-4 w-4" />
                         Redigera
                       </Button>
@@ -164,6 +178,18 @@ const Campaigns = () => {
       <CreateCampaignModal 
         open={isCreateModalOpen} 
         onOpenChange={setIsCreateModalOpen}
+      />
+      
+      <ViewCampaignModal 
+        open={!!viewCampaign} 
+        onOpenChange={(open) => !open && setViewCampaign(null)}
+        campaign={viewCampaign}
+      />
+      
+      <EditCampaignModal 
+        open={!!editCampaign} 
+        onOpenChange={(open) => !open && setEditCampaign(null)}
+        campaign={editCampaign}
       />
     </SidebarProvider>
   );
