@@ -15,7 +15,6 @@ export function ModernHeader() {
           <SidebarTrigger />
           <div>
             <h1 className="text-xl font-semibold text-foreground">Dashboard</h1>
-            <p className="text-sm text-muted-foreground">Plan, prioritize, and accomplish your tasks with ease.</p>
           </div>
         </div>
         
@@ -38,16 +37,16 @@ export function ModernHeader() {
             className="gap-2 bg-primary hover:bg-primary-hover"
           >
             <Plus className="h-4 w-4" />
-            Add Project
+            Lägg till projekt
           </Button>
           
           <Button variant="ghost" size="sm" className="gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
-              TM
+            <div className="w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-sm font-medium">
+              ?
             </div>
             <div className="text-left">
-              <p className="text-sm font-medium">Totok Michael</p>
-              <p className="text-xs text-muted-foreground">tmichael@gmail.com</p>
+              <p className="text-sm font-medium">Ingen användare</p>
+              <p className="text-xs text-muted-foreground">Logga in för att komma igång</p>
             </div>
           </Button>
         </div>

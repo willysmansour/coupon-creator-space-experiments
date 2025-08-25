@@ -126,9 +126,23 @@ const Settings = () => {
                       <div className="flex items-center gap-4">
                         <Avatar className="h-20 w-20">
                           <AvatarImage src="/placeholder.svg" />
-                          <AvatarFallback>AB</AvatarFallback>
+                          <AvatarFallback>?</AvatarFallback>
                         </Avatar>
-                        <Button variant="outline">Ändra profilbild</Button>
+                        <div className="space-y-2">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            id="profile-upload"
+                          />
+                          <Button 
+                            variant="outline"
+                            onClick={() => document.getElementById('profile-upload')?.click()}
+                          >
+                            Ändra profilbild
+                          </Button>
+                          <p className="text-xs text-muted-foreground">JPG eller PNG, max 2MB</p>
+                        </div>
                       </div>
                       
                       <div className="grid grid-cols-2 gap-4">
@@ -147,10 +161,6 @@ const Settings = () => {
                         <Input id="email" type="email" placeholder="din.email@exempel.se" />
                       </div>
                       
-                        <div className="space-y-2">
-                          <Label htmlFor="company">Företag</Label>
-                          <Input id="company" value={company?.name || ''} readOnly />
-                        </div>
                     </CardContent>
                   </Card>
                 </TabsContent>
