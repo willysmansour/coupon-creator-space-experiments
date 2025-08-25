@@ -1,6 +1,6 @@
 import { ModernSidebar } from "@/components/ModernSidebar";
 import { ModernHeader } from "@/components/ModernHeader";
-import { ImageDownloadTable } from "@/components/ImageDownloadTable";
+import { ImageGallery } from "@/components/ImageGallery";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
 const Index = () => {
@@ -13,7 +13,7 @@ const Index = () => {
           <ModernHeader />
           
           <main className="p-6">
-            <ImageDownloadTable />
+            <ImageGallery />
           </main>
         </div>
       </div>
