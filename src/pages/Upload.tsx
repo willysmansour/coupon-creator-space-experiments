@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useCampaign, useCompany, useCreateUpload, uploadFile } from '@/hooks/useSupabaseData';
+import { useCampaign, useCompany, useCreateUpload, uploadFile, useActiveCampaigns } from '@/hooks/useSupabaseData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,11 +10,20 @@ import { Upload as UploadIcon, ImageIcon, VideoIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Upload = () => {
-  const { campaignId } = useParams<{ campaignId: string }>();
+  const { campaignId, companyId } = useParams<{ campaignId?: string; companyId?: string }>();
   const navigate = useNavigate();
+  
+  // Handle both campaign-based (old) and company-based (new) upload flows
   const { data: campaign, isLoading: campaignLoading } = useCampaign(campaignId || '');
-  const { data: company, isLoading: companyLoading } = useCompany(campaign?.company_id || '');
+  const { data: activeCampaigns = [], isLoading: activeCampaignsLoading } = useActiveCampaigns(companyId);
+  const { data: company, isLoading: companyLoading } = useCompany(
+    campaign?.company_id || companyId || ''
+  );
   const createUpload = useCreateUpload();
+  
+  // For company-based flow, use the first active campaign
+  const effectiveCampaign = campaign || (activeCampaigns.length > 0 ? activeCampaigns[0] : null);
+  const effectiveCampaignId = campaignId || effectiveCampaign?.id;
   
   const [file, setFile] = useState<File | null>(null);
   const [message, setMessage] = useState('');
@@ -23,7 +32,7 @@ const Upload = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
-  if (campaignLoading || companyLoading) {
+  if (campaignLoading || companyLoading || activeCampaignsLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">Loading...</div>
@@ -31,26 +40,39 @@ const Upload = () => {
     );
   }
 
-  if (!campaign) {
+  if (!company) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardContent className="p-6 text-center">
-            <h1 className="text-xl font-semibold mb-2">Kampanjen kunde inte hittas</h1>
-            <p className="text-muted-foreground">Den här kampanjen existerar inte eller har tagits bort.</p>
+            <h1 className="text-xl font-semibold mb-2">Företaget kunde inte hittas</h1>
+            <p className="text-muted-foreground">Det här företaget existerar inte.</p>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  if (campaign.status !== 'active') {
+  if (!effectiveCampaign) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-6 text-center">
+            <h1 className="text-xl font-semibold mb-2">Inga aktiva kampanjer</h1>
+            <p className="text-muted-foreground">Det finns inga aktiva kampanjer för detta företag just nu.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (effectiveCampaign.status !== 'active') {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardContent className="p-6 text-center">
             <h1 className="text-xl font-semibold mb-2">Kampanjen är inte aktiv</h1>
-            <p className="text-muted-foreground">Den här kampanjen har avslutats eller är inte tillgänglig just nu.</p>
+            <p className="text-muted-foreground">Kampanjen har avslutats eller är inte tillgänglig just nu.</p>
           </CardContent>
         </Card>
       </div>
@@ -122,7 +144,7 @@ const Upload = () => {
       
       // Create upload record with minimal data
       const upload = await createUpload.mutateAsync({
-        campaign_id: campaignId!,
+        campaign_id: effectiveCampaignId!,
         image_url: imageUrl,
         message: 'Uploaded content' // Default message since field is removed
       });
@@ -164,9 +186,9 @@ const Upload = () => {
         {/* Campaign Info */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">{campaign.title}</CardTitle>
+            <CardTitle className="text-lg">{effectiveCampaign.title}</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Få {campaign.discount} • Gäller till {new Date(campaign.valid_to).toLocaleDateString('sv-SE')}
+              Få {effectiveCampaign.discount} • Gäller till {new Date(effectiveCampaign.valid_to).toLocaleDateString('sv-SE')}
             </p>
           </CardHeader>
         </Card>
