@@ -2,18 +2,36 @@ import QRCode from 'react-qr-code';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Download, QrCode } from 'lucide-react';
-import { useApp } from '@/contexts/AppContext';
 import { useToast } from '@/hooks/use-toast';
+import { useCompanies } from '@/hooks/useSupabaseData';
 
-interface QRCodeGeneratorProps {
-  companyId: string;
-}
-
-export const QRCodeGenerator = ({ companyId }: QRCodeGeneratorProps) => {
-  const { company } = useApp();
+export const QRCodeGenerator = () => {
   const { toast } = useToast();
+  const { data: companies = [], isLoading } = useCompanies();
   
-  const qrUrl = `${window.location.origin}/company/${companyId}`;
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center">Laddar...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Use the first company from the database
+  const company = companies[0];
+  if (!company) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center text-muted-foreground">Inget företag hittades</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const qrUrl = `${window.location.origin}/company/${company.id}`;
 
   const downloadQRCode = () => {
     const svg = document.getElementById('qr-code-svg');

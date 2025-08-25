@@ -233,7 +233,7 @@ const Settings = () => {
                     </CardContent>
                   </Card>
                   
-                  <QRCodeGenerator companyId={company.id} />
+                  <QRCodeGenerator />
                 </TabsContent>
 
                 <TabsContent value="security" className="space-y-4">
