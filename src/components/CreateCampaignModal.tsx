@@ -13,8 +13,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Calendar, Gift, Percent, Zap } from "lucide-react";
-import { useApp } from "@/contexts/AppContext";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useCompanies } from "@/hooks/useSupabaseData";
 
 interface CreateCampaignModalProps {
   open: boolean;
@@ -27,35 +28,66 @@ export function CreateCampaignModal({ open, onOpenChange }: CreateCampaignModalP
   const [validUntil, setValidUntil] = useState("");
   const [description, setDescription] = useState("");
   const [autoApproval, setAutoApproval] = useState(true);
-  const { addCampaign } = useApp();
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { data: companies = [] } = useCompanies();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Add campaign to global state
-    addCampaign({
-      title,
-      discount: parseInt(discount),
-      validUntil,
-      description,
-      status: "active",
-      auto_approval: autoApproval
-    });
-
-    toast({
-      title: "Kampanj skapad!",
-      description: `${title} har skapats och är nu aktiv.`
-    });
-
-    onOpenChange(false);
+    if (companies.length === 0) {
+      toast({
+        title: "Fel",
+        description: "Du måste skapa ett företag först i Inställningar.",
+        variant: "destructive"
+      });
+      return;
+    }
     
-    // Reset form
-    setTitle("");
-    setDiscount("");
-    setValidUntil("");
-    setDescription("");
-    setAutoApproval(true);
+    setIsLoading(true);
+    
+    try {
+      // Get the first company (or you could add a company selector)
+      const company = companies[0];
+      
+      // Save campaign to Supabase database
+      const { error } = await supabase
+        .from("campaigns")
+        .insert({
+          title,
+          discount,
+          description,
+          status: "active",
+          valid_from: new Date().toISOString(),
+          valid_to: new Date(validUntil + "T23:59:59").toISOString(),
+          company_id: company.id
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Kampanj skapad!",
+        description: `${title} har skapats och är nu aktiv.`
+      });
+
+      onOpenChange(false);
+      
+      // Reset form
+      setTitle("");
+      setDiscount("");
+      setValidUntil("");
+      setDescription("");
+      setAutoApproval(true);
+    } catch (error) {
+      console.error("Error creating campaign:", error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte skapa kampanjen. Försök igen.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -143,8 +175,12 @@ export function CreateCampaignModal({ open, onOpenChange }: CreateCampaignModalP
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Avbryt
             </Button>
-            <Button type="submit" className="bg-gradient-to-r from-primary to-primary-hover">
-              Skapa kampanj
+            <Button 
+              type="submit" 
+              className="bg-gradient-to-r from-primary to-primary-hover"
+              disabled={isLoading}
+            >
+              {isLoading ? "Skapar..." : "Skapa kampanj"}
             </Button>
           </DialogFooter>
         </form>
