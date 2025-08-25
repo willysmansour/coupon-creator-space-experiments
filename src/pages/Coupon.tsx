@@ -1,19 +1,26 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useApp } from '@/contexts/AppContext';
+import { useCoupon, useRedeemCoupon } from '@/hooks/useSupabaseData';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Gift, CheckCircle, AlertCircle, Clock, Copy } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 const Coupon = () => {
   const { couponId } = useParams<{ couponId: string }>();
   const navigate = useNavigate();
-  const { getCouponById, redeemCoupon, company } = useApp();
+  const { data: coupon, isLoading } = useCoupon(couponId || '');
+  const redeemCoupon = useRedeemCoupon();
   const [isRedeeming, setIsRedeeming] = useState(false);
-  
-  const coupon = couponId ? getCouponById(couponId) : null;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">Loading...</div>
+      </div>
+    );
+  }
 
   if (!coupon) {
     return (
@@ -32,16 +39,16 @@ const Coupon = () => {
     );
   }
 
-  const isExpired = new Date() > new Date(coupon.expiresAt);
-  const isActive = coupon.status === 'active' && !isExpired;
-  const isUsed = coupon.status === 'used' || coupon.used;
+  const isExpired = new Date() > new Date(coupon.expires_at);
+  const isActive = !coupon.is_used && !isExpired;
+  const isUsed = coupon.is_used;
 
   const getStatusInfo = () => {
     if (isUsed) {
       return {
         icon: CheckCircle,
         title: 'Kupong använd',
-        description: `Inlöst ${coupon.usedAt ? new Date(coupon.usedAt).toLocaleString('sv-SE') : ''}`,
+        description: `Inlöst ${coupon.used_at ? new Date(coupon.used_at).toLocaleString('sv-SE') : ''}`,
         color: 'text-muted-foreground',
         bgColor: 'bg-muted',
         badgeVariant: 'secondary' as const
@@ -50,7 +57,7 @@ const Coupon = () => {
       return {
         icon: AlertCircle,
         title: 'Kupong utgången',
-        description: `Gick ut ${new Date(coupon.expiresAt).toLocaleDateString('sv-SE')}`,
+        description: `Gick ut ${new Date(coupon.expires_at).toLocaleDateString('sv-SE')}`,
         color: 'text-destructive',
         bgColor: 'bg-destructive/10',
         badgeVariant: 'destructive' as const
@@ -59,7 +66,7 @@ const Coupon = () => {
       return {
         icon: Gift,
         title: 'Aktiv kupong',
-        description: `Gäller till ${new Date(coupon.expiresAt).toLocaleDateString('sv-SE')}`,
+        description: `Gäller till ${new Date(coupon.expires_at).toLocaleDateString('sv-SE')}`,
         color: 'text-success',
         bgColor: 'bg-success/10',
         badgeVariant: 'default' as const
@@ -71,11 +78,8 @@ const Coupon = () => {
   const StatusIcon = statusInfo.icon;
 
   const handleCopyCouponCode = () => {
-    navigator.clipboard.writeText(coupon.id);
-    toast({
-      title: "Kupongkod kopierad",
-      description: "Kupongkoden har kopierats till urklipp.",
-    });
+    navigator.clipboard.writeText(coupon.code);
+    toast.success("Kupongkod kopierad till urklipp.");
   };
 
   const handleRedeem = async () => {
@@ -84,25 +88,9 @@ const Coupon = () => {
     setIsRedeeming(true);
     
     try {
-      const success = redeemCoupon(coupon.id);
-      if (success) {
-        toast({
-          title: "Kupong inlöst!",
-          description: "Kupongen har använts framgångsrikt.",
-        });
-      } else {
-        toast({
-          title: "Kunde inte lösa in kupong",
-          description: "Kupongen är inte giltig eller redan använd.",
-          variant: "destructive",
-        });
-      }
+      await redeemCoupon.mutateAsync(coupon.code);
     } catch (error) {
-      toast({
-        title: "Något gick fel",
-        description: "Försök igen senare.",
-        variant: "destructive",
-      });
+      console.error('Redeem error:', error);
     } finally {
       setIsRedeeming(false);
     }
@@ -110,27 +98,6 @@ const Coupon = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-card border-b">
-        <div className="max-w-md mx-auto p-4">
-          <div className="flex items-center gap-3">
-            {company.logoUrl ? (
-              <img src={company.logoUrl} alt={company.name} className="w-8 h-8 rounded" />
-            ) : (
-              <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
-                <span className="text-primary-foreground text-sm font-bold">
-                  {company.name.charAt(0)}
-                </span>
-              </div>
-            )}
-            <div>
-              <h1 className="font-semibold text-foreground">{company.name}</h1>
-              <p className="text-sm text-muted-foreground">Din rabattkupong</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="max-w-md mx-auto p-4 space-y-6">
         {/* Coupon Card */}
@@ -140,7 +107,7 @@ const Coupon = () => {
               <StatusIcon className={`w-8 h-8 ${statusInfo.color}`} />
             </div>
             <CardTitle className="text-2xl font-bold">
-              {coupon.discount}% RABATT
+              {coupon.discount}
             </CardTitle>
             <Badge variant={statusInfo.badgeVariant}>
               {statusInfo.title}
@@ -151,7 +118,7 @@ const Coupon = () => {
             <div className="text-center">
               <p className="text-xs text-muted-foreground mb-2">KUPONGKOD</p>
               <div className="bg-muted p-3 rounded-lg font-mono text-lg font-bold tracking-wider">
-                {coupon.id}
+                {coupon.code}
               </div>
               <Button
                 variant="ghost"
@@ -164,20 +131,12 @@ const Coupon = () => {
               </Button>
             </div>
 
-            {/* Campaign Info */}
+            {/* Expiry Info */}
             <div className="text-center border-t pt-4">
-              <h3 className="font-medium">{coupon.campaign}</h3>
               <p className="text-sm text-muted-foreground mt-1">
                 {statusInfo.description}
               </p>
             </div>
-
-            {/* Customer Info */}
-            {coupon.customerName && (
-              <div className="text-center text-sm text-muted-foreground">
-                Utfärdad till: {coupon.customerName}
-              </div>
-            )}
           </CardContent>
         </Card>
 
@@ -188,7 +147,7 @@ const Coupon = () => {
               <div className="text-background text-xs font-mono">
                 QR CODE
                 <br />
-                {coupon.id.slice(-6)}
+                {coupon.code.slice(-6)}
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
@@ -238,7 +197,7 @@ const Coupon = () => {
 
           <Button 
             variant="outline" 
-            onClick={() => navigate(`/landing/${company.id}`)}
+            onClick={() => navigate('/')}
             className="w-full"
           >
             Se fler kampanjer

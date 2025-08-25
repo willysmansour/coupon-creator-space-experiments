@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useApp } from '@/contexts/AppContext';
+import { useCampaign, useCompany, useCreateUpload, uploadFile } from '@/hooks/useSupabaseData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Upload as UploadIcon, ImageIcon, VideoIcon } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 const Upload = () => {
   const { campaignId } = useParams<{ campaignId: string }>();
   const navigate = useNavigate();
-  const { getCampaignById, addUpload, company } = useApp();
+  const { data: campaign, isLoading: campaignLoading } = useCampaign(campaignId || '');
+  const { data: company, isLoading: companyLoading } = useCompany(campaign?.company_id || '');
+  const createUpload = useCreateUpload();
   
   const [file, setFile] = useState<File | null>(null);
   const [message, setMessage] = useState('');
@@ -21,7 +23,13 @@ const Upload = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
-  const campaign = campaignId ? getCampaignById(campaignId) : null;
+  if (campaignLoading || companyLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">Loading...</div>
+      </div>
+    );
+  }
 
   if (!campaign) {
     return (
@@ -77,20 +85,12 @@ const Upload = () => {
     const maxSize = 20 * 1024 * 1024; // 20MB
 
     if (!validTypes.includes(file.type)) {
-      toast({
-        title: "Ogiltigt filformat",
-        description: "Endast JPG, PNG och MP4 filer är tillåtna.",
-        variant: "destructive",
-      });
+      toast.error("Endast JPG, PNG och MP4 filer är tillåtna.");
       return false;
     }
 
     if (file.size > maxSize) {
-      toast({
-        title: "Fil för stor",
-        description: "Filen får max vara 20MB stor.",
-        variant: "destructive",
-      });
+      toast.error("Filen får max vara 20MB stor.");
       return false;
     }
 
@@ -110,53 +110,34 @@ const Upload = () => {
     e.preventDefault();
     
     if (!file) {
-      toast({
-        title: "Ingen fil vald",
-        description: "Du måste ladda upp en bild eller video.",
-        variant: "destructive",
-      });
+      toast.error('Vänligen välj en bild eller video att ladda upp.');
       return;
     }
-
+    
     if (!message.trim()) {
-      toast({
-        title: "Meddelande saknas",
-        description: "Beskriv gärna din bild/video kort.",
-        variant: "destructive",
-      });
+      toast.error('Vänligen skriv ett meddelande.');
       return;
     }
-
+    
     setIsLoading(true);
-
+    
     try {
-      // Convert file to base64 for local storage
-      const reader = new FileReader();
-      reader.onload = () => {
-        const uploadId = addUpload({
-          customerName: customerName || 'Anonym',
-          email: email || '',
-          image: reader.result as string,
-          message: message.trim(),
-          campaignId: campaign.id,
-          campaign: campaign.title,
-          status: "pending"
-        });
-
-        toast({
-          title: "Tack för ditt bidrag!",
-          description: campaign.auto_approval ? "Din kupong genereras automatiskt." : "Vi granskar ditt bidrag och återkommer snart.",
-        });
-
-        navigate(`/thank-you/${uploadId}`);
-      };
-      reader.readAsDataURL(file);
-    } catch (error) {
-      toast({
-        title: "Något gick fel",
-        description: "Försök igen senare.",
-        variant: "destructive",
+      // Upload file to Supabase Storage
+      const imageUrl = await uploadFile(file);
+      
+      // Create upload record
+      const upload = await createUpload.mutateAsync({
+        campaign_id: campaignId!,
+        customer_name: customerName.trim() || 'Anonym',
+        customer_email: email.trim() || '',
+        image_url: imageUrl,
+        message: message.trim()
       });
+      
+      navigate(`/thank-you/${upload.id}`);
+    } catch (error) {
+      toast.error('Ett fel uppstod när bilden skulle skickas in.');
+      console.error('Upload error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -168,17 +149,17 @@ const Upload = () => {
       <div className="bg-card border-b">
         <div className="max-w-md mx-auto p-4">
           <div className="flex items-center gap-3">
-            {company.logoUrl ? (
-              <img src={company.logoUrl} alt={company.name} className="w-8 h-8 rounded" />
+            {company?.logo ? (
+              <img src={company.logo} alt={company.name} className="w-8 h-8 rounded" />
             ) : (
               <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
                 <span className="text-primary-foreground text-sm font-bold">
-                  {company.name.charAt(0)}
+                  {company?.name.charAt(0)}
                 </span>
               </div>
             )}
             <div>
-              <h1 className="font-semibold text-foreground">{company.name}</h1>
+              <h1 className="font-semibold text-foreground">{company?.name}</h1>
               <p className="text-sm text-muted-foreground">Dela ditt bidrag</p>
             </div>
           </div>
@@ -192,7 +173,7 @@ const Upload = () => {
           <CardHeader>
             <CardTitle className="text-lg">{campaign.title}</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Få {campaign.discount}% rabatt • Gäller till {new Date(campaign.validUntil).toLocaleDateString('sv-SE')}
+              Få {campaign.discount} • Gäller till {new Date(campaign.valid_to).toLocaleDateString('sv-SE')}
             </p>
           </CardHeader>
         </Card>
