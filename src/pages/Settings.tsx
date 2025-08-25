@@ -12,27 +12,97 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, Shield, Bell, Key, Palette, Save, Building2, Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCompanies } from "@/hooks/useSupabaseData";
-import { useState, useRef } from "react";
+import { useCurrentProfile, useUpsertProfile, uploadProfileImage } from "@/hooks/useProfileData";
+import { useUpdateCompany, uploadCompanyLogo } from "@/hooks/useCompanyData";
+import { useState, useRef, useEffect } from "react";
 import { QRCodeGenerator } from "@/components/QRCodeGenerator";
 
 const Settings = () => {
   const { toast } = useToast();
   const { data: companies = [] } = useCompanies();
+  const { data: currentProfile } = useCurrentProfile();
+  const upsertProfile = useUpsertProfile();
+  const updateCompany = useUpdateCompany();
+  
   const company = companies[0]; // Get the first company from the database
-  const [companyName, setCompanyName] = useState(company?.name || '');
-  const [logoPreview, setLogoPreview] = useState<string | undefined>(company?.logo);
+  
+  // Profile state
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [profileImagePreview, setProfileImagePreview] = useState<string | undefined>();
+  
+  // Company state
+  const [companyName, setCompanyName] = useState('');
+  const [logoPreview, setLogoPreview] = useState<string | undefined>();
+  
+  // Loading states
+  const [isLoading, setIsLoading] = useState(false);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const profileImageInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSave = () => {
-    // For now, just show success toast. 
-    // In a real app, this would update the company in Supabase
-    toast({
-      title: "Inställningar sparade",
-      description: "Dina ändringar har sparats framgångsrikt.",
-    });
+  // Load existing data when component mounts or data changes
+  useEffect(() => {
+    if (currentProfile) {
+      setFirstName(currentProfile.first_name || '');
+      setLastName(currentProfile.last_name || '');
+      setEmail(currentProfile.email || '');
+      setProfileImagePreview(currentProfile.avatar_url);
+    }
+  }, [currentProfile]);
+
+  useEffect(() => {
+    if (company) {
+      setCompanyName(company.name || '');
+      setLogoPreview(company.logo);
+    } else if (companies.length === 0) {
+      // Create a default company name if none exists
+      setCompanyName('Mitt Företag');
+    }
+  }, [company, companies]);
+
+  const handleSave = async () => {
+    if (isLoading) return;
+    
+    setIsLoading(true);
+    
+    try {
+      // Save profile data
+      await upsertProfile.mutateAsync({
+        id: currentProfile?.id,
+        first_name: firstName,
+        last_name: lastName,
+        email: email,
+        avatar_url: profileImagePreview,
+      });
+
+      // Save company data if there are changes or create default company
+      if (companyName) {
+        await updateCompany.mutateAsync({
+          id: company?.id,
+          name: companyName,
+          logo: logoPreview,
+        });
+      }
+
+      toast({
+        title: "Inställningar sparade",
+        description: "Dina ändringar har sparats framgångsrikt.",
+      });
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      toast({
+        title: "Fel vid sparande",
+        description: "Det gick inte att spara dina ändringar. Försök igen.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) { // 5MB limit
@@ -53,12 +123,68 @@ const Settings = () => {
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setLogoPreview(result);
-      };
-      reader.readAsDataURL(file);
+      try {
+        setIsLoading(true);
+        const logoUrl = await uploadCompanyLogo(file);
+        setLogoPreview(logoUrl);
+        
+        toast({
+          title: "Logotyp uppladdad",
+          description: "Logotypen har laddats upp. Kom ihåg att spara för att behålla ändringarna.",
+        });
+      } catch (error) {
+        console.error('Error uploading logo:', error);
+        toast({
+          title: "Fel vid uppladdning",
+          description: "Det gick inte att ladda upp logotypen. Försök igen.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  const handleProfileImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) { // 2MB limit for profile images
+        toast({
+          title: "Fil för stor",
+          description: "Profilbilden får vara max 2MB.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Felaktigt filformat",
+          description: "Endast bildfiler är tillåtna.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const imageUrl = await uploadProfileImage(file);
+        setProfileImagePreview(imageUrl);
+        
+        toast({
+          title: "Profilbild uppladdad",
+          description: "Profilbilden har laddats upp. Kom ihåg att spara för att behålla ändringarna.",
+        });
+      } catch (error) {
+        console.error('Error uploading profile image:', error);
+        toast({
+          title: "Fel vid uppladdning",
+          description: "Det gick inte att ladda upp profilbilden. Försök igen.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -125,21 +251,29 @@ const Settings = () => {
                     <CardContent className="space-y-4">
                       <div className="flex items-center gap-4">
                         <Avatar className="h-20 w-20">
-                          <AvatarImage src="/placeholder.svg" />
-                          <AvatarFallback>?</AvatarFallback>
+                          <AvatarImage src={profileImagePreview || "/placeholder.svg"} />
+                          <AvatarFallback>
+                            {firstName && lastName 
+                              ? `${firstName[0]}${lastName[0]}`.toUpperCase()
+                              : '?'
+                            }
+                          </AvatarFallback>
                         </Avatar>
                         <div className="space-y-2">
                           <input
+                            ref={profileImageInputRef}
                             type="file"
                             accept="image/*"
+                            onChange={handleProfileImageUpload}
                             className="hidden"
                             id="profile-upload"
                           />
                           <Button 
                             variant="outline"
-                            onClick={() => document.getElementById('profile-upload')?.click()}
+                            onClick={() => profileImageInputRef.current?.click()}
+                            disabled={isLoading}
                           >
-                            Ändra profilbild
+                            {isLoading ? 'Laddar upp...' : 'Ändra profilbild'}
                           </Button>
                           <p className="text-xs text-muted-foreground">JPG eller PNG, max 2MB</p>
                         </div>
@@ -148,17 +282,33 @@ const Settings = () => {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="firstName">Förnamn</Label>
-                          <Input id="firstName" placeholder="Ditt förnamn" />
+                          <Input 
+                            id="firstName" 
+                            value={firstName}
+                            onChange={(e) => setFirstName(e.target.value)}
+                            placeholder="Ditt förnamn" 
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="lastName">Efternamn</Label>
-                          <Input id="lastName" placeholder="Ditt efternamn" />
+                          <Input 
+                            id="lastName" 
+                            value={lastName}
+                            onChange={(e) => setLastName(e.target.value)}
+                            placeholder="Ditt efternamn" 
+                          />
                         </div>
                       </div>
                       
                       <div className="space-y-2">
                         <Label htmlFor="email">E-post</Label>
-                        <Input id="email" type="email" placeholder="din.email@exempel.se" />
+                        <Input 
+                          id="email" 
+                          type="email" 
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="din.email@exempel.se" 
+                        />
                       </div>
                       
                     </CardContent>
@@ -231,10 +381,11 @@ const Settings = () => {
                             <Button
                               variant="outline"
                               onClick={() => fileInputRef.current?.click()}
+                              disabled={isLoading}
                               className="flex items-center gap-2"
                             >
                               <Upload className="h-4 w-4" />
-                              {logoPreview ? 'Ändra logotyp' : 'Ladda upp logotyp'}
+                              {isLoading ? 'Laddar upp...' : (logoPreview ? 'Ändra logotyp' : 'Ladda upp logotyp')}
                             </Button>
                             <p className="text-xs text-muted-foreground">
                               JPG, PNG eller GIF. Max 5MB.
@@ -421,9 +572,13 @@ const Settings = () => {
               </Tabs>
 
               <div className="flex justify-end">
-                <Button onClick={handleSave} className="flex items-center gap-2">
+                <Button 
+                  onClick={handleSave} 
+                  disabled={isLoading}
+                  className="flex items-center gap-2"
+                >
                   <Save className="h-4 w-4" />
-                  Spara ändringar
+                  {isLoading ? 'Sparar...' : 'Spara ändringar'}
                 </Button>
               </div>
             </div>
