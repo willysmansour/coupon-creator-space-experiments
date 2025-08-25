@@ -40,10 +40,18 @@ export interface Coupon {
   uploadId: string;
 }
 
+export interface Company {
+  id: string;
+  name: string;
+  logoUrl?: string;
+  createdAt: string;
+}
+
 interface AppState {
   campaigns: Campaign[];
   uploads: Upload[];
   coupons: Coupon[];
+  company: Company;
 }
 
 interface AppActions {
@@ -56,6 +64,7 @@ interface AppActions {
   updateCoupon: (id: string, updates: Partial<Coupon>) => void;
   approveUpload: (uploadId: string) => void;
   rejectUpload: (uploadId: string) => void;
+  updateCompany: (updates: Partial<Company>) => void;
 }
 
 const AppContext = createContext<(AppState & AppActions) | undefined>(undefined);
@@ -147,10 +156,21 @@ const initialCoupons: Coupon[] = [
   }
 ];
 
+const initialCompany: Company = {
+  id: "1",
+  name: "Donezo AB",
+  logoUrl: undefined,
+  createdAt: "2024-01-01T00:00:00Z"
+};
+
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns);
   const [uploads, setUploads] = useState<Upload[]>(initialUploads);
   const [coupons, setCoupons] = useState<Coupon[]>(initialCoupons);
+  const [company, setCompany] = useState<Company>(() => {
+    const saved = localStorage.getItem('company');
+    return saved ? JSON.parse(saved) : initialCompany;
+  });
 
   const addCampaign = (campaignData: Omit<Campaign, 'id' | 'submissions' | 'couponsIssued' | 'createdAt'>) => {
     const newCampaign: Campaign = {
@@ -253,10 +273,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     updateUpload(uploadId, { status: "rejected" });
   };
 
+  const updateCompany = (updates: Partial<Company>) => {
+    const updatedCompany = { ...company, ...updates };
+    setCompany(updatedCompany);
+    localStorage.setItem('company', JSON.stringify(updatedCompany));
+  };
+
   const value = {
     campaigns,
     uploads,
     coupons,
+    company,
     addCampaign,
     updateCampaign,
     deleteCampaign,
@@ -265,7 +292,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     addCoupon,
     updateCoupon,
     approveUpload,
-    rejectUpload
+    rejectUpload,
+    updateCompany
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -9,17 +9,61 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, Shield, Bell, Key, Palette, Save } from "lucide-react";
+import { User, Shield, Bell, Key, Palette, Save, Building2, Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useApp } from "@/contexts/AppContext";
+import { useState, useRef } from "react";
 
 const Settings = () => {
   const { toast } = useToast();
+  const { company, updateCompany } = useApp();
+  const [companyName, setCompanyName] = useState(company.name);
+  const [logoPreview, setLogoPreview] = useState<string | undefined>(company.logoUrl);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSave = () => {
+    updateCompany({ name: companyName, logoUrl: logoPreview });
     toast({
       title: "Inställningar sparade",
       description: "Dina ändringar har sparats framgångsrikt.",
     });
+  };
+
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast({
+          title: "Fil för stor",
+          description: "Logotypen får vara max 5MB.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Felaktigt filformat",
+          description: "Endast bildfiler är tillåtna.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setLogoPreview(result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeLogo = () => {
+    setLogoPreview(undefined);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   return (
@@ -40,10 +84,14 @@ const Settings = () => {
               </div>
 
               <Tabs defaultValue="profile" className="space-y-4">
-                <TabsList className="grid w-full grid-cols-5">
+                <TabsList className="grid w-full grid-cols-6">
                   <TabsTrigger value="profile" className="flex items-center gap-2">
                     <User className="h-4 w-4" />
                     Profil
+                  </TabsTrigger>
+                  <TabsTrigger value="company" className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4" />
+                    Företag
                   </TabsTrigger>
                   <TabsTrigger value="security" className="flex items-center gap-2">
                     <Shield className="h-4 w-4" />
@@ -99,6 +147,87 @@ const Settings = () => {
                       <div className="space-y-2">
                         <Label htmlFor="company">Företag</Label>
                         <Input id="company" defaultValue="Donezo AB" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="company" className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Företagsinformation</CardTitle>
+                      <CardDescription>
+                        Hantera företagets logotyp och information som visas på QR-kod landningssidan
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="companyName">Företagsnamn</Label>
+                        <Input 
+                          id="companyName" 
+                          value={companyName}
+                          onChange={(e) => setCompanyName(e.target.value)}
+                          placeholder="Ditt företagsnamn"
+                        />
+                      </div>
+                      
+                      <Separator />
+                      
+                      <div className="space-y-4">
+                        <Label>Företagslogotyp</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Denna logotyp kommer att visas först när användare skannar QR-koden. Rekommenderad storlek: 200x200px eller större.
+                        </p>
+                        
+                        <div className="flex items-start gap-4">
+                          <div className="relative">
+                            <div className="w-32 h-32 border-2 border-dashed border-border rounded-lg flex items-center justify-center bg-muted/30">
+                              {logoPreview ? (
+                                <div className="relative w-full h-full">
+                                  <img
+                                    src={logoPreview}
+                                    alt="Företagslogotyp förhandsvisning"
+                                    className="w-full h-full object-contain rounded-lg"
+                                  />
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full"
+                                    onClick={removeLogo}
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div className="text-center">
+                                  <Building2 className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                                  <p className="text-xs text-muted-foreground">Ingen logotyp</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className="flex-1 space-y-2">
+                            <input
+                              ref={fileInputRef}
+                              type="file"
+                              accept="image/*"
+                              onChange={handleLogoUpload}
+                              className="hidden"
+                            />
+                            <Button
+                              variant="outline"
+                              onClick={() => fileInputRef.current?.click()}
+                              className="flex items-center gap-2"
+                            >
+                              <Upload className="h-4 w-4" />
+                              {logoPreview ? 'Ändra logotyp' : 'Ladda upp logotyp'}
+                            </Button>
+                            <p className="text-xs text-muted-foreground">
+                              JPG, PNG eller GIF. Max 5MB.
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
