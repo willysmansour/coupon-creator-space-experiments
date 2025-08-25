@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Dialog,
@@ -12,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Calendar, Edit, Percent } from "lucide-react";
+import { Calendar, Edit, Percent, Zap } from "lucide-react";
 import { useApp, Campaign } from "@/contexts/AppContext";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -28,6 +29,7 @@ export function EditCampaignModal({ open, onOpenChange, campaign }: EditCampaign
   const [validUntil, setValidUntil] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState<"active" | "inactive" | "expired">("active");
+  const [autoApproval, setAutoApproval] = useState(false);
   const { updateCampaign } = useApp();
   const { toast } = useToast();
 
@@ -38,6 +40,7 @@ export function EditCampaignModal({ open, onOpenChange, campaign }: EditCampaign
       setValidUntil(campaign.validUntil);
       setDescription(campaign.description || "");
       setStatus(campaign.status);
+      setAutoApproval(campaign.auto_approval || false);
     }
   }, [campaign]);
 
@@ -52,7 +55,8 @@ export function EditCampaignModal({ open, onOpenChange, campaign }: EditCampaign
       discount: parseInt(discount),
       validUntil,
       description,
-      status
+      status,
+      auto_approval: autoApproval
     });
 
     toast({
@@ -146,6 +150,18 @@ export function EditCampaignModal({ open, onOpenChange, campaign }: EditCampaign
               placeholder="Lägg till en beskrivning av kampanjen..."
               rows={3}
             />
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="auto-approval"
+              checked={autoApproval}
+              onCheckedChange={(checked) => setAutoApproval(checked as boolean)}
+            />
+            <Label htmlFor="auto-approval" className="flex items-center gap-2 text-sm">
+              <Zap className="h-4 w-4" />
+              Automatiskt godkännande av uploads
+            </Label>
           </div>
 
           <DialogFooter>

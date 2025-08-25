@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Calendar, Gift, Percent } from "lucide-react";
+import { Calendar, Gift, Percent, Zap } from "lucide-react";
 import { useApp } from "@/contexts/AppContext";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -25,6 +26,7 @@ export function CreateCampaignModal({ open, onOpenChange }: CreateCampaignModalP
   const [discount, setDiscount] = useState("");
   const [validUntil, setValidUntil] = useState("");
   const [description, setDescription] = useState("");
+  const [autoApproval, setAutoApproval] = useState(true);
   const { addCampaign } = useApp();
   const { toast } = useToast();
 
@@ -37,7 +39,8 @@ export function CreateCampaignModal({ open, onOpenChange }: CreateCampaignModalP
       discount: parseInt(discount),
       validUntil,
       description,
-      status: "active"
+      status: "active",
+      auto_approval: autoApproval
     });
 
     toast({
@@ -52,6 +55,7 @@ export function CreateCampaignModal({ open, onOpenChange }: CreateCampaignModalP
     setDiscount("");
     setValidUntil("");
     setDescription("");
+    setAutoApproval(true);
   };
 
   return (
@@ -121,6 +125,18 @@ export function CreateCampaignModal({ open, onOpenChange }: CreateCampaignModalP
               placeholder="Lägg till en beskrivning av kampanjen..."
               rows={3}
             />
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="auto-approval"
+              checked={autoApproval}
+              onCheckedChange={(checked) => setAutoApproval(checked as boolean)}
+            />
+            <Label htmlFor="auto-approval" className="flex items-center gap-2 text-sm">
+              <Zap className="h-4 w-4" />
+              Automatiskt godkännande av uploads
+            </Label>
           </div>
 
           <DialogFooter>

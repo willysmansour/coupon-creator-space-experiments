@@ -15,6 +15,9 @@ import Help from "./pages/Help";
 import Logout from "./pages/Logout";
 import NotFound from "./pages/NotFound";
 import Landing from "./pages/Landing";
+import Upload from "./pages/Upload";
+import ThankYou from "./pages/ThankYou";
+import Coupon from "./pages/Coupon";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +39,9 @@ const App = () => (
             <Route path="/help" element={<Help />} />
             <Route path="/logout" element={<Logout />} />
             <Route path="/landing/:companyId" element={<Landing />} />
+            <Route path="/c/:campaignId" element={<Upload />} />
+            <Route path="/thank-you/:uploadId" element={<ThankYou />} />
+            <Route path="/coupon/:couponId" element={<Coupon />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

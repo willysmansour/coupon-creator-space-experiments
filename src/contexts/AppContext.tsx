@@ -10,6 +10,7 @@ export interface Campaign {
   submissions: number;
   couponsIssued: number;
   status: "active" | "inactive" | "expired";
+  auto_approval: boolean;
   createdAt: string;
 }
 
@@ -64,7 +65,11 @@ interface AppActions {
   updateCoupon: (id: string, updates: Partial<Coupon>) => void;
   approveUpload: (uploadId: string) => void;
   rejectUpload: (uploadId: string) => void;
+  redeemCoupon: (couponId: string) => boolean;
   updateCompany: (updates: Partial<Company>) => void;
+  getCampaignById: (id: string) => Campaign | undefined;
+  getCouponById: (id: string) => Coupon | undefined;
+  getUploadById: (id: string) => Upload | undefined;
 }
 
 const AppContext = createContext<(AppState & AppActions) | undefined>(undefined);
@@ -79,6 +84,7 @@ const initialCampaigns: Campaign[] = [
     submissions: 47,
     couponsIssued: 32,
     status: "active",
+    auto_approval: true,
     createdAt: "2024-11-01"
   },
   {
@@ -89,6 +95,7 @@ const initialCampaigns: Campaign[] = [
     submissions: 23,
     couponsIssued: 18,
     status: "active",
+    auto_approval: false,
     createdAt: "2024-11-15"
   },
   {
@@ -99,6 +106,7 @@ const initialCampaigns: Campaign[] = [
     submissions: 89,
     couponsIssued: 67,
     status: "expired",
+    auto_approval: true,
     createdAt: "2024-06-01"
   }
 ];
@@ -193,7 +201,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const newUpload: Upload = {
       ...uploadData,
       id: Date.now().toString(),
-      submittedAt: new Date().toISOString()
+      submittedAt: new Date().toISOString(),
+      status: "pending"
     };
     setUploads(prev => [...prev, newUpload]);
     
@@ -203,6 +212,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         ? { ...campaign, submissions: campaign.submissions + 1 }
         : campaign
     ));
+
+    // Check for auto-approval
+    const campaign = campaigns.find(c => c.id === uploadData.campaignId);
+    if (campaign?.auto_approval) {
+      // Auto-approve the upload
+      setTimeout(() => {
+        approveUpload(newUpload.id);
+      }, 100);
+    }
+
+    return newUpload.id;
   };
 
   const updateUpload = (id: string, updates: Partial<Upload>) => {
@@ -273,6 +293,22 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     updateUpload(uploadId, { status: "rejected" });
   };
 
+  const redeemCoupon = (couponId: string) => {
+    const coupon = coupons.find(c => c.id === couponId);
+    if (!coupon || coupon.status !== "active") return false;
+
+    updateCoupon(couponId, { 
+      status: "used", 
+      used: true, 
+      usedAt: new Date().toISOString() 
+    });
+    return true;
+  };
+
+  const getCampaignById = (id: string) => campaigns.find(c => c.id === id);
+  const getCouponById = (id: string) => coupons.find(c => c.id === id);
+  const getUploadById = (id: string) => uploads.find(u => u.id === id);
+
   const updateCompany = (updates: Partial<Company>) => {
     const updatedCompany = { ...company, ...updates };
     setCompany(updatedCompany);
@@ -293,7 +329,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     updateCoupon,
     approveUpload,
     rejectUpload,
-    updateCompany
+    redeemCoupon,
+    updateCompany,
+    getCampaignById,
+    getCouponById,
+    getUploadById
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
