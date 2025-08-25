@@ -14,7 +14,171 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      campaigns: {
+        Row: {
+          company_id: string
+          created_at: string
+          description: string | null
+          discount: string
+          id: string
+          status: string
+          title: string
+          updated_at: string
+          valid_from: string
+          valid_to: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          description?: string | null
+          discount: string
+          id?: string
+          status?: string
+          title: string
+          updated_at?: string
+          valid_from: string
+          valid_to: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          discount?: string
+          id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          valid_from?: string
+          valid_to?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      companies: {
+        Row: {
+          created_at: string
+          id: string
+          logo: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          logo?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          logo?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      coupons: {
+        Row: {
+          code: string
+          created_at: string
+          discount: string
+          expires_at: string
+          id: string
+          is_used: boolean
+          updated_at: string
+          upload_id: string
+          used_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          discount: string
+          expires_at: string
+          id?: string
+          is_used?: boolean
+          updated_at?: string
+          upload_id: string
+          used_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          discount?: string
+          expires_at?: string
+          id?: string
+          is_used?: boolean
+          updated_at?: string
+          upload_id?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupons_upload_id_fkey"
+            columns: ["upload_id"]
+            isOneToOne: false
+            referencedRelation: "uploads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      uploads: {
+        Row: {
+          approved_at: string | null
+          campaign_id: string
+          created_at: string
+          customer_email: string | null
+          customer_name: string | null
+          id: string
+          image_url: string
+          message: string | null
+          status: string
+          submitted_at: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          campaign_id: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          id?: string
+          image_url: string
+          message?: string | null
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          campaign_id?: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          id?: string
+          image_url?: string
+          message?: string | null
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "uploads_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
