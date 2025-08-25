@@ -8,51 +8,44 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Business Dashboard Color Palette */
-    --background: 248 250 252;
-    --foreground: 15 23 42;
+    /* Clean Business Palette */
+    --background: 249 250 251;
+    --foreground: 17 24 39;
 
     --card: 255 255 255;
-    --card-foreground: 15 23 42;
+    --card-foreground: 17 24 39;
 
     --popover: 255 255 255;
-    --popover-foreground: 15 23 42;
+    --popover-foreground: 17 24 39;
 
-    /* Professional Blue Primary */
-    --primary: 217 91% 60%;
+    /* Professional Primary */
+    --primary: 59 130 246;
     --primary-foreground: 255 255 255;
-    --primary-hover: 217 91% 55%;
+    --primary-hover: 37 99 235;
 
-    /* Subtle Gray Secondary */
-    --secondary: 241 245 249;
-    --secondary-foreground: 51 65 85;
+    /* Clean Neutrals */
+    --secondary: 243 244 246;
+    --secondary-foreground: 75 85 99;
 
-    --muted: 248 250 252;
-    --muted-foreground: 100 116 139;
+    --muted: 249 250 251;
+    --muted-foreground: 107 114 128;
 
-    --accent: 236 253 245;
-    --accent-foreground: 5 150 105;
+    --accent: 239 246 255;
+    --accent-foreground: 59 130 246;
 
     /* Status Colors */
-    --success: 34 197 94;
+    --success: 16 185 129;
     --success-foreground: 255 255 255;
     --warning: 245 158 11;
     --warning-foreground: 255 255 255;
     --destructive: 239 68 68;
     --destructive-foreground: 255 255 255;
 
-    --border: 226 232 240;
-    --input: 226 232 240;
-    --ring: 217 91% 60%;
+    --border: 229 231 235;
+    --input: 229 231 235;
+    --ring: 59 130 246;
 
-    --radius: 8px;
-
-    /* Custom Design Tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 70%));
-    --gradient-success: linear-gradient(135deg, hsl(34 197 94), hsl(16 185 129));
-    --shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    --shadow-medium: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --radius: 6px;
 
     --sidebar-background: 0 0% 98%;
 
@@ -72,41 +65,38 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 17 24 39;
+    --foreground: 249 250 251;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 17 24 39;
+    --card-foreground: 249 250 251;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 17 24 39;
+    --popover-foreground: 249 250 251;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 59 130 246;
+    --primary-foreground: 255 255 255;
+    --primary-hover: 37 99 235;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 31 41 55;
+    --secondary-foreground: 209 213 219;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 31 41 55;
+    --muted-foreground: 156 163 175;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 30 41 59;
+    --accent-foreground: 147 197 253;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --success: 16 185 129;
+    --success-foreground: 255 255 255;
+    --warning: 245 158 11;
+    --warning-foreground: 255 255 255;
+    --destructive: 239 68 68;
+    --destructive-foreground: 255 255 255;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 55 65 81;
+    --input: 55 65 81;
+    --ring: 59 130 246;
   }
 }
 
@@ -116,6 +106,13 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }
