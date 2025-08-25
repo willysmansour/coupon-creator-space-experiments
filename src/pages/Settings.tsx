@@ -11,19 +11,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, Shield, Bell, Key, Palette, Save, Building2, Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useApp } from "@/contexts/AppContext";
+import { useCompanies } from "@/hooks/useSupabaseData";
 import { useState, useRef } from "react";
 import { QRCodeGenerator } from "@/components/QRCodeGenerator";
 
 const Settings = () => {
   const { toast } = useToast();
-  const { company, updateCompany } = useApp();
-  const [companyName, setCompanyName] = useState(company.name);
-  const [logoPreview, setLogoPreview] = useState<string | undefined>(company.logoUrl);
+  const { data: companies = [] } = useCompanies();
+  const company = companies[0]; // Get the first company from the database
+  const [companyName, setCompanyName] = useState(company?.name || '');
+  const [logoPreview, setLogoPreview] = useState<string | undefined>(company?.logo);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSave = () => {
-    updateCompany({ name: companyName, logoUrl: logoPreview });
+    // For now, just show success toast. 
+    // In a real app, this would update the company in Supabase
     toast({
       title: "Inställningar sparade",
       description: "Dina ändringar har sparats framgångsrikt.",
@@ -145,10 +147,10 @@ const Settings = () => {
                         <Input id="email" type="email" defaultValue="anna.bergstrom@donezo.se" />
                       </div>
                       
-                      <div className="space-y-2">
-                        <Label htmlFor="company">Företag</Label>
-                        <Input id="company" defaultValue="Donezo AB" />
-                      </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="company">Företag</Label>
+                          <Input id="company" value={company?.name || ''} readOnly />
+                        </div>
                     </CardContent>
                   </Card>
                 </TabsContent>

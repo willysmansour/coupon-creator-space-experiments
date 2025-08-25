@@ -165,8 +165,8 @@ const initialCoupons: Coupon[] = [
 ];
 
 const initialCompany: Company = {
-  id: "1",
-  name: "Donezo AB",
+  id: "123e4567-e89b-12d3-a456-426614174000", // Match the UUID from database
+  name: "ACME Corp", // Match the database name
   logoUrl: undefined,
   createdAt: "2024-01-01T00:00:00Z"
 };

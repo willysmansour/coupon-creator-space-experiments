@@ -16,6 +16,7 @@ import Logout from "./pages/Logout";
 import NotFound from "./pages/NotFound";
 import Landing from "./pages/Landing";
 import Upload from "./pages/Upload";
+import CompanyWelcome from "./pages/CompanyWelcome";
 import ThankYou from "./pages/ThankYou";
 import Coupon from "./pages/Coupon";
 
@@ -38,7 +39,8 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="/help" element={<Help />} />
             <Route path="/logout" element={<Logout />} />
-            <Route path="/company/:companyId" element={<Upload />} />
+            <Route path="/company/:companyId" element={<CompanyWelcome />} />
+            <Route path="/company/:companyId/upload" element={<Upload />} />
             <Route path="/landing/:companyId" element={<Landing />} />
             <Route path="/c/:campaignId" element={<Upload />} />
             <Route path="/thank-you/:uploadId" element={<ThankYou />} />
