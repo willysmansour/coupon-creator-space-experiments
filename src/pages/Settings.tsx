@@ -13,6 +13,7 @@ import { User, Shield, Bell, Key, Palette, Save, Building2, Upload, X } from "lu
 import { useToast } from "@/hooks/use-toast";
 import { useApp } from "@/contexts/AppContext";
 import { useState, useRef } from "react";
+import { QRCodeGenerator } from "@/components/QRCodeGenerator";
 
 const Settings = () => {
   const { toast } = useToast();
@@ -231,6 +232,8 @@ const Settings = () => {
                       </div>
                     </CardContent>
                   </Card>
+                  
+                  <QRCodeGenerator companyId={company.id} />
                 </TabsContent>
 
                 <TabsContent value="security" className="space-y-4">
