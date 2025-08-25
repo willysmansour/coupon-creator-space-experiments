@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useUpload, useCampaign, useCompany, useCouponByUpload } from '@/hooks/useSupabaseData';
+import { useUpload, useCampaign, useCompany, useCouponByUpload, useUpdateUploadWithCustomer } from '@/hooks/useSupabaseData';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { CheckCircle, Clock, Gift } from 'lucide-react';
+import { toast } from 'sonner';
 
 const ThankYou = () => {
   const { uploadId } = useParams<{ uploadId: string }>();
@@ -13,6 +16,12 @@ const ThankYou = () => {
   const { data: campaign, isLoading: campaignLoading } = useCampaign(upload?.campaign_id || '');
   const { data: company, isLoading: companyLoading } = useCompany(campaign?.company_id || '');
   const { data: coupon, isLoading: couponLoading } = useCouponByUpload(uploadId || '');
+  const updateUploadWithCustomer = useUpdateUploadWithCustomer();
+  
+  const [customerName, setCustomerName] = useState('');
+  const [email, setEmail] = useState('');
+  const [showForm, setShowForm] = useState(!upload?.customer_name && !upload?.customer_email);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   if (uploadLoading || campaignLoading || companyLoading) {
     return (
@@ -154,6 +163,71 @@ const ThankYou = () => {
           </CardContent>
         </Card>
 
+        {/* Customer Details Form - only show if not provided */}
+        {showForm && !upload?.customer_name && !upload?.customer_email && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Get your coupon via email</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="name" className="text-sm font-medium">
+                  Name *
+                </Label>
+                <Input
+                  id="name"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  placeholder="Your name"
+                  className="mt-1"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="email" className="text-sm font-medium">
+                  Email *
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  className="mt-1"
+                />
+              </div>
+              
+              <Button
+                onClick={async () => {
+                  if (!customerName.trim() || !email.trim()) {
+                    toast.error('Please fill in both name and email');
+                    return;
+                  }
+                  
+                  setIsSubmitting(true);
+                  try {
+                    await updateUploadWithCustomer.mutateAsync({
+                      id: uploadId!,
+                      customer_name: customerName.trim(),
+                      customer_email: email.trim()
+                    });
+                    setShowForm(false);
+                    toast.success('Details saved! Your coupon will be sent to your email.');
+                  } catch (error) {
+                    toast.error('Failed to save details');
+                  } finally {
+                    setIsSubmitting(false);
+                  }
+                }}
+                className="w-full"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Saving..." : "Get Coupon"}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Action Buttons */}
         <div className="space-y-3">
           {coupon && (
@@ -163,14 +237,14 @@ const ThankYou = () => {
               size="lg"
             >
               <Gift className="w-5 h-5 mr-2" />
-              Visa min kupong
+              View my coupon
             </Button>
           )}
           
-          {!coupon && upload.status === 'pending' && (
+          {!coupon && upload.status === 'pending' && !showForm && (
             <div className="text-center p-4 bg-accent rounded-lg">
               <p className="text-sm text-accent-foreground">
-                Väntar på godkännande. Du kommer få en kupong när ditt bidrag godkänns.
+                Your submission is being reviewed. You'll receive a coupon once approved.
               </p>
             </div>
           )}
@@ -180,7 +254,7 @@ const ThankYou = () => {
             onClick={() => navigate(`/company/${company?.id}`)}
             className="w-full"
           >
-            Tillbaka till kampanjer
+            Back to campaigns
           </Button>
         </div>
       </div>

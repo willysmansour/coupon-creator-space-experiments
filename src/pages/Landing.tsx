@@ -30,80 +30,52 @@ const Landing = () => {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted/30">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-md mx-auto space-y-6">
-          {/* Company Logo and Header */}
-          <div className="text-center space-y-4">
-            <div className="w-24 h-24 mx-auto rounded-full bg-card border shadow-lg flex items-center justify-center">
-              {company.logo ? (
-                <img
-                  src={company.logo}
-                  alt={`${company.name} logotyp`}
-                  className="w-20 h-20 object-contain rounded-full"
-                />
-              ) : (
-                <Building2 className="h-12 w-12 text-primary" />
-              )}
-            </div>
-            
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">{company.name}</h1>
-              <p className="text-muted-foreground">Välkommen till vår kampanj!</p>
-            </div>
-          </div>
+  // Get the first active campaign to use for the upload button
+  const firstActiveCampaign = activeCampaigns.length > 0 ? activeCampaigns[0] : null;
 
-          {/* Active Campaigns */}
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-center">Aktiva kampanjer</h2>
-            
-            {activeCampaigns.length > 0 ? (
-              activeCampaigns.map((campaign) => (
-                <Card key={campaign.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg">{campaign.title}</CardTitle>
-                    <CardDescription>
-                      {campaign.description || "Ladda upp en bild för att få rabatt!"}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="flex items-center justify-between">
-                      <div className="text-2xl font-bold text-primary">
-                        {campaign.discount}
-                      </div>
-                      <Link to={`/c/${campaign.id}`}>
-                        <Button className="flex items-center gap-2">
-                          <Camera className="h-4 w-4" />
-                          Ladda upp bild
-                          <ArrowRight className="h-4 w-4" />
-                        </Button>
-                      </Link>
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Gäller till: {new Date(campaign.valid_to).toLocaleDateString('sv-SE')}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/30 flex items-center justify-center">
+      <div className="max-w-md mx-auto p-8 text-center space-y-8">
+        {/* Company Logo - Large and centered */}
+        <div className="space-y-6">
+          <div className="w-48 h-48 mx-auto rounded-full bg-card border shadow-lg flex items-center justify-center">
+            {company.logo ? (
+              <img
+                src={company.logo}
+                alt={`${company.name} logotyp`}
+                className="w-44 h-44 object-contain rounded-full"
+              />
             ) : (
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <p className="text-muted-foreground">Inga aktiva kampanjer just nu.</p>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Kom tillbaka senare för nya erbjudanden!
-                  </p>
-                </CardContent>
-              </Card>
+              <Building2 className="h-24 w-24 text-primary" />
             )}
           </div>
-
-          {/* Footer */}
-          <div className="text-center pt-6">
-            <p className="text-xs text-muted-foreground">
-              Powered by {company.name}
+          
+          <div className="space-y-4">
+            <h1 className="text-3xl font-bold text-foreground">{company.name}</h1>
+            <p className="text-xl text-muted-foreground">
+              Upload content to receive an offer
             </p>
           </div>
+        </div>
+
+        {/* Upload Content Button */}
+        <div className="pt-4">
+          {firstActiveCampaign ? (
+            <Link to={`/c/${firstActiveCampaign.id}`}>
+              <Button size="lg" className="h-14 px-8 text-lg">
+                <Camera className="h-6 w-6 mr-2" />
+                Upload Content
+              </Button>
+            </Link>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-muted-foreground">Inga aktiva kampanjer just nu.</p>
+              <Button size="lg" disabled className="h-14 px-8 text-lg">
+                <Camera className="h-6 w-6 mr-2" />
+                Upload Content
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>

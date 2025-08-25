@@ -311,6 +311,39 @@ export const useRedeemCoupon = () => {
   });
 };
 
+export const useUpdateUploadWithCustomer = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ id, customer_name, customer_email }: { 
+      id: string; 
+      customer_name: string; 
+      customer_email: string; 
+    }) => {
+      const { data, error } = await supabase
+        .from('uploads')
+        .update({ 
+          customer_name, 
+          customer_email 
+        })
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data as Upload;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['uploads'] });
+      queryClient.invalidateQueries({ queryKey: ['upload', data.id] });
+      toast.success('Customer details saved successfully!');
+    },
+    onError: (error) => {
+      toast.error('Failed to save customer details: ' + error.message);
+    }
+  });
+};
+
 // File upload helper
 export const uploadFile = async (file: File, bucket = 'uploads'): Promise<string> => {
   const fileExt = file.name.split('.').pop();

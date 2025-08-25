@@ -114,24 +114,17 @@ const Upload = () => {
       return;
     }
     
-    if (!message.trim()) {
-      toast.error('Vänligen skriv ett meddelande.');
-      return;
-    }
-    
     setIsLoading(true);
     
     try {
       // Upload file to Supabase Storage
       const imageUrl = await uploadFile(file);
       
-      // Create upload record
+      // Create upload record with minimal data
       const upload = await createUpload.mutateAsync({
         campaign_id: campaignId!,
-        customer_name: customerName.trim() || 'Anonym',
-        customer_email: email.trim() || '',
         image_url: imageUrl,
-        message: message.trim()
+        message: 'Uploaded content' // Default message since field is removed
       });
       
       navigate(`/thank-you/${upload.id}`);
@@ -249,53 +242,6 @@ const Upload = () => {
             </div>
           </div>
 
-          {/* Message */}
-          <div>
-            <Label htmlFor="message" className="text-sm font-medium">
-              Beskriv din bild/video *
-            </Label>
-            <Textarea
-              id="message"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="t.ex. Min favorit produkt, Så här använder jag den..."
-              className="mt-2"
-              rows={3}
-            />
-          </div>
-
-          {/* Optional contact info */}
-          <div className="space-y-3">
-            <div>
-              <Label htmlFor="name" className="text-sm font-medium">
-                Namn (valfritt)
-              </Label>
-              <Input
-                id="name"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                placeholder="Ditt namn"
-                className="mt-1"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="email" className="text-sm font-medium">
-                E-post (valfritt)
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="din@email.se"
-                className="mt-1"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                För att få kupongen via e-post
-              </p>
-            </div>
-          </div>
 
           {/* Submit Button */}
           <Button
@@ -303,7 +249,7 @@ const Upload = () => {
             className="w-full h-12 text-base"
             disabled={isLoading}
           >
-            {isLoading ? "Skickar..." : "Skicka in"}
+            {isLoading ? "Uploading..." : "Upload"}
           </Button>
         </form>
       </div>
