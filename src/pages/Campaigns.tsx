@@ -9,11 +9,14 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Edit, Gift, Users, Calendar, TrendingUp, Plus } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Eye, Edit, Gift, Users, Calendar, TrendingUp, Plus, Trash2 } from "lucide-react";
 import { useApp, Campaign } from "@/contexts/AppContext";
+import { useToast } from "@/hooks/use-toast";
 
 const Campaigns = () => {
-  const { campaigns } = useApp();
+  const { campaigns, uploads, coupons, deleteCampaign } = useApp();
+  const { toast } = useToast();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [viewCampaign, setViewCampaign] = useState<Campaign | null>(null);
   const [editCampaign, setEditCampaign] = useState<Campaign | null>(null);
@@ -41,6 +44,25 @@ const Campaigns = () => {
       default:
         return status;
     }
+  };
+
+  const handleDeleteCampaign = (campaign: Campaign) => {
+    const campaignStats = getCampaignStats(campaign.id);
+    deleteCampaign(campaign.id);
+    
+    toast({
+      title: "Kampanj borttagen",
+      description: `"${campaign.title}" och ${campaignStats.uploads} relaterade uppladdningar har tagits bort permanent.`,
+    });
+  };
+
+  const getCampaignStats = (campaignId: string) => {
+    const campaignUploads = uploads.filter(u => u.campaignId === campaignId);
+    const campaignCoupons = coupons.filter(c => c.campaignId === campaignId);
+    return {
+      uploads: campaignUploads.length,
+      coupons: campaignCoupons.length
+    };
   };
 
   return (
@@ -166,6 +188,44 @@ const Campaigns = () => {
                         <Edit className="h-4 w-4" />
                         Redigera
                       </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="gap-2 text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Ta bort
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Ta bort kampanj</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Är du säker på att du vill ta bort kampanjen "{campaign.title}"?
+                              <br /><br />
+                              <strong>Detta kommer permanent att ta bort:</strong>
+                              <ul className="list-disc list-inside mt-2 space-y-1">
+                                <li>{getCampaignStats(campaign.id).uploads} uppladdade bilder</li>
+                                <li>{getCampaignStats(campaign.id).coupons} utfärdade kuponger</li>
+                                <li>Alla relaterade data</li>
+                              </ul>
+                              <br />
+                              Denna åtgärd kan inte ångras.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                            <AlertDialogAction 
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              onClick={() => handleDeleteCampaign(campaign)}
+                            >
+                              Ta bort permanent
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
                 </Card>

@@ -49,6 +49,7 @@ interface AppState {
 interface AppActions {
   addCampaign: (campaign: Omit<Campaign, 'id' | 'submissions' | 'couponsIssued' | 'createdAt'>) => void;
   updateCampaign: (id: string, updates: Partial<Campaign>) => void;
+  deleteCampaign: (id: string) => void;
   addUpload: (upload: Omit<Upload, 'id' | 'submittedAt'>) => void;
   updateUpload: (id: string, updates: Partial<Upload>) => void;
   addCoupon: (coupon: Omit<Coupon, 'id' | 'issuedAt'>) => void;
@@ -237,6 +238,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
 
+  const deleteCampaign = (id: string) => {
+    // Remove the campaign
+    setCampaigns(prev => prev.filter(campaign => campaign.id !== id));
+    
+    // Remove all uploads related to this campaign
+    setUploads(prev => prev.filter(upload => upload.campaignId !== id));
+    
+    // Remove all coupons related to this campaign
+    setCoupons(prev => prev.filter(coupon => coupon.campaignId !== id));
+  };
+
   const rejectUpload = (uploadId: string) => {
     updateUpload(uploadId, { status: "rejected" });
   };
@@ -247,6 +259,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     coupons,
     addCampaign,
     updateCampaign,
+    deleteCampaign,
     addUpload,
     updateUpload,
     addCoupon,
