@@ -69,33 +69,78 @@ const Settings = () => {
     setIsLoading(true);
     
     try {
-      // Save profile data
-      await upsertProfile.mutateAsync({
-        id: currentProfile?.id,
-        first_name: firstName,
-        last_name: lastName,
-        email: email,
-        avatar_url: profileImagePreview,
-      });
-
-      // Save company data if there are changes or create default company
-      if (companyName) {
-        await updateCompany.mutateAsync({
-          id: company?.id,
-          name: companyName,
-          logo: logoPreview,
+      // Validate company name
+      if (companyName && companyName.trim().length < 2) {
+        toast({
+          title: "Ogiltigt företagsnamn",
+          description: "Företagsnamnet måste vara minst 2 tecken långt.",
+          variant: "destructive",
         });
+        setIsLoading(false);
+        return;
       }
 
+      let profileSaved = false;
+      let companySaved = false;
+
+      // Save profile data
+      try {
+        await upsertProfile.mutateAsync({
+          id: currentProfile?.id,
+          first_name: firstName,
+          last_name: lastName,
+          email: email,
+          avatar_url: profileImagePreview,
+        });
+        profileSaved = true;
+        console.log('Profile saved successfully');
+      } catch (profileError) {
+        console.error('Error saving profile:', profileError);
+        toast({
+          title: "Fel vid sparande av profil",
+          description: `Det gick inte att spara profilinformationen: ${profileError instanceof Error ? profileError.message : 'Okänt fel'}`,
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Save company data if there are changes or create default company
+      if (companyName && companyName.trim()) {
+        try {
+          await updateCompany.mutateAsync({
+            id: company?.id,
+            name: companyName.trim(),
+            logo: logoPreview,
+          });
+          companySaved = true;
+          console.log('Company saved successfully');
+        } catch (companyError) {
+          console.error('Error saving company:', companyError);
+          toast({
+            title: "Fel vid sparande av företag",
+            description: `Det gick inte att spara företagsinformationen: ${companyError instanceof Error ? companyError.message : 'Okänt fel'}`,
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // Success message
+      const savedItems = [];
+      if (profileSaved) savedItems.push('profil');
+      if (companySaved) savedItems.push('företag');
+      
       toast({
         title: "Inställningar sparade",
-        description: "Dina ändringar har sparats framgångsrikt.",
+        description: `Dina ändringar för ${savedItems.join(' och ')} har sparats framgångsrikt.`,
       });
     } catch (error) {
-      console.error('Error saving settings:', error);
+      console.error('Unexpected error saving settings:', error);
       toast({
-        title: "Fel vid sparande",
-        description: "Det gick inte att spara dina ändringar. Försök igen.",
+        title: "Oväntat fel",
+        description: `Ett oväntat fel inträffade: ${error instanceof Error ? error.message : 'Okänt fel'}. Försök igen.`,
         variant: "destructive",
       });
     } finally {
