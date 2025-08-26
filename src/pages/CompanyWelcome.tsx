@@ -1,19 +1,18 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useCompany, useActiveCampaigns } from '@/hooks/useSupabaseData';
+import { useCompany } from '@/hooks/useSupabaseData';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Gift, Upload } from 'lucide-react';
+import { Gift, Upload, Camera, Video } from 'lucide-react';
 
 const CompanyWelcome = () => {
   const { companyId } = useParams<{ companyId: string }>();
   const navigate = useNavigate();
   
   const { data: company, isLoading: companyLoading } = useCompany(companyId || '');
-  const { data: activeCampaigns = [], isLoading: campaignsLoading } = useActiveCampaigns(companyId);
 
-  if (companyLoading || campaignsLoading) {
+  if (companyLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -37,13 +36,13 @@ const CompanyWelcome = () => {
     );
   }
 
-  if (activeCampaigns.length === 0) {
+  if (!company.discount_active) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardContent className="p-6 text-center">
-            <h1 className="text-xl font-semibold mb-2">Inga aktiva kampanjer</h1>
-            <p className="text-muted-foreground">Det finns inga aktiva kampanjer för detta företag just nu.</p>
+            <h1 className="text-xl font-semibold mb-2">Ingen aktiv rabatt</h1>
+            <p className="text-muted-foreground">Det finns ingen aktiv rabatt för detta företag just nu.</p>
           </CardContent>
         </Card>
       </div>
@@ -53,8 +52,6 @@ const CompanyWelcome = () => {
   const handleContinue = () => {
     navigate(`/company/${companyId}/upload`);
   };
-
-  const activeCampaign = activeCampaigns[0]; // Use the first active campaign
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20">
@@ -83,32 +80,42 @@ const CompanyWelcome = () => {
           </div>
         </div>
 
-        {/* Campaign Information */}
+        {/* Discount Information */}
         <Card className="border-primary/20 shadow-lg">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">{activeCampaign.title}</CardTitle>
+              <CardTitle className="text-lg">Rabatterbjudande</CardTitle>
               <Badge variant="secondary" className="bg-success/10 text-success border-success/20">
                 Aktiv
               </Badge>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            {activeCampaign.description && (
+            {company.content_description && (
               <p className="text-sm text-muted-foreground">
-                {activeCampaign.description}
+                {company.content_description}
               </p>
             )}
             
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2 text-primary">
                 <Gift className="h-4 w-4" />
-                <span className="font-semibold">{activeCampaign.discount} rabatt</span>
+                <span className="font-semibold">{company.discount_percentage}% rabatt</span>
               </div>
               
               <div className="flex items-center gap-2 text-muted-foreground">
-                <Calendar className="h-4 w-4" />
-                <span>Till {new Date(activeCampaign.valid_to).toLocaleDateString('sv-SE')}</span>
+                {company.content_types?.includes('photo') && (
+                  <div className="flex items-center gap-1">
+                    <Camera className="h-4 w-4" />
+                    <span>Foto</span>
+                  </div>
+                )}
+                {company.content_types?.includes('video') && (
+                  <div className="flex items-center gap-1">
+                    <Video className="h-4 w-4" />
+                    <span>Video</span>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
