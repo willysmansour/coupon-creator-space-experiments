@@ -21,6 +21,8 @@ const Auth = () => {
 
   const redirectTo = useMemo(() => search.get("redirect") || "/", [search]);
 
+  const [currentUser, setCurrentUser] = useState(null);
+
   useEffect(() => {
     document.title = mode === "signin" ? "Logga in" : mode === "signup" ? "Skapa Admin" : "Registrera Företag";
 
@@ -36,10 +38,9 @@ const Auth = () => {
       }
     });
 
+    // Check for existing session but don't auto-redirect - just store user info
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        navigate(redirectTo, { replace: true });
-      }
+      setCurrentUser(session?.user || null);
     });
 
     return () => listener.subscription.unsubscribe();
@@ -93,6 +94,25 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-6">
       <main className="w-full max-w-md">
         <Card className="p-6 space-y-6">
+          {currentUser && (
+            <div className="bg-muted/50 p-4 rounded-lg border space-y-3">
+              <div className="text-sm">
+                <p className="font-medium text-foreground">Du är redan inloggad som:</p>
+                <p className="text-muted-foreground">{currentUser.email}</p>
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={() => navigate(redirectTo)}>
+                  Till Dashboard
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => supabase.auth.signOut()}>
+                  Logga ut
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Du kan fortfarande registrera nya företag nedan.
+              </p>
+            </div>
+          )}
           <Tabs value={mode} onValueChange={(value) => setMode(value as any)} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="signin">Logga in</TabsTrigger>
@@ -165,7 +185,7 @@ const Auth = () => {
                   <Input id="company-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
                 </div>
                 <Button className="w-full" onClick={onCompanyRegister} disabled={loading || !companyName.trim()}>
-                  {loading ? "Registrerar företag..." : "Registrera Företag"}
+                  {loading ? "Skapar konto..." : "Skapa Konto"}
                 </Button>
               </section>
             </TabsContent>
