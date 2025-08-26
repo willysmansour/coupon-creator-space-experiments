@@ -121,21 +121,11 @@ export const useAssignRole = () => {
   });
 };
 
-// Generate various test email formats
-const generateTestEmailFormats = () => {
-  const timestamp = Date.now();
-  return [
-    `test.${timestamp}@gmail.com`,
-    `testuser.${timestamp}@gmail.com`,
-    `demo.${timestamp}@example.org`,
-    `test+${timestamp}@example.com`
-  ];
-};
 
 // Get user-friendly error messages
 const getErrorMessage = (error: any): string => {
   if (error?.message?.includes('Email address is invalid')) {
-    return "E-postadressen godkänns inte. Prova en annan e-postadress eller stäng av test-läge.";
+    return "E-postadressen är ogiltig. Kontrollera att du angett rätt format.";
   }
   if (error?.message?.includes('Password')) {
     return "Lösenordet uppfyller inte kraven. Använd minst 6 tecken.";
@@ -162,68 +152,50 @@ export const useRegisterCompany = () => {
       companyName: string;
       logo?: string;
     }) => {
-      // Try different email formats if the first one fails
-      const emailsToTry = email.includes('test+') || email.includes('test.') 
-        ? generateTestEmailFormats() 
-        : [email];
-
-      let lastError: any;
-      
-      for (const tryEmail of emailsToTry) {
-        try {
-          // First create the auth user
-          const { data: authData, error: authError } = await supabase.auth.signUp({
-            email: tryEmail,
-            password,
-            options: {
-              emailRedirectTo: `${window.location.origin}/`
-            }
-          });
-
-          if (authError) throw authError;
-          if (!authData.user) throw new Error('User creation failed');
-
-          // Create the company
-          const { data: companyData, error: companyError } = await supabase
-            .from('companies')
-            .insert({
-              name: companyName,
-              logo,
-              owner_user_id: authData.user.id
-            })
-            .select()
-            .single();
-
-          if (companyError) throw companyError;
-
-          // Delete existing customer role first (if exists)
-          await supabase
-            .from('user_roles')
-            .delete()
-            .eq('user_id', authData.user.id)
-            .eq('role', 'customer');
-
-          // Assign company admin role
-          const { error: roleError } = await supabase
-            .from('user_roles')
-            .insert({
-              user_id: authData.user.id,
-              role: 'company_admin',
-              company_id: companyData.id
-            });
-
-          if (roleError) throw roleError;
-
-          return { user: authData.user, company: companyData };
-        } catch (error) {
-          lastError = error;
-          console.log(`Email ${tryEmail} failed, trying next format...`);
-          continue;
+      // Create the auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`
         }
-      }
-      
-      // If all emails failed, throw the last error
-      throw lastError;
+      });
+
+      if (authError) throw authError;
+      if (!authData.user) throw new Error('User creation failed');
+
+      // Create the company
+      const { data: companyData, error: companyError } = await supabase
+        .from('companies')
+        .insert({
+          name: companyName,
+          logo,
+          owner_user_id: authData.user.id
+        })
+        .select()
+        .single();
+
+      if (companyError) throw companyError;
+
+      // Delete existing customer role first (if exists)
+      await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', authData.user.id)
+        .eq('role', 'customer');
+
+      // Assign company admin role
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .insert({
+          user_id: authData.user.id,
+          role: 'company_admin',
+          company_id: companyData.id
+        });
+
+      if (roleError) throw roleError;
+
+      return { user: authData.user, company: companyData };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-role'] });

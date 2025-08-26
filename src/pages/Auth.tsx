@@ -16,7 +16,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [loading, setLoading] = useState(false);
-  const [testMode, setTestMode] = useState(false);
+  
   const [search] = useSearchParams();
   const navigate = useNavigate();
   const registerCompany = useRegisterCompany();
@@ -82,9 +82,8 @@ const Auth = () => {
   const onCompanyRegister = async () => {
     setLoading(true);
     try {
-      const finalEmail = testMode ? `test.${Date.now()}@gmail.com` : email;
       await registerCompany.mutateAsync({
-        email: finalEmail,
+        email,
         password,
         companyName
       });
@@ -155,34 +154,6 @@ const Auth = () => {
                 </p>
               </header>
               
-              {/* Test Mode Toggle */}
-              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                <div className="space-y-0.5">
-                  <Label htmlFor="test-mode" className="text-sm font-medium">
-                    Test-läge
-                  </Label>
-                  <p className="text-xs text-muted-foreground">
-                    Genererar automatiskt test e-post för snabb registrering
-                  </p>
-                </div>
-                <Switch
-                  id="test-mode"
-                  checked={testMode}
-                  onCheckedChange={setTestMode}
-                />
-              </div>
-
-              {/* Test Mode Banner */}
-              {testMode && (
-                <div className="bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-                  <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">
-                    🧪 Test-läge aktivt
-                  </p>
-                  <p className="text-xs text-blue-600 dark:text-blue-300 mt-1">
-                    E-postadressen genereras automatiskt för testning
-                  </p>
-                </div>
-              )}
 
               <section className="space-y-4">
                 <div className="space-y-2">
@@ -194,18 +165,16 @@ const Auth = () => {
                   <Input 
                     id="company-email" 
                     type="email" 
-                    value={testMode ? `test+${Date.now()}@example.com` : email} 
+                    value={email} 
                     onChange={(e) => setEmail(e.target.value)}
-                    disabled={testMode}
-                    placeholder={testMode ? "Genereras automatiskt..." : "din@email.com"}
-                    className={testMode ? "opacity-75" : ""}
+                    placeholder="din@email.com"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="company-password">Lösenord</Label>
                   <Input id="company-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
                 </div>
-                <Button className="w-full" onClick={onCompanyRegister} disabled={loading || !companyName.trim()}>
+                <Button className="w-full" onClick={onCompanyRegister} disabled={loading || !companyName.trim() || !email.trim()}>
                   {loading ? "Skapar konto..." : "Skapa Konto"}
                 </Button>
               </section>
