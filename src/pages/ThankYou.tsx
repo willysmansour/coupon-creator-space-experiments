@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useUpload, useCompany, useCouponByUpload, useUpdateUploadWithCustomer } from '@/hooks/useSupabaseData';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -207,14 +208,31 @@ const ThankYou = () => {
                   
                   setIsSubmitting(true);
                   try {
+                    // First update the upload with customer details
                     await updateUploadWithCustomer.mutateAsync({
                       id: uploadId!,
                       customer_name: customerName.trim(),
                       customer_email: email.trim()
                     });
-                    setShowForm(false);
-                    toast.success('Detaljer sparade! Din kupong skickas till din e-post.');
+
+                    // Then send the coupon email
+                    const { error: emailError } = await supabase.functions.invoke('send-coupon-email', {
+                      body: {
+                        uploadId: uploadId!,
+                        customerName: customerName.trim(),
+                        customerEmail: email.trim()
+                      }
+                    });
+
+                    if (emailError) {
+                      console.error('Email error:', emailError);
+                      toast.error('Detaljer sparade men e-post misslyckades');
+                    } else {
+                      setShowForm(false);
+                      toast.success('Detaljer sparade! Din kupong skickas till din e-post inom kort.');
+                    }
                   } catch (error) {
+                    console.error('Error:', error);
                     toast.error('Misslyckades att spara detaljer');
                   } finally {
                     setIsSubmitting(false);

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Check, X, Clock, Eye, Upload, Users } from "lucide-react";
 import { useUploads, useUpdateUploadStatus } from "@/hooks/useSupabaseData";
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 const Uploads = () => {
@@ -19,7 +20,25 @@ const Uploads = () => {
     if (upload) {
       try {
         await updateUploadStatus.mutateAsync({ id, status: 'approved' });
-        toast.success(`${upload.customer_name || 'Uppladdning'} har godkänts och en kupong har skapats.`);
+        
+        // Send coupon email if customer details exist
+        if (upload.customer_name && upload.customer_email) {
+          try {
+            await supabase.functions.invoke('send-coupon-email', {
+              body: {
+                uploadId: id,
+                customerName: upload.customer_name,
+                customerEmail: upload.customer_email
+              }
+            });
+            toast.success(`${upload.customer_name} har godkänts och kupong-email skickat.`);
+          } catch (emailError) {
+            console.error('Email error:', emailError);
+            toast.success(`${upload.customer_name} har godkänts men e-post misslyckades.`);
+          }
+        } else {
+          toast.success(`Uppladdning godkänd. Kupong skapas när kund fyller i sina detaljer.`);
+        }
       } catch (error) {
         toast.error('Misslyckades att godkänna uppladdningen');
       }

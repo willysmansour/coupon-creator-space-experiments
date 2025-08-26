@@ -1,1 +1,4 @@
 project_id = "mbpghmizndwixvuqrvmu"
+
+[functions.send-coupon-email]
+verify_jwt = false
