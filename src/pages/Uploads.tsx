@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Check, X, Clock, Eye, Trash2, Upload, Users } from "lucide-react";
-import { useCompanyAwareUploads } from "@/hooks/useCompanyAwareData";
+import { useFilteredUploads } from "@/hooks/useFilteredSupabaseData";
 import { useUpdateUploadStatus, useDeleteUpload } from "@/hooks/useSupabaseData";
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -22,9 +22,11 @@ import {
   AlertDialogTrigger 
 } from "@/components/ui/alert-dialog";
 import { toast } from 'sonner';
+import { useState } from 'react';
 
 const Uploads = () => {
-  const { data: uploads = [], isLoading } = useCompanyAwareUploads();
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | undefined>();
+  const { data: uploads = [], isLoading } = useFilteredUploads(selectedCompanyId);
   const updateUploadStatus = useUpdateUploadStatus();
   const deleteUpload = useDeleteUpload();
 
@@ -122,8 +124,11 @@ const Uploads = () => {
       <SidebarProvider>
         <div className="min-h-screen flex w-full bg-background">
           <ModernSidebar />
-          <div className="flex-1">
-            <ModernHeader />
+        <div className="flex-1">
+          <ModernHeader 
+            selectedCompanyId={selectedCompanyId}
+            onCompanyChange={setSelectedCompanyId}
+          />
             <main className="p-6">
               <div className="text-center">Loading...</div>
             </main>
@@ -143,7 +148,10 @@ const Uploads = () => {
         <ModernSidebar />
         
         <div className="flex-1">
-          <ModernHeader />
+          <ModernHeader 
+            selectedCompanyId={selectedCompanyId}
+            onCompanyChange={setSelectedCompanyId}
+          />
           
           <main className="p-6 space-y-6">
             {/* Page Header */}

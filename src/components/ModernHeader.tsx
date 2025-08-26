@@ -4,8 +4,14 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Search, Bell, User, Building2 } from "lucide-react";
 import { useUserRole } from "@/hooks/useAuth";
+import { CompanySelector } from "@/components/CompanySelector";
 
-export function ModernHeader() {
+interface ModernHeaderProps {
+  selectedCompanyId?: string;
+  onCompanyChange?: (companyId: string | undefined) => void;
+}
+
+export function ModernHeader({ selectedCompanyId, onCompanyChange }: ModernHeaderProps = {}) {
   const { data: userRole } = useUserRole();
 
   const getRoleDisplay = () => {
@@ -23,7 +29,7 @@ export function ModernHeader() {
 
   return (
     <header className="h-16 bg-card border-b flex items-center justify-between px-6">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-6">
         <SidebarTrigger />
         <div>
           <h1 className="text-xl font-semibold text-foreground">Dashboard</h1>
@@ -34,6 +40,14 @@ export function ModernHeader() {
             </p>
           )}
         </div>
+        
+        {/* Company selector for super admins */}
+        {userRole?.role === 'super_admin' && onCompanyChange && (
+          <CompanySelector 
+            selectedCompanyId={selectedCompanyId}
+            onCompanyChange={onCompanyChange}
+          />
+        )}
       </div>
       
       <div className="flex items-center gap-4">

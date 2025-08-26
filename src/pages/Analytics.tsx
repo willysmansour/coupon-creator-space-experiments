@@ -3,15 +3,21 @@ import { ModernHeader } from "@/components/ModernHeader";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Card } from "@/components/ui/card";
 import { BarChart3, TrendingUp, Users, DollarSign } from "lucide-react";
+import { useState } from "react";
 
 const Analytics = () => {
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | undefined>();
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         <ModernSidebar />
         
         <div className="flex-1">
-          <ModernHeader />
+          <ModernHeader 
+            selectedCompanyId={selectedCompanyId}
+            onCompanyChange={setSelectedCompanyId}
+          />
           
           <main className="p-6 space-y-6">
             {/* Page Header */}

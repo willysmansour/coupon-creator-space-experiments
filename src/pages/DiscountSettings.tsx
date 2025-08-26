@@ -15,6 +15,7 @@ import { useCompanies } from "@/hooks/useSupabaseData";
 import { supabase } from "@/integrations/supabase/client";
 
 const DiscountSettings = () => {
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | undefined>();
   const { data: companies = [], refetch } = useCompanies();
   const company = companies[0]; // Get first company
   const { toast } = useToast();
@@ -115,7 +116,10 @@ const DiscountSettings = () => {
         <ModernSidebar />
         
         <div className="flex-1">
-          <ModernHeader />
+          <ModernHeader 
+            selectedCompanyId={selectedCompanyId}
+            onCompanyChange={setSelectedCompanyId}
+          />
           
           <main className="p-6 space-y-6 max-w-4xl mx-auto">
             {/* Page Header */}
