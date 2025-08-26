@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, Shield, Bell, Key, Palette, Save, Building2, Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useCompanies } from "@/hooks/useSupabaseData";
+import { useCompanyAwareCompanies } from "@/hooks/useCompanyAwareData";
 import { useCurrentProfile, useUpsertProfile, uploadProfileImage } from "@/hooks/useProfileData";
 import { useUpdateCompany, uploadCompanyLogo } from "@/hooks/useCompanyData";
 import { useState, useRef, useEffect } from "react";
@@ -19,12 +19,12 @@ import { QRCodeGenerator } from "@/components/QRCodeGenerator";
 
 const Settings = () => {
   const { toast } = useToast();
-  const { data: companies = [] } = useCompanies();
+  const { data: companies = [] } = useCompanyAwareCompanies();
   const { data: currentProfile } = useCurrentProfile();
   const upsertProfile = useUpsertProfile();
   const updateCompany = useUpdateCompany();
   
-  const company = companies[0]; // Get the first company from the database
+  const company = companies[0]; // Get the user's company
   
   // Profile state
   const [firstName, setFirstName] = useState('');
@@ -56,11 +56,12 @@ const Settings = () => {
     if (company) {
       setCompanyName(company.name || '');
       setLogoPreview(company.logo);
-    } else if (companies.length === 0) {
-      // Create a default company name if none exists
-      setCompanyName('Mitt Företag');
+    } else {
+      // Default empty values for new users
+      setCompanyName('');
+      setLogoPreview(undefined);
     }
-  }, [company, companies]);
+  }, [company]);
 
   const handleSave = async () => {
     if (isLoading) return;

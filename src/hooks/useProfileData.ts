@@ -28,15 +28,19 @@ export const useProfiles = () => {
   });
 };
 
-// Get current user profile (first one for now)
+// Get current user profile
 export const useCurrentProfile = () => {
   return useQuery({
     queryKey: ["current-profile"],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) return null;
+
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
-        .limit(1)
+        .eq("user_id", user.id)
         .maybeSingle();
 
       if (error) throw error;
