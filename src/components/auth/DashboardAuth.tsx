@@ -15,6 +15,14 @@ export function DashboardAuth({ children }: DashboardAuthProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Redirect to auth if no user is authenticated (hook must be called before any early returns)
+  useEffect(() => {
+    if (!authLoading && !user) {
+      const redirectPath = location.pathname !== '/auth' ? location.pathname : '/';
+      navigate(`/auth?redirect=${encodeURIComponent(redirectPath)}`);
+    }
+  }, [user, authLoading, navigate, location.pathname]);
+
   if (authLoading || roleLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -23,15 +31,7 @@ export function DashboardAuth({ children }: DashboardAuthProps) {
     );
   }
 
-  // Redirect to auth if no user is authenticated
-  useEffect(() => {
-    if (!authLoading && !user) {
-      const redirectPath = location.pathname !== '/auth' ? location.pathname : '/';
-      navigate(`/auth?redirect=${encodeURIComponent(redirectPath)}`);
-    }
-  }, [user, authLoading, navigate, location.pathname]);
-
-  // Show loading or return null while redirecting
+  // Show loading while redirecting
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
