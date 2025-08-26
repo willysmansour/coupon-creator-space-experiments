@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { useRegisterCompany } from "@/hooks/useAuth";
 
 const Auth = () => {
-  const [mode, setMode] = useState<"signin" | "signup" | "company">("signin");
+  const [mode, setMode] = useState<"signin" | "company">("company");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [companyName, setCompanyName] = useState("");
@@ -24,7 +24,7 @@ const Auth = () => {
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    document.title = mode === "signin" ? "Logga in" : mode === "signup" ? "Skapa Admin" : "Registrera Företag";
+    document.title = mode === "signin" ? "Logga in" : "Kom igång med ditt företag";
 
     const { data: listener } = supabase.auth.onAuthStateChange((_, session) => {
       if (session?.user) {
@@ -109,15 +109,14 @@ const Auth = () => {
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                Du kan fortfarande registrera nya företag nedan.
+                Du kan fortsätta använda tjänsten eller logga ut för att byta konto.
               </p>
             </div>
           )}
           <Tabs value={mode} onValueChange={(value) => setMode(value as any)} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="company">Kom igång</TabsTrigger>
               <TabsTrigger value="signin">Logga in</TabsTrigger>
-              <TabsTrigger value="signup">Admin</TabsTrigger>
-              <TabsTrigger value="company">Företag</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin" className="space-y-4">
@@ -142,33 +141,11 @@ const Auth = () => {
               </section>
             </TabsContent>
 
-            <TabsContent value="signup" className="space-y-4">
-              <header className="space-y-1">
-                <h1 className="text-2xl font-semibold text-foreground">Skapa Admin</h1>
-                <p className="text-sm text-muted-foreground">
-                  Skapa ett nytt administratörskonto för att hantera systemet.
-                </p>
-              </header>
-              <section className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="admin-email">E-post</Label>
-                  <Input id="admin-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="admin-password">Lösenord</Label>
-                  <Input id="admin-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-                </div>
-                <Button className="w-full" onClick={onSignUp} disabled={loading}>
-                  {loading ? "Skapar konto..." : "Skapa Admin Konto"}
-                </Button>
-              </section>
-            </TabsContent>
-
             <TabsContent value="company" className="space-y-4">
               <header className="space-y-1">
-                <h1 className="text-2xl font-semibold text-foreground">Registrera Företag</h1>
+                <h1 className="text-2xl font-semibold text-foreground">Kom igång med ditt företag</h1>
                 <p className="text-sm text-muted-foreground">
-                  Skapa ett nytt företagskonto med egen dashboard.
+                  Skapa ditt företagskonto och få tillgång till alla våra tjänster direkt.
                 </p>
               </header>
               <section className="space-y-4">
