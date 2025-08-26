@@ -5,6 +5,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Check, X, Clock, Eye, Upload, Users } from "lucide-react";
 import { useUploads, useUpdateUploadStatus } from "@/hooks/useSupabaseData";
 import { toast } from 'sonner';
@@ -186,14 +187,25 @@ const Uploads = () => {
                             <X className="h-3 w-3" />
                             Avvisa
                           </Button>
-                          <Button 
-                            size="sm" 
-                            variant="ghost"
-                            className="gap-1"
-                          >
-                            <Eye className="h-3 w-3" />
-                            Visa större
-                          </Button>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button 
+                                size="sm" 
+                                variant="ghost"
+                                className="gap-1"
+                              >
+                                <Eye className="h-3 w-3" />
+                                Visa större
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-4xl">
+                              <img
+                                src={submission.image_url}
+                                alt={`Bild från ${submission.customer_name || 'kund'}`}
+                                className="w-full h-auto max-h-[80vh] object-contain"
+                              />
+                            </DialogContent>
+                          </Dialog>
                         </div>
                       )}
                     </div>
