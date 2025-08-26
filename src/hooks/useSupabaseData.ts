@@ -325,12 +325,15 @@ export const useRedeemCoupon = () => {
       if (error) throw error;
       return data as Coupon;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['coupons'] });
-      toast.success('Coupon redeemed successfully!');
+      if (data?.id) {
+        queryClient.invalidateQueries({ queryKey: ['coupon', data.id] });
+      }
+      toast.success('Tack för din kupong!');
     },
     onError: (error) => {
-      toast.error('Failed to redeem coupon: ' + error.message);
+      toast.error('Kunde inte använda kupongen: ' + error.message);
     }
   });
 };

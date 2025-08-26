@@ -89,7 +89,7 @@ const Coupon = () => {
     
     try {
       await redeemCoupon.mutateAsync(coupon.code);
-      toast.success('✅ Kupong har använts! Rabatten är nu applicerad.');
+      toast.success('🎉 Tack för din kupong! Rabatten är registrerad.');
     } catch (error) {
       console.error('Redeem error:', error);
       toast.error('Kunde inte använda kupongen. Försök igen.');
@@ -206,7 +206,7 @@ const Coupon = () => {
           {isUsed && (
             <div className="text-center p-4 bg-muted rounded-lg">
               <p className="text-sm text-muted-foreground">
-                ✅ Denna kupong har redan använts
+                🎉 Tack för din kupong! Den är nu använd.
               </p>
             </div>
           )}
