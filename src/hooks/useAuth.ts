@@ -27,7 +27,7 @@ export const useUserRole = () => {
         .select(`
           role,
           company_id,
-          companies!inner(name)
+          companies!left(name)
         `)
         .eq('user_id', user.id)
         .order('role', { ascending: true })
