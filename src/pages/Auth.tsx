@@ -82,14 +82,14 @@ const Auth = () => {
   const onCompanyRegister = async () => {
     setLoading(true);
     try {
-      const finalEmail = testMode ? `test+${Date.now()}@example.com` : email;
+      const finalEmail = testMode ? `test.${Date.now()}@gmail.com` : email;
       await registerCompany.mutateAsync({
         email: finalEmail,
         password,
         companyName
       });
     } catch (error: any) {
-      toast.error(error?.message || "Kunde inte skapa företagskonto");
+      // Error handling is now done in the hook
       console.error("Registration error:", error);
     } finally {
       setLoading(false);

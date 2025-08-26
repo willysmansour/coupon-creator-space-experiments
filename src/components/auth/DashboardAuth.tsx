@@ -40,24 +40,27 @@ export function DashboardAuth({ children }: DashboardAuthProps) {
     );
   }
 
-  // If user exists but role is customer and they don't have a company, help them complete registration
+  // If user exists but role is customer without a company, show registration complete message
   if (userRole && userRole.role === 'customer') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <LogIn className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <CardTitle>Slutför din registrering</CardTitle>
+            <CardTitle>Registrering nästan klar!</CardTitle>
             <CardDescription>
-              Ditt konto är skapat, men du behöver slutföra företagsregistreringen för att komma åt dashboarden.
+              {userRole.company_id 
+                ? "Ditt företagskonto håller på att aktiveras. Kontakta support om det tar för lång tid."
+                : "Du behöver skapa eller kopplas till ett företag för att komma åt dashboarden."
+              }
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3">
             <Button 
-              onClick={() => navigate('/auth?redirect=' + encodeURIComponent(location.pathname))} 
+              onClick={() => navigate('/auth')} 
               className="w-full"
             >
-              Registrera företag
+              {userRole.company_id ? "Försök igen" : "Skapa företag"}
             </Button>
             <Button 
               onClick={() => navigate('/auth')} 

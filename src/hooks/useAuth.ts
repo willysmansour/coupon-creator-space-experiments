@@ -121,6 +121,31 @@ export const useAssignRole = () => {
   });
 };
 
+// Generate various test email formats
+const generateTestEmailFormats = () => {
+  const timestamp = Date.now();
+  return [
+    `test.${timestamp}@gmail.com`,
+    `testuser.${timestamp}@gmail.com`,
+    `demo.${timestamp}@example.org`,
+    `test+${timestamp}@example.com`
+  ];
+};
+
+// Get user-friendly error messages
+const getErrorMessage = (error: any): string => {
+  if (error?.message?.includes('Email address is invalid')) {
+    return "E-postadressen godkänns inte. Prova en annan e-postadress eller stäng av test-läge.";
+  }
+  if (error?.message?.includes('Password')) {
+    return "Lösenordet uppfyller inte kraven. Använd minst 6 tecken.";
+  }
+  if (error?.message?.includes('already been taken')) {
+    return "E-postadressen används redan. Prova logga in istället.";
+  }
+  return error?.message || "Ett oväntat fel uppstod vid registreringen";
+};
+
 // Create company and assign admin (for company registration)
 export const useRegisterCompany = () => {
   const queryClient = useQueryClient();
@@ -137,64 +162,76 @@ export const useRegisterCompany = () => {
       companyName: string;
       logo?: string;
     }) => {
-      // First create the auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`
+      // Try different email formats if the first one fails
+      const emailsToTry = email.includes('test+') || email.includes('test.') 
+        ? generateTestEmailFormats() 
+        : [email];
+
+      let lastError: any;
+      
+      for (const tryEmail of emailsToTry) {
+        try {
+          // First create the auth user
+          const { data: authData, error: authError } = await supabase.auth.signUp({
+            email: tryEmail,
+            password,
+            options: {
+              emailRedirectTo: `${window.location.origin}/`
+            }
+          });
+
+          if (authError) throw authError;
+          if (!authData.user) throw new Error('User creation failed');
+
+          // Create the company
+          const { data: companyData, error: companyError } = await supabase
+            .from('companies')
+            .insert({
+              name: companyName,
+              logo,
+              owner_user_id: authData.user.id
+            })
+            .select()
+            .single();
+
+          if (companyError) throw companyError;
+
+          // Delete existing customer role first (if exists)
+          await supabase
+            .from('user_roles')
+            .delete()
+            .eq('user_id', authData.user.id)
+            .eq('role', 'customer');
+
+          // Assign company admin role
+          const { error: roleError } = await supabase
+            .from('user_roles')
+            .insert({
+              user_id: authData.user.id,
+              role: 'company_admin',
+              company_id: companyData.id
+            });
+
+          if (roleError) throw roleError;
+
+          return { user: authData.user, company: companyData };
+        } catch (error) {
+          lastError = error;
+          console.log(`Email ${tryEmail} failed, trying next format...`);
+          continue;
         }
-      });
-
-      if (authError) throw authError;
-      if (!authData.user) throw new Error('User creation failed');
-
-      // Create the company
-      const { data: companyData, error: companyError } = await supabase
-        .from('companies')
-        .insert({
-          name: companyName,
-          logo,
-          owner_user_id: authData.user.id
-        })
-        .select()
-        .single();
-
-      if (companyError) {
-        console.error('Company creation error:', companyError);
-        throw new Error(`Failed to create company: ${companyError.message}`);
       }
-
-      // Delete existing customer role first  
-      await supabase
-        .from('user_roles')
-        .delete()
-        .eq('user_id', authData.user.id)
-        .eq('role', 'customer');
-
-      // Assign company admin role
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .insert({
-          user_id: authData.user.id,
-          role: 'company_admin',
-          company_id: companyData.id
-        });
-
-      if (roleError) {
-        console.error('Role assignment error:', roleError);
-        throw new Error(`Failed to assign admin role: ${roleError.message}`);
-      }
-
-      return { user: authData.user, company: companyData };
+      
+      // If all emails failed, throw the last error
+      throw lastError;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-role'] });
       toast.success('Company registered successfully! Please check your email for verification.');
     },
     onError: (error: any) => {
-      console.error('Full registration error:', error);
-      toast.error('Registration failed: ' + (error?.message || 'Unknown error'));
+      const message = getErrorMessage(error);
+      toast.error('Registration failed: ' + message);
     }
   });
 };
