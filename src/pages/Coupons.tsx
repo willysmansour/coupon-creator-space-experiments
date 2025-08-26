@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Gift, CheckCircle, Clock, Eye, Download } from "lucide-react";
 import { useFilteredCoupons } from "@/hooks/useFilteredSupabaseData";
+import { DashboardAuth } from "@/components/auth/DashboardAuth";
 import { useState } from "react";
 
 const Coupons = () => {
@@ -44,141 +45,143 @@ const Coupons = () => {
   const totalCoupons = coupons.length;
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <ModernSidebar />
-        
-        <div className="flex-1">
-          <ModernHeader 
-            selectedCompanyId={selectedCompanyId}
-            onCompanyChange={setSelectedCompanyId}
-          />
+    <DashboardAuth>
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full bg-background">
+          <ModernSidebar />
           
-          <main className="p-6 space-y-6">
-            {/* Page Header */}
-            <div className="mb-8">
-              <h1 className="text-2xl font-bold text-foreground mb-2">Kuponger</h1>
-              <p className="text-muted-foreground">
-                Övervaka utfärdade rabattkuponger och deras användning.
-              </p>
-            </div>
+          <div className="flex-1">
+            <ModernHeader 
+              selectedCompanyId={selectedCompanyId}
+              onCompanyChange={setSelectedCompanyId}
+            />
+            
+            <main className="p-6 space-y-6">
+              {/* Page Header */}
+              <div className="mb-8">
+                <h1 className="text-2xl font-bold text-foreground mb-2">Kuponger</h1>
+                <p className="text-muted-foreground">
+                  Övervaka utfärdade rabattkuponger och deras användning.
+                </p>
+              </div>
 
-            {/* Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <ModernMetricCard
-                title="Totala kuponger"
-                value={totalCoupons.toString()}
-                change="Alla utfärdade"
-                variant="primary"
-              />
-              <ModernMetricCard
-                title="Aktiva kuponger"
-                value={activeCoupons.toString()}
-                change="Kan användas"
-                variant="secondary"
-              />
-              <ModernMetricCard
-                title="Använda kuponger"
-                value={usedCoupons.toString()}
-                change={totalCoupons > 0 ? `${Math.round((usedCoupons / totalCoupons) * 100)}% inlösningsgrad` : "0% inlösningsgrad"}
-                variant="accent"
-              />
-              <ModernMetricCard
-                title="Utgångna"
-                value={expiredCoupons.toString()}
-                change="Ej använda"
-                variant="secondary"
-              />
-            </div>
+              {/* Metrics */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <ModernMetricCard
+                  title="Totala kuponger"
+                  value={totalCoupons.toString()}
+                  change="Alla utfärdade"
+                  variant="primary"
+                />
+                <ModernMetricCard
+                  title="Aktiva kuponger"
+                  value={activeCoupons.toString()}
+                  change="Kan användas"
+                  variant="secondary"
+                />
+                <ModernMetricCard
+                  title="Använda kuponger"
+                  value={usedCoupons.toString()}
+                  change={totalCoupons > 0 ? `${Math.round((usedCoupons / totalCoupons) * 100)}% inlösningsgrad` : "0% inlösningsgrad"}
+                  variant="accent"
+                />
+                <ModernMetricCard
+                  title="Utgångna"
+                  value={expiredCoupons.toString()}
+                  change="Ej använda"
+                  variant="secondary"
+                />
+              </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-4 mb-6">
-              <Button className="gap-2">
-                <Download className="h-4 w-4" />
-                Exportera kuponger
-              </Button>
-              <Button variant="outline" className="gap-2">
-                <Eye className="h-4 w-4" />
-                Visa statistik
-              </Button>
-            </div>
+              {/* Action Buttons */}
+              <div className="flex gap-4 mb-6">
+                <Button className="gap-2">
+                  <Download className="h-4 w-4" />
+                  Exportera kuponger
+                </Button>
+                <Button variant="outline" className="gap-2">
+                  <Eye className="h-4 w-4" />
+                  Visa statistik
+                </Button>
+              </div>
 
-            {/* Coupons List */}
-            <div className="space-y-4">
-              {coupons.map(coupon => {
-                const isExpired = new Date(coupon.expires_at) < new Date();
-                const isUsed = coupon.is_used;
-                const status = isUsed ? 'used' : (isExpired ? 'expired' : 'active');
-                
-                return (
-                  <Card key={coupon.id} className="p-6 hover:shadow-sm transition-shadow">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="p-3 rounded-lg bg-accent">
-                          <Gift className="h-6 w-6 text-primary" />
-                        </div>
-                        
-                        <div>
-                          <div className="flex items-center gap-3 mb-1">
-                            <h3 className="font-semibold text-lg text-foreground">
-                              {coupon.code}
-                            </h3>
-                            <Badge className={getStatusColor(status)}>
-                              {getStatusText(status)}
-                            </Badge>
+              {/* Coupons List */}
+              <div className="space-y-4">
+                {coupons.map(coupon => {
+                  const isExpired = new Date(coupon.expires_at) < new Date();
+                  const isUsed = coupon.is_used;
+                  const status = isUsed ? 'used' : (isExpired ? 'expired' : 'active');
+                  
+                  return (
+                    <Card key={coupon.id} className="p-6 hover:shadow-sm transition-shadow">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="p-3 rounded-lg bg-accent">
+                            <Gift className="h-6 w-6 text-primary" />
                           </div>
                           
-                          <p className="text-sm text-muted-foreground">
-                            Utfärdad {new Date(coupon.created_at).toLocaleDateString('sv-SE')}
-                          </p>
-                          
-                          {isUsed && coupon.used_at && (
-                            <p className="text-sm text-success font-medium mt-1">
-                              ✓ Använd {new Date(coupon.used_at).toLocaleDateString('sv-SE')}
+                          <div>
+                            <div className="flex items-center gap-3 mb-1">
+                              <h3 className="font-semibold text-lg text-foreground">
+                                {coupon.code}
+                              </h3>
+                              <Badge className={getStatusColor(status)}>
+                                {getStatusText(status)}
+                              </Badge>
+                            </div>
+                            
+                            <p className="text-sm text-muted-foreground">
+                              Utfärdad {new Date(coupon.created_at).toLocaleDateString('sv-SE')}
                             </p>
+                            
+                            {isUsed && coupon.used_at && (
+                              <p className="text-sm text-success font-medium mt-1">
+                                ✓ Använd {new Date(coupon.used_at).toLocaleDateString('sv-SE')}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="text-right">
+                          <div className="text-2xl font-bold text-primary mb-1">
+                            {coupon.discount}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            Utgår: {new Date(coupon.expires_at).toLocaleDateString('sv-SE')}
+                          </div>
+                          {status === "active" && (
+                            <div className="flex items-center gap-1 text-xs text-success mt-1">
+                              <CheckCircle className="h-3 w-3" />
+                              Giltig
+                            </div>
+                          )}
+                          {status === "expired" && (
+                            <div className="flex items-center gap-1 text-xs text-destructive mt-1">
+                              <Clock className="h-3 w-3" />
+                              Utgången
+                            </div>
                           )}
                         </div>
                       </div>
-                      
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-primary mb-1">
-                          {coupon.discount}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          Utgår: {new Date(coupon.expires_at).toLocaleDateString('sv-SE')}
-                        </div>
-                        {status === "active" && (
-                          <div className="flex items-center gap-1 text-xs text-success mt-1">
-                            <CheckCircle className="h-3 w-3" />
-                            Giltig
-                          </div>
-                        )}
-                        {status === "expired" && (
-                          <div className="flex items-center gap-1 text-xs text-destructive mt-1">
-                            <Clock className="h-3 w-3" />
-                            Utgången
-                          </div>
-                        )}
-                      </div>
+                    </Card>
+                  );
+                })}
+                
+                {coupons.length === 0 && (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                      <Gift className="h-8 w-8 text-muted-foreground" />
                     </div>
-                  </Card>
-                );
-              })}
-              
-              {coupons.length === 0 && (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                    <Gift className="h-8 w-8 text-muted-foreground" />
+                    <p className="text-lg font-medium text-foreground mb-2">Inga kuponger utfärdade</p>
+                    <p className="text-muted-foreground">Kuponger kommer att visas här när de utfärdas.</p>
                   </div>
-                  <p className="text-lg font-medium text-foreground mb-2">Inga kuponger utfärdade</p>
-                  <p className="text-muted-foreground">Kuponger kommer att visas här när de utfärdas.</p>
-                </div>
-              )}
-            </div>
-          </main>
+                )}
+              </div>
+            </main>
+          </div>
         </div>
-      </div>
-    </SidebarProvider>
+      </SidebarProvider>
+    </DashboardAuth>
   );
 };
 

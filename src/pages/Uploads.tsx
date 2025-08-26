@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Check, X, Clock, Eye, Trash2, Upload, Users } from "lucide-react";
+import { DashboardAuth } from "@/components/auth/DashboardAuth";
 import { useFilteredUploads } from "@/hooks/useFilteredSupabaseData";
 import { useUpdateUploadStatus, useDeleteUpload } from "@/hooks/useSupabaseData";
 import { supabase } from '@/integrations/supabase/client';
@@ -143,187 +144,189 @@ const Uploads = () => {
   const rejectedCount = uploads.filter(s => s.status === "rejected").length;
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <ModernSidebar />
-        
-        <div className="flex-1">
-          <ModernHeader 
-            selectedCompanyId={selectedCompanyId}
-            onCompanyChange={setSelectedCompanyId}
-          />
+    <DashboardAuth>
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full bg-background">
+          <ModernSidebar />
           
-          <main className="p-6 space-y-6">
-            {/* Page Header */}
-            <div className="mb-8">
-              <h1 className="text-2xl font-bold text-foreground mb-2">Uppladdningar</h1>
-              <p className="text-muted-foreground">
-                Granska och godkänn kunduppladdningar för att utfärda rabattkuponger.
-              </p>
-            </div>
+          <div className="flex-1">
+            <ModernHeader 
+              selectedCompanyId={selectedCompanyId}
+              onCompanyChange={setSelectedCompanyId}
+            />
+            
+            <main className="p-6 space-y-6">
+              {/* Page Header */}
+              <div className="mb-8">
+                <h1 className="text-2xl font-bold text-foreground mb-2">Uppladdningar</h1>
+                <p className="text-muted-foreground">
+                  Granska och godkänn kunduppladdningar för att utfärda rabattkuponger.
+                </p>
+              </div>
 
-            {/* Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <ModernMetricCard
-                title="Totala uppladdningar"
-                value={uploads.length.toString()}
-                change="Från alla kampanjer"
-                variant="primary"
-              />
-              <ModernMetricCard
-                title="Väntande granskning"
-                value={pendingCount.toString()}
-                change="Behöver åtgärd"
-                variant="accent"
-              />
-              <ModernMetricCard
-                title="Godkända"
-                value={approvedCount.toString()}
-                change={`${uploads.length > 0 ? Math.round((approvedCount / uploads.length) * 100) : 0}% av totalt`}
-                variant="secondary"
-              />
-              <ModernMetricCard
-                title="Avvisade"
-                value={rejectedCount.toString()}
-                change={`${uploads.length > 0 ? Math.round((rejectedCount / uploads.length) * 100) : 0}% av totalt`}
-                variant="secondary"
-              />
-            </div>
+              {/* Metrics */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <ModernMetricCard
+                  title="Totala uppladdningar"
+                  value={uploads.length.toString()}
+                  change="Från alla kampanjer"
+                  variant="primary"
+                />
+                <ModernMetricCard
+                  title="Väntande granskning"
+                  value={pendingCount.toString()}
+                  change="Behöver åtgärd"
+                  variant="accent"
+                />
+                <ModernMetricCard
+                  title="Godkända"
+                  value={approvedCount.toString()}
+                  change={`${uploads.length > 0 ? Math.round((approvedCount / uploads.length) * 100) : 0}% av totalt`}
+                  variant="secondary"
+                />
+                <ModernMetricCard
+                  title="Avvisade"
+                  value={rejectedCount.toString()}
+                  change={`${uploads.length > 0 ? Math.round((rejectedCount / uploads.length) * 100) : 0}% av totalt`}
+                  variant="secondary"
+                />
+              </div>
 
-            {/* Submissions List */}
-            <div className="space-y-4">
-              {uploads.map(submission => (
-                <Card key={submission.id} className="p-4 hover:shadow-sm transition-shadow">
-                  <div className="flex gap-4">
-                    {/* Image */}
-                    <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-muted">
-                      <img 
-                        src={submission.image_url} 
-                        alt="Upload submission"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h4 className="font-medium text-foreground">
-                            {submission.customer_name || 'Okänd kund'}
-                          </h4>
-                          <p className="text-sm text-muted-foreground">
-                            {submission.customer_email || 'Ingen e-post'}
-                          </p>
-                        </div>
-                        {getStatusBadge(submission.status)}
+              {/* Submissions List */}
+              <div className="space-y-4">
+                {uploads.map(submission => (
+                  <Card key={submission.id} className="p-4 hover:shadow-sm transition-shadow">
+                    <div className="flex gap-4">
+                      {/* Image */}
+                      <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-muted">
+                        <img 
+                          src={submission.image_url} 
+                          alt="Upload submission"
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                       
-                      <p className="text-sm text-muted-foreground mb-2">
-                        {new Date(submission.submitted_at).toLocaleDateString('sv-SE')}
-                      </p>
-                      
-                      {submission.message && (
-                        <p className="text-sm text-foreground mb-3 line-clamp-2">
-                          "{submission.message}"
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <h4 className="font-medium text-foreground">
+                              {submission.customer_name || 'Okänd kund'}
+                            </h4>
+                            <p className="text-sm text-muted-foreground">
+                              {submission.customer_email || 'Ingen e-post'}
+                            </p>
+                          </div>
+                          {getStatusBadge(submission.status)}
+                        </div>
+                        
+                        <p className="text-sm text-muted-foreground mb-2">
+                          {new Date(submission.submitted_at).toLocaleDateString('sv-SE')}
                         </p>
-                      )}
-                      
-                      {submission.status === "pending" && (
-                        <div className="flex gap-2">
-                          <Button 
-                            size="sm" 
-                            className="gap-1 bg-success hover:bg-success/90"
-                            onClick={() => handleApprove(submission.id)}
-                            disabled={updateUploadStatus.isPending}
-                          >
-                            <Check className="h-3 w-3" />
-                            Godkänn
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handleReject(submission.id)}
-                            disabled={updateUploadStatus.isPending}
-                          >
-                            <X className="h-3 w-3" />
-                            Avvisa
-                          </Button>
-                        </div>
-                      )}
-                      
-                      {/* Action buttons for all uploads */}
-                      <div className="flex gap-2 mt-3">
-                        <Dialog>
-                          <DialogTrigger asChild>
+                        
+                        {submission.message && (
+                          <p className="text-sm text-foreground mb-3 line-clamp-2">
+                            "{submission.message}"
+                          </p>
+                        )}
+                        
+                        {submission.status === "pending" && (
+                          <div className="flex gap-2">
                             <Button 
                               size="sm" 
-                              variant="ghost"
-                              className="gap-1"
+                              className="gap-1 bg-success hover:bg-success/90"
+                              onClick={() => handleApprove(submission.id)}
+                              disabled={updateUploadStatus.isPending}
                             >
-                              <Eye className="h-3 w-3" />
-                              Visa större
+                              <Check className="h-3 w-3" />
+                              Godkänn
                             </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-4xl">
-                            <img
-                              src={submission.image_url}
-                              alt={`Bild från ${submission.customer_name || 'kund'}`}
-                              className="w-full h-auto max-h-[80vh] object-contain"
-                            />
-                          </DialogContent>
-                        </Dialog>
-
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
                             <Button 
                               size="sm" 
-                              variant="ghost"
-                              className="gap-1 text-destructive hover:text-destructive"
-                              disabled={deleteUpload.isPending}
+                              variant="outline"
+                              onClick={() => handleReject(submission.id)}
+                              disabled={updateUploadStatus.isPending}
                             >
-                              <Trash2 className="h-3 w-3" />
-                              Ta bort
+                              <X className="h-3 w-3" />
+                              Avvisa
                             </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Ta bort uppladdning</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Är du säker på att du vill ta bort uppladdningen från {submission.customer_name || 'okänd kund'}? 
-                                Detta kommer också att ta bort eventuella relaterade kuponger. Åtgärden kan inte ångras.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Avbryt</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(submission.id)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          </div>
+                        )}
+                        
+                        {/* Action buttons for all uploads */}
+                        <div className="flex gap-2 mt-3">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button 
+                                size="sm" 
+                                variant="ghost"
+                                className="gap-1"
                               >
+                                <Eye className="h-3 w-3" />
+                                Visa större
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-4xl">
+                              <img
+                                src={submission.image_url}
+                                alt={`Bild från ${submission.customer_name || 'kund'}`}
+                                className="w-full h-auto max-h-[80vh] object-contain"
+                              />
+                            </DialogContent>
+                          </Dialog>
+
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                size="sm" 
+                                variant="ghost"
+                                className="gap-1 text-destructive hover:text-destructive"
+                                disabled={deleteUpload.isPending}
+                              >
+                                <Trash2 className="h-3 w-3" />
                                 Ta bort
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Ta bort uppladdning</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Är du säker på att du vill ta bort uppladdningen från {submission.customer_name || 'okänd kund'}? 
+                                  Detta kommer också att ta bort eventuella relaterade kuponger. Åtgärden kan inte ångras.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDelete(submission.id)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Ta bort
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
                       </div>
                     </div>
+                  </Card>
+                ))}
+                
+                {uploads.length === 0 && (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                      <Upload className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <p className="text-lg font-medium text-foreground mb-2">Inga uppladdningar ännu</p>
+                    <p className="text-muted-foreground">Uppladdningar från kunder kommer att visas här.</p>
                   </div>
-                </Card>
-              ))}
-              
-              {uploads.length === 0 && (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                    <Upload className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                  <p className="text-lg font-medium text-foreground mb-2">Inga uppladdningar ännu</p>
-                  <p className="text-muted-foreground">Uppladdningar från kunder kommer att visas här.</p>
-                </div>
-              )}
-            </div>
-          </main>
+                )}
+              </div>
+            </main>
+          </div>
         </div>
-      </div>
-    </SidebarProvider>
+      </SidebarProvider>
+    </DashboardAuth>
   );
 };
 
