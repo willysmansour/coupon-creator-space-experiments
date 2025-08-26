@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Check, X, Clock, Eye, Trash2, Upload, Users } from "lucide-react";
-import { useUploads, useUpdateUploadStatus, useDeleteUpload } from "@/hooks/useSupabaseData";
+import { useCompanyAwareUploads } from "@/hooks/useCompanyAwareData";
+import { useUpdateUploadStatus, useDeleteUpload } from "@/hooks/useSupabaseData";
 import { supabase } from '@/integrations/supabase/client';
 import { 
   AlertDialog, 
@@ -23,7 +24,7 @@ import {
 import { toast } from 'sonner';
 
 const Uploads = () => {
-  const { data: uploads = [], isLoading } = useUploads();
+  const { data: uploads = [], isLoading } = useCompanyAwareUploads();
   const updateUploadStatus = useUpdateUploadStatus();
   const deleteUpload = useDeleteUpload();
 

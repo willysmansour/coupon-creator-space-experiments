@@ -20,6 +20,7 @@ import CompanyWelcome from "./pages/CompanyWelcome";
 import ThankYou from "./pages/ThankYou";
 import Coupon from "./pages/Coupon";
 import Auth from "./pages/Auth";
+import Admin from "./pages/Admin";
 import { RequireAuth } from "./components/auth/RequireAuth";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="/help" element={<Help />} />
             <Route path="/logout" element={<Logout />} />
+            <Route path="/admin" element={<RequireAuth><Admin /></RequireAuth>} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/company/:companyId" element={<CompanyWelcome />} />
             <Route path="/company/:companyId/upload" element={<Upload />} />

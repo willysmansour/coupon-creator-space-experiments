@@ -36,11 +36,11 @@ serve(async (req: Request) => {
 
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // Check if any admin exists
+    // Check if any super admin exists
     const { data: existingAdmins, error: countErr } = await supabase
       .from("user_roles")
       .select("id", { count: "exact", head: false })
-      .eq("role", "admin");
+      .eq("role", "super_admin");
 
     if (countErr) throw countErr;
 
@@ -48,15 +48,15 @@ serve(async (req: Request) => {
 
     if (adminCount > 0) {
       return new Response(
-        JSON.stringify({ assigned: false, reason: "Admin already exists" }),
+        JSON.stringify({ assigned: false, reason: "Super admin already exists" }),
         { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
 
-    // Assign admin role to this first user
+    // Assign super admin role to this first user
     const { error: insertErr } = await supabase.from("user_roles").insert({
       user_id: userId,
-      role: "admin",
+      role: "super_admin",
     });
     if (insertErr) throw insertErr;
 

@@ -70,8 +70,10 @@ export type Database = {
           discount_expires_at: string | null
           discount_percentage: number | null
           id: string
+          is_active: boolean | null
           logo: string | null
           name: string
+          owner_user_id: string | null
           updated_at: string
         }
         Insert: {
@@ -82,8 +84,10 @@ export type Database = {
           discount_expires_at?: string | null
           discount_percentage?: number | null
           id?: string
+          is_active?: boolean | null
           logo?: string | null
           name: string
+          owner_user_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -94,8 +98,10 @@ export type Database = {
           discount_expires_at?: string | null
           discount_percentage?: number | null
           id?: string
+          is_active?: boolean | null
           logo?: string | null
           name?: string
+          owner_user_id?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -157,6 +163,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          company_id: string | null
           created_at: string
           email: string | null
           first_name: string | null
@@ -167,6 +174,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          company_id?: string | null
           created_at?: string
           email?: string | null
           first_name?: string | null
@@ -177,6 +185,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          company_id?: string | null
           created_at?: string
           email?: string | null
           first_name?: string | null
@@ -185,7 +194,15 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       uploads: {
         Row: {
@@ -239,24 +256,35 @@ export type Database = {
       }
       user_roles: {
         Row: {
+          company_id: string | null
           created_at: string
           id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
+          company_id?: string | null
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
+          company_id?: string | null
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -267,6 +295,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      get_user_company_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -274,9 +306,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_super_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
-      app_role: "admin" | "customer"
+      app_role: "super_admin" | "company_admin" | "customer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -404,7 +440,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "customer"],
+      app_role: ["super_admin", "company_admin", "customer"],
     },
   },
 } as const

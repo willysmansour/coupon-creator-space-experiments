@@ -8,9 +8,11 @@ import {
   Users,
   HelpCircle,
   LogOut,
-  Home
+  Home,
+  Shield
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
+import { useUserRole } from "@/hooks/useAuth";
 
 import {
   Sidebar,
@@ -24,27 +26,38 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-const mainItems = [
-  { title: "Dashboard", url: "/", icon: Home },
-  { title: "Rabattinställningar", url: "/campaigns", icon: Gift },
-  { title: "Uppladdningar", url: "/uploads", icon: Upload },
-  { title: "Kuponger", url: "/coupons", icon: CheckCircle },
-  { title: "Analytics", url: "/analytics", icon: BarChart3 },
-  { title: "Kunder", url: "/customers", icon: Users },
-];
+// Define menu items with role restrictions
+const getMenuItems = (userRole?: string) => {
+  const mainItems = [
+    { title: "Dashboard", url: "/", icon: Home, roles: ['super_admin', 'company_admin'] },
+    { title: "Rabattinställningar", url: "/campaigns", icon: Gift, roles: ['super_admin', 'company_admin'] },
+    { title: "Uppladdningar", url: "/uploads", icon: Upload, roles: ['super_admin', 'company_admin'] },
+    { title: "Kuponger", url: "/coupons", icon: CheckCircle, roles: ['super_admin', 'company_admin'] },
+    { title: "Analytics", url: "/analytics", icon: BarChart3, roles: ['super_admin', 'company_admin'] },
+    { title: "Kunder", url: "/customers", icon: Users, roles: ['super_admin', 'company_admin'] },
+    { title: "Admin Panel", url: "/admin", icon: Shield, roles: ['super_admin'] },
+  ];
 
-const generalItems = [
-  { title: "Inställningar", url: "/settings", icon: Settings },
-  { title: "Hjälp", url: "/help", icon: HelpCircle },
-  { title: "Logga ut", url: "/logout", icon: LogOut },
-];
+  const generalItems = [
+    { title: "Inställningar", url: "/settings", icon: Settings, roles: ['super_admin', 'company_admin'] },
+    { title: "Hjälp", url: "/help", icon: HelpCircle, roles: ['super_admin', 'company_admin'] },
+    { title: "Logga ut", url: "/logout", icon: LogOut, roles: ['super_admin', 'company_admin'] },
+  ];
+
+  return {
+    main: mainItems.filter(item => !userRole || item.roles.includes(userRole)),
+    general: generalItems.filter(item => !userRole || item.roles.includes(userRole))
+  };
+};
 
 export function ModernSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
   const collapsed = state === "collapsed";
+  const { data: userRole } = useUserRole();
 
+  const menuItems = getMenuItems(userRole?.role);
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
     isActive ? "bg-primary text-primary-foreground font-medium shadow-sm" : "hover:bg-accent text-muted-foreground hover:text-foreground";
@@ -69,7 +82,7 @@ export function ModernSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
-              {mainItems.map((item) => (
+              {menuItems.main.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink 
@@ -95,7 +108,7 @@ export function ModernSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
-              {generalItems.map((item) => (
+              {menuItems.general.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink 
