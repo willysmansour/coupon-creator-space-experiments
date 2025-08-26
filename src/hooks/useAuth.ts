@@ -160,7 +160,17 @@ export const useRegisterCompany = () => {
         .select()
         .single();
 
-      if (companyError) throw companyError;
+      if (companyError) {
+        console.error('Company creation error:', companyError);
+        throw new Error(`Failed to create company: ${companyError.message}`);
+      }
+
+      // Delete existing customer role first  
+      await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', authData.user.id)
+        .eq('role', 'customer');
 
       // Assign company admin role
       const { error: roleError } = await supabase
@@ -171,7 +181,10 @@ export const useRegisterCompany = () => {
           company_id: companyData.id
         });
 
-      if (roleError) throw roleError;
+      if (roleError) {
+        console.error('Role assignment error:', roleError);
+        throw new Error(`Failed to assign admin role: ${roleError.message}`);
+      }
 
       return { user: authData.user, company: companyData };
     },
@@ -180,7 +193,8 @@ export const useRegisterCompany = () => {
       toast.success('Company registered successfully! Please check your email for verification.');
     },
     onError: (error: any) => {
-      toast.error('Registration failed: ' + error.message);
+      console.error('Full registration error:', error);
+      toast.error('Registration failed: ' + (error?.message || 'Unknown error'));
     }
   });
 };

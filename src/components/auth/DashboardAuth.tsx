@@ -40,19 +40,25 @@ export function DashboardAuth({ children }: DashboardAuthProps) {
     );
   }
 
-  // If user exists but role is customer, show access denied
+  // If user exists but role is customer and they don't have a company, help them complete registration
   if (userRole && userRole.role === 'customer') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <LogIn className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <CardTitle>Ingen behörighet</CardTitle>
+            <CardTitle>Slutför din registrering</CardTitle>
             <CardDescription>
-              Du har inte behörighet att komma åt denna sida. Kontakta en administratör för åtkomst.
+              Ditt konto är skapat, men du behöver slutföra företagsregistreringen för att komma åt dashboarden.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            <Button 
+              onClick={() => navigate('/auth?redirect=' + encodeURIComponent(location.pathname))} 
+              className="w-full"
+            >
+              Registrera företag
+            </Button>
             <Button 
               onClick={() => navigate('/auth')} 
               variant="outline"
