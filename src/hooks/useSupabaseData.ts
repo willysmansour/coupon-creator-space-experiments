@@ -17,7 +17,7 @@ export interface Campaign {
 
 export interface Upload {
   id: string;
-  campaign_id: string;
+  company_id: string;
   customer_name?: string;
   customer_email?: string;
   image_url: string;
@@ -45,6 +45,11 @@ export interface Company {
   id: string;
   name: string;
   logo?: string;
+  discount_percentage?: number;
+  content_types?: string[];
+  content_description?: string;
+  discount_active?: boolean;
+  discount_expires_at?: string;
   created_at: string;
   updated_at: string;
 }
@@ -224,19 +229,19 @@ export const useCouponByUpload = (uploadId: string) => {
 export const useCreateUpload = () => {
   const queryClient = useQueryClient();
   
-  return useMutation({
-    mutationFn: async (upload: {
-      campaign_id: string;
-      customer_name?: string;
-      customer_email?: string;
-      image_url: string;
-      message?: string;
-    }) => {
-      const { data, error } = await supabase
-        .from('uploads')
-        .insert(upload)
-        .select()
-        .single();
+return useMutation({
+  mutationFn: async (upload: {
+    company_id: string;
+    customer_name?: string;
+    customer_email?: string;
+    image_url: string;
+    message?: string;
+  }) => {
+    const { data, error } = await supabase
+      .from('uploads')
+      .insert(upload)
+      .select()
+      .single();
       
       if (error) throw error;
       return data as Upload;

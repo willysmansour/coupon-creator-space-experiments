@@ -63,21 +63,36 @@ export type Database = {
       }
       companies: {
         Row: {
+          content_description: string | null
+          content_types: string[] | null
           created_at: string
+          discount_active: boolean | null
+          discount_expires_at: string | null
+          discount_percentage: number | null
           id: string
           logo: string | null
           name: string
           updated_at: string
         }
         Insert: {
+          content_description?: string | null
+          content_types?: string[] | null
           created_at?: string
+          discount_active?: boolean | null
+          discount_expires_at?: string | null
+          discount_percentage?: number | null
           id?: string
           logo?: string | null
           name: string
           updated_at?: string
         }
         Update: {
+          content_description?: string | null
+          content_types?: string[] | null
           created_at?: string
+          discount_active?: boolean | null
+          discount_expires_at?: string | null
+          discount_percentage?: number | null
           id?: string
           logo?: string | null
           name?: string
@@ -88,6 +103,7 @@ export type Database = {
       coupons: {
         Row: {
           code: string
+          company_id: string | null
           created_at: string
           discount: string
           expires_at: string
@@ -99,6 +115,7 @@ export type Database = {
         }
         Insert: {
           code: string
+          company_id?: string | null
           created_at?: string
           discount: string
           expires_at: string
@@ -110,6 +127,7 @@ export type Database = {
         }
         Update: {
           code?: string
+          company_id?: string | null
           created_at?: string
           discount?: string
           expires_at?: string
@@ -120,6 +138,13 @@ export type Database = {
           used_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "coupons_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "coupons_upload_id_fkey"
             columns: ["upload_id"]
@@ -165,7 +190,7 @@ export type Database = {
       uploads: {
         Row: {
           approved_at: string | null
-          campaign_id: string
+          company_id: string | null
           created_at: string
           customer_email: string | null
           customer_name: string | null
@@ -178,7 +203,7 @@ export type Database = {
         }
         Insert: {
           approved_at?: string | null
-          campaign_id: string
+          company_id?: string | null
           created_at?: string
           customer_email?: string | null
           customer_name?: string | null
@@ -191,7 +216,7 @@ export type Database = {
         }
         Update: {
           approved_at?: string | null
-          campaign_id?: string
+          company_id?: string | null
           created_at?: string
           customer_email?: string | null
           customer_name?: string | null
@@ -204,10 +229,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "uploads_campaign_id_fkey"
-            columns: ["campaign_id"]
+            foreignKeyName: "uploads_company_id_fkey"
+            columns: ["company_id"]
             isOneToOne: false
-            referencedRelation: "campaigns"
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]

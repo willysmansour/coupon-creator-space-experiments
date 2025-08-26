@@ -26,7 +26,7 @@ import {
 
 const mainItems = [
   { title: "Dashboard", url: "/", icon: Home },
-  { title: "Kampanjer", url: "/campaigns", icon: Gift },
+  { title: "Rabattinställningar", url: "/campaigns", icon: Gift },
   { title: "Uppladdningar", url: "/uploads", icon: Upload },
   { title: "Kuponger", url: "/coupons", icon: CheckCircle },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },

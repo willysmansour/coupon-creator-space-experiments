@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useUpload, useCampaign, useCompany, useCouponByUpload, useUpdateUploadWithCustomer } from '@/hooks/useSupabaseData';
+import { useUpload, useCompany, useCouponByUpload, useUpdateUploadWithCustomer } from '@/hooks/useSupabaseData';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

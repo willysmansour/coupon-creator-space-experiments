@@ -1,30 +1,21 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useCampaign, useCompany, useCreateUpload, uploadFile, useActiveCampaigns } from '@/hooks/useSupabaseData';
+import { useCompany, useCreateUpload, uploadFile } from '@/hooks/useSupabaseData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Upload as UploadIcon, ImageIcon, VideoIcon } from 'lucide-react';
+import { Upload as UploadIcon, ImageIcon, VideoIcon, Gift } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Upload = () => {
-  const { campaignId, companyId } = useParams<{ campaignId?: string; companyId?: string }>();
+  const { companyId } = useParams<{ companyId?: string }>();
   const navigate = useNavigate();
-  
-  // Handle both campaign-based (old) and company-based (new) upload flows
-  const { data: campaign, isLoading: campaignLoading } = useCampaign(campaignId || '');
-  const { data: activeCampaigns = [], isLoading: activeCampaignsLoading } = useActiveCampaigns(companyId);
-  const { data: company, isLoading: companyLoading } = useCompany(
-    campaign?.company_id || companyId || ''
-  );
+
+  const { data: company, isLoading: companyLoading } = useCompany(companyId || '');
   const createUpload = useCreateUpload();
-  
-  // For company-based flow, use the first active campaign
-  const effectiveCampaign = campaign || (activeCampaigns.length > 0 ? activeCampaigns[0] : null);
-  const effectiveCampaignId = campaignId || effectiveCampaign?.id;
-  
+
   const [file, setFile] = useState<File | null>(null);
   const [message, setMessage] = useState('');
   const [customerName, setCustomerName] = useState('');
@@ -32,7 +23,7 @@ const Upload = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
-  if (campaignLoading || companyLoading || activeCampaignsLoading) {
+  if (companyLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">Loading...</div>
@@ -47,32 +38,6 @@ const Upload = () => {
           <CardContent className="p-6 text-center">
             <h1 className="text-xl font-semibold mb-2">Företaget kunde inte hittas</h1>
             <p className="text-muted-foreground">Det här företaget existerar inte.</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (!effectiveCampaign) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-6 text-center">
-            <h1 className="text-xl font-semibold mb-2">Inga aktiva kampanjer</h1>
-            <p className="text-muted-foreground">Det finns inga aktiva kampanjer för detta företag just nu.</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (effectiveCampaign.status !== 'active') {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-6 text-center">
-            <h1 className="text-xl font-semibold mb-2">Kampanjen är inte aktiv</h1>
-            <p className="text-muted-foreground">Kampanjen har avslutats eller är inte tillgänglig just nu.</p>
           </CardContent>
         </Card>
       </div>
@@ -144,9 +109,11 @@ const Upload = () => {
       
       // Create upload record with minimal data
       const upload = await createUpload.mutateAsync({
-        campaign_id: effectiveCampaignId!,
+        company_id: company.id,
         image_url: imageUrl,
-        message: 'Uploaded content' // Default message since field is removed
+        message: message || 'Uploaded content',
+        customer_name: customerName || undefined,
+        customer_email: email || undefined,
       });
       
       navigate(`/thank-you/${upload.id}`);
@@ -157,6 +124,11 @@ const Upload = () => {
       setIsLoading(false);
     }
   };
+
+  const discountPercent = (company as any)?.discount_percentage as number | undefined;
+  const discountActive = (company as any)?.discount_active as boolean | undefined;
+  const discountExpires = (company as any)?.discount_expires_at as string | undefined;
+  const contentDescription = (company as any)?.content_description as string | undefined;
 
   return (
     <div className="min-h-screen bg-background">
@@ -183,13 +155,24 @@ const Upload = () => {
 
       {/* Main Content */}
       <div className="max-w-md mx-auto p-4 space-y-6">
-        {/* Campaign Info */}
+        {/* Offer Info */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">{effectiveCampaign.title}</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Få {effectiveCampaign.discount} • Gäller till {new Date(effectiveCampaign.valid_to).toLocaleDateString('sv-SE')}
-            </p>
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-full bg-primary/10">
+                <Gift className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">{discountActive === false ? 'Erbjudandet är pausat' : 'Få en rabattkupong'}</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {typeof discountPercent === 'number' ? `Ladda upp innehåll och få ${discountPercent}% rabatt` : 'Ladda upp innehåll för att få en kupong'}
+                  {discountExpires ? ` • Gäller till ${new Date(discountExpires).toLocaleDateString('sv-SE')}` : ''}
+                </p>
+                {contentDescription && (
+                  <p className="text-sm text-muted-foreground mt-2">{contentDescription}</p>
+                )}
+              </div>
+            </div>
           </CardHeader>
         </Card>
 
@@ -264,14 +247,39 @@ const Upload = () => {
             </div>
           </div>
 
+          {/* Optional message */}
+          <div>
+            <Label htmlFor="message" className="text-sm font-medium">
+              Meddelande (valfritt)
+            </Label>
+            <Textarea
+              id="message"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Berätta något om ditt bidrag..."
+              className="mt-1"
+            />
+          </div>
+
+          {/* Optional contact fields */}
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <Label htmlFor="name" className="text-sm font-medium">Namn (valfritt)</Label>
+              <Input id="name" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="mt-1" />
+            </div>
+            <div>
+              <Label htmlFor="email" className="text-sm font-medium">E-post (valfritt)</Label>
+              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1" />
+            </div>
+          </div>
 
           {/* Submit Button */}
           <Button
             type="submit"
             className="w-full h-12 text-base"
-            disabled={isLoading}
+            disabled={isLoading || discountActive === false}
           >
-            {isLoading ? "Uploading..." : "Upload"}
+            {discountActive === false ? 'Erbjudande pausat' : isLoading ? 'Laddar upp...' : 'Ladda upp'}
           </Button>
         </form>
       </div>
