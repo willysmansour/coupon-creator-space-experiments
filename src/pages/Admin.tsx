@@ -18,12 +18,35 @@ import { SuperAdminLogin } from "@/components/SuperAdminLogin";
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const { data: companies } = useCompanies();
-  const assignRole = useAssignRole();
-  
   const [newUserEmail, setNewUserEmail] = useState("");
   const [selectedRole, setSelectedRole] = useState<UserRole>("company_admin");
   const [selectedCompany, setSelectedCompany] = useState("");
+
+  // ALL HOOKS MUST BE CALLED AT THE TOP - BEFORE ANY CONDITIONAL LOGIC
+  const { data: companies } = useCompanies();
+  const assignRole = useAssignRole();
+  
+  // Fetch all users with their roles - ALWAYS call this hook
+  const { data: allUsers } = useQuery({
+    queryKey: ['admin-users'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select(`
+          id,
+          user_id,
+          role,
+          company_id,
+          companies(name),
+          created_at
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: isAuthenticated // Only fetch when authenticated
+  });
 
   // Check for existing session on mount
   useEffect(() => {
@@ -47,28 +70,6 @@ const Admin = () => {
   if (!isAuthenticated) {
     return <SuperAdminLogin onLoginSuccess={handleLoginSuccess} />;
   }
-
-  // Fetch all users with their roles
-  const { data: allUsers } = useQuery({
-    queryKey: ['admin-users'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select(`
-          id,
-          user_id,
-          role,
-          company_id,
-          companies(name),
-          created_at
-        `)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: isAuthenticated // Only fetch when authenticated
-  });
 
   const handleAssignRole = async () => {
     if (!newUserEmail || !selectedRole) {
