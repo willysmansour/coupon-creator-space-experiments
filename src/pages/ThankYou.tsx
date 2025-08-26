@@ -13,8 +13,7 @@ const ThankYou = () => {
   const { uploadId } = useParams<{ uploadId: string }>();
   const navigate = useNavigate();
   const { data: upload, isLoading: uploadLoading } = useUpload(uploadId || '');
-  const { data: campaign, isLoading: campaignLoading } = useCampaign(upload?.campaign_id || '');
-  const { data: company, isLoading: companyLoading } = useCompany(campaign?.company_id || '');
+  const { data: company, isLoading: companyLoading } = useCompany(upload?.company_id || '');
   const { data: coupon, isLoading: couponLoading } = useCouponByUpload(uploadId || '');
   const updateUploadWithCustomer = useUpdateUploadWithCustomer();
   
@@ -23,7 +22,7 @@ const ThankYou = () => {
   const [showForm, setShowForm] = useState(!upload?.customer_name && !upload?.customer_email);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  if (uploadLoading || campaignLoading || companyLoading) {
+  if (uploadLoading || companyLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">Loading...</div>
@@ -31,7 +30,7 @@ const ThankYou = () => {
     );
   }
 
-  if (!upload || !campaign) {
+  if (!upload || !company) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -120,14 +119,16 @@ const ThankYou = () => {
           </CardHeader>
         </Card>
 
-        {/* Campaign Info */}
+        {/* Discount Info */}
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-medium">{campaign.title}</h3>
+                <h3 className="font-medium">Rabatterbjudande</h3>
                 <p className="text-sm text-muted-foreground">
-                  {campaign.discount}
+                  {typeof (company as any)?.discount_percentage === 'number' 
+                    ? `${(company as any).discount_percentage}% rabatt` 
+                    : 'Rabattkupong'}
                 </p>
               </div>
               <Badge variant={upload.status === 'approved' ? 'default' : 'secondary'}>

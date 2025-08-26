@@ -1,61 +1,42 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CreateCampaignModal } from "@/components/CreateCampaignModal";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Plus, Search, Bell, User } from "lucide-react";
 import { useState } from "react";
 
 export function ModernHeader() {
-  const [showCreateModal, setShowCreateModal] = useState(false);
-
   return (
-    <>
-      <header className="h-16 bg-card border-b flex items-center justify-between px-6">
-        <div className="flex items-center gap-4">
-          <SidebarTrigger />
-          <div>
-            <h1 className="text-xl font-semibold text-foreground">Dashboard</h1>
-          </div>
+    <header className="h-16 bg-card border-b flex items-center justify-between px-6">
+      <div className="flex items-center gap-4">
+        <SidebarTrigger />
+        <div>
+          <h1 className="text-xl font-semibold text-foreground">Dashboard</h1>
+        </div>
+      </div>
+      
+      <div className="flex items-center gap-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input 
+            placeholder="Sök..." 
+            className="pl-10 w-64 bg-input border-0 focus:ring-2 focus:ring-primary/20"
+          />
         </div>
         
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search task" 
-              className="pl-10 w-64 bg-input border-0 focus:ring-2 focus:ring-primary/20"
-            />
+        <Button variant="outline" size="sm" className="gap-2">
+          <Bell className="h-4 w-4" />
+        </Button>
+        
+        <Button variant="ghost" size="sm" className="gap-2">
+          <div className="w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-sm font-medium">
+            ?
           </div>
-          
-          <Button variant="outline" size="sm" className="gap-2">
-            <Bell className="h-4 w-4" />
-          </Button>
-          
-          <Button 
-            onClick={() => setShowCreateModal(true)}
-            size="sm"
-            className="gap-2 bg-primary hover:bg-primary-hover"
-          >
-            <Plus className="h-4 w-4" />
-            Lägg till projekt
-          </Button>
-          
-          <Button variant="ghost" size="sm" className="gap-2">
-            <div className="w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-sm font-medium">
-              ?
-            </div>
-            <div className="text-left">
-              <p className="text-sm font-medium">Ingen användare</p>
-              <p className="text-xs text-muted-foreground">Logga in för att komma igång</p>
-            </div>
-          </Button>
-        </div>
-      </header>
-
-      <CreateCampaignModal 
-        open={showCreateModal} 
-        onOpenChange={setShowCreateModal} 
-      />
-    </>
+          <div className="text-left">
+            <p className="text-sm font-medium">Ingen användare</p>
+            <p className="text-xs text-muted-foreground">Logga in för att komma igång</p>
+          </div>
+        </Button>
+      </div>
+    </header>
   );
 }

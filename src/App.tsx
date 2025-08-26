@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppProvider } from "@/contexts/AppContext";
 import Index from "./pages/Index";
-import Campaigns from "./pages/Campaigns";
+import DiscountSettings from "./pages/DiscountSettings";
 import Uploads from "./pages/Uploads";
 import Coupons from "./pages/Coupons";
 import Analytics from "./pages/Analytics";
@@ -31,7 +31,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/campaigns" element={<Campaigns />} />
+            <Route path="/campaigns" element={<DiscountSettings />} />
             <Route path="/uploads" element={<Uploads />} />
             <Route path="/coupons" element={<Coupons />} />
             <Route path="/analytics" element={<Analytics />} />
@@ -41,8 +41,6 @@ const App = () => (
             <Route path="/logout" element={<Logout />} />
             <Route path="/company/:companyId" element={<CompanyWelcome />} />
             <Route path="/company/:companyId/upload" element={<Upload />} />
-            <Route path="/landing/:companyId" element={<Landing />} />
-            <Route path="/c/:campaignId" element={<Upload />} />
             <Route path="/thank-you/:uploadId" element={<ThankYou />} />
             <Route path="/coupon/:couponId" element={<Coupon />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
