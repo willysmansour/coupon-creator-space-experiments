@@ -22,8 +22,8 @@ export function DashboardAuth({ children }: DashboardAuthProps) {
     );
   }
 
-  // If no user or no role (customer), show login prompt
-  if (!user || !userRole || userRole.role === 'customer') {
+  // Show login prompt only if no user is authenticated
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="w-full max-w-md">
@@ -40,6 +40,32 @@ export function DashboardAuth({ children }: DashboardAuthProps) {
               className="w-full"
             >
               Logga in
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // If user exists but role is customer, show access denied
+  if (userRole && userRole.role === 'customer') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <LogIn className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <CardTitle>Ingen behörighet</CardTitle>
+            <CardDescription>
+              Du har inte behörighet att komma åt denna sida. Kontakta en administratör för åtkomst.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => navigate('/auth')} 
+              variant="outline"
+              className="w-full"
+            >
+              Tillbaka till inloggning
             </Button>
           </CardContent>
         </Card>
