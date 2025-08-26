@@ -19,6 +19,8 @@ import Upload from "./pages/Upload";
 import CompanyWelcome from "./pages/CompanyWelcome";
 import ThankYou from "./pages/ThankYou";
 import Coupon from "./pages/Coupon";
+import Auth from "./pages/Auth";
+import { RequireAuth } from "./components/auth/RequireAuth";
 
 const queryClient = new QueryClient();
 
@@ -32,13 +34,14 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/campaigns" element={<DiscountSettings />} />
-            <Route path="/uploads" element={<Uploads />} />
+            <Route path="/uploads" element={<RequireAuth><Uploads /></RequireAuth>} />
             <Route path="/coupons" element={<Coupons />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/customers" element={<Customers />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/help" element={<Help />} />
             <Route path="/logout" element={<Logout />} />
+            <Route path="/auth" element={<Auth />} />
             <Route path="/company/:companyId" element={<CompanyWelcome />} />
             <Route path="/company/:companyId/upload" element={<Upload />} />
             <Route path="/thank-you/:uploadId" element={<ThankYou />} />
