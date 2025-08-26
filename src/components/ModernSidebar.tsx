@@ -35,7 +35,7 @@ const getMenuItems = (userRole?: string) => {
     { title: "Kuponger", url: "/coupons", icon: CheckCircle, roles: ['super_admin', 'company_admin'] },
     { title: "Analytics", url: "/analytics", icon: BarChart3, roles: ['super_admin', 'company_admin'] },
     { title: "Kunder", url: "/customers", icon: Users, roles: ['super_admin', 'company_admin'] },
-    { title: "Admin Panel", url: "/admin", icon: Shield, roles: ['super_admin'] },
+    // Admin Panel is hidden from navigation - only accessible via direct URL for super admins
   ];
 
   const generalItems = [
