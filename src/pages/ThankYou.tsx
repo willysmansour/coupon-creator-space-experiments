@@ -216,7 +216,7 @@ const ThankYou = () => {
                     });
 
                     // Then send the coupon email
-                    const { error: emailError } = await supabase.functions.invoke('send-coupon-email', {
+                    const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-coupon-email', {
                       body: {
                         uploadId: uploadId!,
                         customerName: customerName.trim(),
@@ -224,9 +224,14 @@ const ThankYou = () => {
                       }
                     });
 
-                    if (emailError) {
-                      console.error('Email error:', emailError);
-                      toast.error('Detaljer sparade men e-post misslyckades');
+                    if (emailError || !emailResult?.success) {
+                      console.error('Email error:', emailError || emailResult);
+                      if (emailResult?.needsApproval) {
+                        setShowForm(false);
+                        toast.success('Detaljer sparade! Du får en kupong när ditt bidrag godkänns.');
+                      } else {
+                        toast.error('Detaljer sparade men e-post misslyckades att skickas');
+                      }
                     } else {
                       setShowForm(false);
                       toast.success('Detaljer sparade! Din kupong skickas till din e-post inom kort.');

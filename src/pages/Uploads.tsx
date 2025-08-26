@@ -36,17 +36,23 @@ const Uploads = () => {
         // Send coupon email if customer details exist
         if (upload.customer_name && upload.customer_email) {
           try {
-            await supabase.functions.invoke('send-coupon-email', {
+            const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-coupon-email', {
               body: {
                 uploadId: id,
                 customerName: upload.customer_name,
                 customerEmail: upload.customer_email
               }
             });
-            toast.success(`${upload.customer_name} har godkänts och kupong-email skickat.`);
+            
+            if (emailError || !emailResult?.success) {
+              console.error('Email error:', emailError || emailResult);
+              toast.success(`${upload.customer_name} har godkänts men e-post misslyckades att skickas.`);
+            } else {
+              toast.success(`${upload.customer_name} har godkänts och kupong-email skickat!`);
+            }
           } catch (emailError) {
             console.error('Email error:', emailError);
-            toast.success(`${upload.customer_name} har godkänts men e-post misslyckades.`);
+            toast.success(`${upload.customer_name} har godkänts men e-post misslyckades att skickas.`);
           }
         } else {
           toast.success(`Uppladdning godkänd. Kupong skapas när kund fyller i sina detaljer.`);
