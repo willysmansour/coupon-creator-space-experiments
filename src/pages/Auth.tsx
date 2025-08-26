@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { useRegisterCompany } from "@/hooks/useAuth";
 
@@ -15,6 +16,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [testMode, setTestMode] = useState(false);
   const [search] = useSearchParams();
   const navigate = useNavigate();
   const registerCompany = useRegisterCompany();
@@ -80,11 +82,15 @@ const Auth = () => {
   const onCompanyRegister = async () => {
     setLoading(true);
     try {
+      const finalEmail = testMode ? `test+${Date.now()}@example.com` : email;
       await registerCompany.mutateAsync({
-        email,
+        email: finalEmail,
         password,
         companyName
       });
+    } catch (error: any) {
+      toast.error(error?.message || "Kunde inte skapa företagskonto");
+      console.error("Registration error:", error);
     } finally {
       setLoading(false);
     }
@@ -148,6 +154,36 @@ const Auth = () => {
                   Skapa ditt företagskonto och få tillgång till alla våra tjänster direkt.
                 </p>
               </header>
+              
+              {/* Test Mode Toggle */}
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <div className="space-y-0.5">
+                  <Label htmlFor="test-mode" className="text-sm font-medium">
+                    Test-läge
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Genererar automatiskt test e-post för snabb registrering
+                  </p>
+                </div>
+                <Switch
+                  id="test-mode"
+                  checked={testMode}
+                  onCheckedChange={setTestMode}
+                />
+              </div>
+
+              {/* Test Mode Banner */}
+              {testMode && (
+                <div className="bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                  <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">
+                    🧪 Test-läge aktivt
+                  </p>
+                  <p className="text-xs text-blue-600 dark:text-blue-300 mt-1">
+                    E-postadressen genereras automatiskt för testning
+                  </p>
+                </div>
+              )}
+
               <section className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="company-name">Företagsnamn</Label>
@@ -155,7 +191,15 @@ const Auth = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="company-email">E-post</Label>
-                  <Input id="company-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                  <Input 
+                    id="company-email" 
+                    type="email" 
+                    value={testMode ? `test+${Date.now()}@example.com` : email} 
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={testMode}
+                    placeholder={testMode ? "Genereras automatiskt..." : "din@email.com"}
+                    className={testMode ? "opacity-75" : ""}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="company-password">Lösenord</Label>
