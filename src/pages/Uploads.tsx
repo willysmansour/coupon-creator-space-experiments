@@ -41,6 +41,9 @@ const Uploads = () => {
                 uploadId: id,
                 customerName: upload.customer_name,
                 customerEmail: upload.customer_email
+              },
+              headers: {
+                'x-app-origin': window.location.origin,
               }
             });
             

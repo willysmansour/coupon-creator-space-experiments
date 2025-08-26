@@ -221,6 +221,9 @@ const ThankYou = () => {
                         uploadId: uploadId!,
                         customerName: customerName.trim(),
                         customerEmail: email.trim()
+                      },
+                      headers: {
+                        'x-app-origin': window.location.origin,
                       }
                     });
 

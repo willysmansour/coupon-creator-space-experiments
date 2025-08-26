@@ -104,12 +104,28 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Create coupon URL - use the correct domain format
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-    const baseUrl = supabaseUrl.includes('supabase.co') 
-      ? supabaseUrl.replace('https://mbpghmizndwixvuqrvmu.supabase.co', 'https://df5289f0-8e73-4575-87cf-e111381883d0.sandbox.lovable.dev')
-      : 'https://df5289f0-8e73-4575-87cf-e111381883d0.sandbox.lovable.dev';
-    const couponUrl = `${baseUrl}/coupon/${existingCoupon.id}`;
+    // Create coupon URL using APP_BASE_URL or infer from request headers
+    const appBaseEnv = (Deno.env.get('APP_BASE_URL') || '').trim();
+    const originHeader = req.headers.get('x-app-origin') || req.headers.get('origin') || '';
+    const hostHeader = req.headers.get('x-forwarded-host') || req.headers.get('host') || '';
+    const protoHeader = req.headers.get('x-forwarded-proto') || 'https';
+
+    let baseUrl = '';
+    if (appBaseEnv && appBaseEnv.startsWith('http')) {
+      baseUrl = appBaseEnv;
+    } else if (originHeader && originHeader.startsWith('http')) {
+      baseUrl = originHeader;
+    } else if (hostHeader) {
+      baseUrl = `${protoHeader}://${hostHeader}`;
+    }
+
+    console.log('Resolved APP base URL for coupon links:', { baseUrl, appBaseEnv, originHeader, hostHeader, protoHeader });
+
+    if (!baseUrl) {
+      throw new Error('APP_BASE_URL is not configured and could not infer from request headers');
+    }
+
+    const couponUrl = `${baseUrl.replace(/\/+$/, '')}/coupon/${existingCoupon.id}`;
 
     // Send email with Resend
     const emailResponse = await resend.emails.send({
