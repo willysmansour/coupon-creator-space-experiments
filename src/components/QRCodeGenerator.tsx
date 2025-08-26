@@ -3,11 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Download, QrCode } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useCompanies } from '@/hooks/useSupabaseData';
+import { useCompanyAwareCompanies } from '@/hooks/useCompanyAwareData';
 
 export const QRCodeGenerator = () => {
   const { toast } = useToast();
-  const { data: companies = [], isLoading } = useCompanies();
+  const { data: companies = [], isLoading } = useCompanyAwareCompanies();
   
   if (isLoading) {
     return (
@@ -19,13 +19,15 @@ export const QRCodeGenerator = () => {
     );
   }
 
-  // Use the first company from the database
+  // Use the user's company (filtered by company-aware hook)
   const company = companies[0];
   if (!company) {
     return (
       <Card>
         <CardContent className="p-6">
-          <div className="text-center text-muted-foreground">Inget företag hittades</div>
+          <div className="text-center text-muted-foreground">
+            Du har inget företag kopplat till ditt konto. Skapa ett företag först för att få din QR-kod.
+          </div>
         </CardContent>
       </Card>
     );
