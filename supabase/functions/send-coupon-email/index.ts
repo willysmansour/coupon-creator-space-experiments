@@ -104,8 +104,12 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Create coupon URL
-    const couponUrl = `${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.lovableproject.com') || 'https://your-domain.com'}/coupon/${existingCoupon.id}`;
+    // Create coupon URL - use the correct domain format
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+    const baseUrl = supabaseUrl.includes('supabase.co') 
+      ? supabaseUrl.replace('https://mbpghmizndwixvuqrvmu.supabase.co', 'https://df5289f0-8e73-4575-87cf-e111381883d0.sandbox.lovable.dev')
+      : 'https://df5289f0-8e73-4575-87cf-e111381883d0.sandbox.lovable.dev';
+    const couponUrl = `${baseUrl}/coupon/${existingCoupon.id}`;
 
     // Send email with Resend
     const emailResponse = await resend.emails.send({

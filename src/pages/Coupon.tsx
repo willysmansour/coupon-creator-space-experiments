@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useCoupon, useRedeemCoupon } from '@/hooks/useSupabaseData';
+import { useCoupon, useRedeemCoupon, type CouponWithCompany } from '@/hooks/useSupabaseData';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -89,8 +89,10 @@ const Coupon = () => {
     
     try {
       await redeemCoupon.mutateAsync(coupon.code);
+      toast.success('✅ Kupong har använts! Rabatten är nu applicerad.');
     } catch (error) {
       console.error('Redeem error:', error);
+      toast.error('Kunde inte använda kupongen. Försök igen.');
     } finally {
       setIsRedeeming(false);
     }
@@ -98,6 +100,23 @@ const Coupon = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Company Header */}
+      {coupon.company && (
+        <div className="bg-gradient-to-br from-primary/10 to-primary/5 border-b">
+          <div className="max-w-md mx-auto p-6 text-center">
+            {coupon.company.logo && (
+              <img 
+                src={coupon.company.logo} 
+                alt={`${coupon.company.name} logotyp`}
+                className="w-16 h-16 mx-auto mb-3 rounded-lg object-contain bg-white/50 backdrop-blur-sm"
+              />
+            )}
+            <h1 className="text-xl font-bold text-foreground">{coupon.company.name}</h1>
+            <p className="text-sm text-muted-foreground mt-1">Exklusiv kupong</p>
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
       <div className="max-w-md mx-auto p-4 space-y-6">
         {/* Coupon Card */}
@@ -159,24 +178,29 @@ const Coupon = () => {
         {/* Action Buttons */}
         <div className="space-y-3">
           {isActive && (
-            <Button 
-              onClick={handleRedeem}
-              disabled={isRedeeming}
-              className="w-full h-12"
-              size="lg"
-            >
-              {isRedeeming ? (
-                <>
-                  <Clock className="w-5 h-5 mr-2 animate-spin" />
-                  Löser in...
-                </>
-              ) : (
-                <>
-                  <CheckCircle className="w-5 h-5 mr-2" />
-                  Lös in nu
-                </>
-              )}
-            </Button>
+            <div className="bg-gradient-to-r from-success/10 to-success/5 p-4 rounded-lg border border-success/20">
+              <p className="text-sm text-center text-muted-foreground mb-3">
+                🏪 <strong>För kassapersonal:</strong> Tryck på knappen nedan för att använda kupongen
+              </p>
+              <Button 
+                onClick={handleRedeem}
+                disabled={isRedeeming}
+                className="w-full h-12 bg-success hover:bg-success/90 text-white"
+                size="lg"
+              >
+                {isRedeeming ? (
+                  <>
+                    <Clock className="w-5 h-5 mr-2 animate-spin" />
+                    Löser in kupong...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-5 h-5 mr-2" />
+                    ✅ Använd kupong i kassan
+                  </>
+                )}
+              </Button>
+            </div>
           )}
 
           {isUsed && (

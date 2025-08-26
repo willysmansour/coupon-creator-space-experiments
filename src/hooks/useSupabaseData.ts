@@ -54,6 +54,17 @@ export interface Company {
   updated_at: string;
 }
 
+export interface CouponCompany {
+  id: string;
+  name: string;
+  logo?: string;
+  discount_percentage?: number;
+}
+
+export interface CouponWithCompany extends Coupon {
+  company: CouponCompany;
+}
+
 // Companies hooks
 export const useCompanies = () => {
   return useQuery({
@@ -197,12 +208,20 @@ export const useCoupon = (id: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('coupons')
-        .select('*')
+        .select(`
+          *,
+          company:company_id (
+            id,
+            name,
+            logo,
+            discount_percentage
+          )
+        `)
         .eq('id', id)
         .single();
       
       if (error) throw error;
-      return data as Coupon;
+      return data as CouponWithCompany;
     },
     enabled: !!id
   });
