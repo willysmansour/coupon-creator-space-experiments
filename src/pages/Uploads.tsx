@@ -6,14 +6,26 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Check, X, Clock, Eye, Upload, Users } from "lucide-react";
-import { useUploads, useUpdateUploadStatus } from "@/hooks/useSupabaseData";
+import { Check, X, Clock, Eye, Trash2, Upload, Users } from "lucide-react";
+import { useUploads, useUpdateUploadStatus, useDeleteUpload } from "@/hooks/useSupabaseData";
 import { supabase } from '@/integrations/supabase/client';
+import { 
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle, 
+  AlertDialogTrigger 
+} from "@/components/ui/alert-dialog";
 import { toast } from 'sonner';
 
 const Uploads = () => {
   const { data: uploads = [], isLoading } = useUploads();
   const updateUploadStatus = useUpdateUploadStatus();
+  const deleteUpload = useDeleteUpload();
 
   const handleApprove = async (id: string) => {
     const upload = uploads.find(u => u.id === id);
@@ -53,6 +65,18 @@ const Uploads = () => {
         toast.success(`${upload.customer_name || 'Uppladdning'} har avvisats.`);
       } catch (error) {
         toast.error('Misslyckades att avvisa uppladdningen');
+      }
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    const upload = uploads.find(u => u.id === id);
+    if (upload) {
+      try {
+        await deleteUpload.mutateAsync(id);
+        toast.success(`Uppladdning från ${upload.customer_name || 'okänd kund'} har tagits bort`);
+      } catch (error) {
+        toast.error('Misslyckades att ta bort uppladdningen');
       }
     }
   };
@@ -206,27 +230,63 @@ const Uploads = () => {
                             <X className="h-3 w-3" />
                             Avvisa
                           </Button>
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button 
-                                size="sm" 
-                                variant="ghost"
-                                className="gap-1"
-                              >
-                                <Eye className="h-3 w-3" />
-                                Visa större
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-4xl">
-                              <img
-                                src={submission.image_url}
-                                alt={`Bild från ${submission.customer_name || 'kund'}`}
-                                className="w-full h-auto max-h-[80vh] object-contain"
-                              />
-                            </DialogContent>
-                          </Dialog>
                         </div>
                       )}
+                      
+                      {/* Action buttons for all uploads */}
+                      <div className="flex gap-2 mt-3">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              className="gap-1"
+                            >
+                              <Eye className="h-3 w-3" />
+                              Visa större
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-4xl">
+                            <img
+                              src={submission.image_url}
+                              alt={`Bild från ${submission.customer_name || 'kund'}`}
+                              className="w-full h-auto max-h-[80vh] object-contain"
+                            />
+                          </DialogContent>
+                        </Dialog>
+
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              className="gap-1 text-destructive hover:text-destructive"
+                              disabled={deleteUpload.isPending}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                              Ta bort
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Ta bort uppladdning</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Är du säker på att du vill ta bort uppladdningen från {submission.customer_name || 'okänd kund'}? 
+                                Detta kommer också att ta bort eventuella relaterade kuponger. Åtgärden kan inte ångras.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(submission.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Ta bort
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </div>
                   </div>
                 </Card>

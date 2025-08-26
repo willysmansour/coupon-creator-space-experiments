@@ -1,12 +1,25 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Download, Eye } from "lucide-react";
+import { 
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle, 
+  AlertDialogTrigger 
+} from "@/components/ui/alert-dialog";
+import { Download, Eye, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { useUploads } from "@/hooks/useSupabaseData";
+import { useUploads, useDeleteUpload } from "@/hooks/useSupabaseData";
+import { toast } from "sonner";
 
 export const ImageGallery = () => {
   const { data: uploads = [], isLoading } = useUploads();
+  const deleteUpload = useDeleteUpload();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   
   // Filter only approved uploads
@@ -17,6 +30,15 @@ export const ImageGallery = () => {
     link.href = imageUrl;
     link.download = `${customerName || 'bild'}.jpg`;
     link.click();
+  };
+
+  const handleDelete = async (uploadId: string, customerName: string) => {
+    try {
+      await deleteUpload.mutateAsync(uploadId);
+      toast.success(`Bild från ${customerName} har tagits bort`);
+    } catch (error) {
+      toast.error('Misslyckades att ta bort bilden');
+    }
   };
 
   return (
@@ -56,36 +78,66 @@ export const ImageGallery = () => {
                       className="w-full h-80 object-cover"
                     />
                     
-                    {/* Overlay med åtgärder */}
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-white hover:bg-white/20 h-10 w-10 p-0"
-                          >
-                            <Eye className="h-5 w-5" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-4xl">
-                          <img
-                            src={image.image_url}
-                            alt={`Bild från ${image.customer_name || 'kund'}`}
-                            className="w-full h-auto max-h-[80vh] object-contain"
-                          />
-                        </DialogContent>
-                      </Dialog>
-                      
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDownload(image.image_url, image.customer_name || 'kund')}
-                        className="text-white hover:bg-white/20 h-10 w-10 p-0"
-                      >
-                        <Download className="h-5 w-5" />
-                      </Button>
-                    </div>
+                     {/* Overlay med åtgärder */}
+                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
+                       <Dialog>
+                         <DialogTrigger asChild>
+                           <Button
+                             variant="ghost"
+                             size="sm"
+                             className="text-white hover:bg-white/20 h-10 w-10 p-0"
+                           >
+                             <Eye className="h-5 w-5" />
+                           </Button>
+                         </DialogTrigger>
+                         <DialogContent className="max-w-4xl">
+                           <img
+                             src={image.image_url}
+                             alt={`Bild från ${image.customer_name || 'kund'}`}
+                             className="w-full h-auto max-h-[80vh] object-contain"
+                           />
+                         </DialogContent>
+                       </Dialog>
+                       
+                       <Button
+                         variant="ghost"
+                         size="sm"
+                         onClick={() => handleDownload(image.image_url, image.customer_name || 'kund')}
+                         className="text-white hover:bg-white/20 h-10 w-10 p-0"
+                       >
+                         <Download className="h-5 w-5" />
+                       </Button>
+
+                       <AlertDialog>
+                         <AlertDialogTrigger asChild>
+                           <Button
+                             variant="ghost"
+                             size="sm"
+                             className="text-white hover:bg-red-500/20 h-10 w-10 p-0"
+                           >
+                             <Trash2 className="h-5 w-5" />
+                           </Button>
+                         </AlertDialogTrigger>
+                         <AlertDialogContent>
+                           <AlertDialogHeader>
+                             <AlertDialogTitle>Ta bort bild</AlertDialogTitle>
+                             <AlertDialogDescription>
+                               Är du säker på att du vill ta bort bilden från {image.customer_name || 'okänd kund'}? 
+                               Detta kommer också att ta bort eventuella relaterade kuponger. Åtgärden kan inte ångras.
+                             </AlertDialogDescription>
+                           </AlertDialogHeader>
+                           <AlertDialogFooter>
+                             <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                             <AlertDialogAction
+                               onClick={() => handleDelete(image.id, image.customer_name || 'okänd kund')}
+                               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                             >
+                               Ta bort
+                             </AlertDialogAction>
+                           </AlertDialogFooter>
+                         </AlertDialogContent>
+                       </AlertDialog>
+                     </div>
                   </div>
 
                   {/* Info sektion */}

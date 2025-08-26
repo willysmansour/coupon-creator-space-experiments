@@ -349,6 +349,63 @@ export const useUpdateUploadWithCustomer = () => {
   });
 };
 
+export const useDeleteUpload = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (uploadId: string) => {
+      // First get the upload to get the image URL for cleanup
+      const { data: upload, error: fetchError } = await supabase
+        .from('uploads')
+        .select('image_url')
+        .eq('id', uploadId)
+        .single();
+        
+      if (fetchError) throw fetchError;
+      
+      // Delete related coupons first (if any)
+      const { error: couponError } = await supabase
+        .from('coupons')
+        .delete()
+        .eq('upload_id', uploadId);
+        
+      if (couponError) console.warn('Failed to delete related coupons:', couponError);
+      
+      // Delete the upload record
+      const { error: deleteError } = await supabase
+        .from('uploads')
+        .delete()
+        .eq('id', uploadId);
+        
+      if (deleteError) throw deleteError;
+      
+      // Try to delete the image from storage (optional cleanup)
+      if (upload?.image_url) {
+        try {
+          const fileName = upload.image_url.split('/').pop();
+          if (fileName) {
+            await supabase.storage
+              .from('uploads')
+              .remove([fileName]);
+          }
+        } catch (storageError) {
+          console.warn('Failed to delete image from storage:', storageError);
+        }
+      }
+      
+      return uploadId;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['uploads'] });
+      queryClient.invalidateQueries({ queryKey: ['coupons'] });
+      toast.success('Upload deleted successfully!');
+    },
+    onError: (error) => {
+      toast.error('Failed to delete upload: ' + error.message);
+    }
+  });
+};
+
 // File upload helper
 export const uploadFile = async (file: File, bucket = 'uploads'): Promise<string> => {
   const fileExt = file.name.split('.').pop();
