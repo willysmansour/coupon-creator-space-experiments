@@ -18,8 +18,6 @@ const Upload = () => {
 
   const [file, setFile] = useState<File | null>(null);
   const [message, setMessage] = useState('');
-  const [customerName, setCustomerName] = useState('');
-  const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
@@ -112,8 +110,6 @@ const Upload = () => {
         company_id: company.id,
         image_url: imageUrl,
         message: message || 'Uploaded content',
-        customer_name: customerName || undefined,
-        customer_email: email || undefined,
       });
       
       navigate(`/thank-you/${upload.id}`);
@@ -261,17 +257,6 @@ const Upload = () => {
             />
           </div>
 
-          {/* Optional contact fields */}
-          <div className="grid grid-cols-1 gap-4">
-            <div>
-              <Label htmlFor="name" className="text-sm font-medium">Namn (valfritt)</Label>
-              <Input id="name" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="mt-1" />
-            </div>
-            <div>
-              <Label htmlFor="email" className="text-sm font-medium">E-post (valfritt)</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1" />
-            </div>
-          </div>
 
           {/* Submit Button */}
           <Button

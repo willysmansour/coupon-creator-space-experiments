@@ -168,32 +168,32 @@ const ThankYou = () => {
         {showForm && !upload?.customer_name && !upload?.customer_email && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Get your coupon via email</CardTitle>
+              <CardTitle className="text-base">Få din kupong via e-post</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="name" className="text-sm font-medium">
-                  Name *
+                  Namn *
                 </Label>
                 <Input
                   id="name"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  placeholder="Your name"
+                  placeholder="Ditt namn"
                   className="mt-1"
                 />
               </div>
               
               <div>
                 <Label htmlFor="email" className="text-sm font-medium">
-                  Email *
+                  E-post *
                 </Label>
                 <Input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
+                  placeholder="din@email.se"
                   className="mt-1"
                 />
               </div>
@@ -201,7 +201,7 @@ const ThankYou = () => {
               <Button
                 onClick={async () => {
                   if (!customerName.trim() || !email.trim()) {
-                    toast.error('Please fill in both name and email');
+                    toast.error('Vänligen fyll i både namn och e-post');
                     return;
                   }
                   
@@ -213,9 +213,9 @@ const ThankYou = () => {
                       customer_email: email.trim()
                     });
                     setShowForm(false);
-                    toast.success('Details saved! Your coupon will be sent to your email.');
+                    toast.success('Detaljer sparade! Din kupong skickas till din e-post.');
                   } catch (error) {
-                    toast.error('Failed to save details');
+                    toast.error('Misslyckades att spara detaljer');
                   } finally {
                     setIsSubmitting(false);
                   }
@@ -223,7 +223,7 @@ const ThankYou = () => {
                 className="w-full"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Saving..." : "Get Coupon"}
+                {isSubmitting ? "Sparar..." : "Få kupong"}
               </Button>
             </CardContent>
           </Card>
@@ -245,7 +245,7 @@ const ThankYou = () => {
           {!coupon && upload.status === 'pending' && !showForm && (
             <div className="text-center p-4 bg-accent rounded-lg">
               <p className="text-sm text-accent-foreground">
-                Your submission is being reviewed. You'll receive a coupon once approved.
+                Ditt bidrag granskas. Du får en kupong när det godkänns.
               </p>
             </div>
           )}
@@ -255,7 +255,7 @@ const ThankYou = () => {
             onClick={() => navigate(`/company/${company?.id}`)}
             className="w-full"
           >
-            Back to campaigns
+            Tillbaka till företaget
           </Button>
         </div>
       </div>

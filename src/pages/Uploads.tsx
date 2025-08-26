@@ -6,32 +6,34 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, X, Clock, Eye, Upload, Users } from "lucide-react";
-import { useApp } from "@/contexts/AppContext";
-import { useToast } from "@/components/ui/use-toast";
+import { useUploads, useUpdateUploadStatus } from "@/hooks/useSupabaseData";
+import { toast } from 'sonner';
 
 const Uploads = () => {
-  const { uploads, approveUpload, rejectUpload } = useApp();
-  const { toast } = useToast();
+  const { data: uploads = [], isLoading } = useUploads();
+  const updateUploadStatus = useUpdateUploadStatus();
 
-  const handleApprove = (id: string) => {
+  const handleApprove = async (id: string) => {
     const upload = uploads.find(u => u.id === id);
     if (upload) {
-      approveUpload(id);
-      toast({
-        title: "Bild godkänd!",
-        description: `${upload.customerName}s bild har godkänts och en kupong har skapats.`
-      });
+      try {
+        await updateUploadStatus.mutateAsync({ id, status: 'approved' });
+        toast.success(`${upload.customer_name || 'Uppladdning'} har godkänts och en kupong har skapats.`);
+      } catch (error) {
+        toast.error('Misslyckades att godkänna uppladdningen');
+      }
     }
   };
 
-  const handleReject = (id: string) => {
+  const handleReject = async (id: string) => {
     const upload = uploads.find(u => u.id === id);
     if (upload) {
-      rejectUpload(id);
-      toast({
-        title: "Bild avvisad",
-        description: `${upload.customerName}s bild har avvisats.`
-      });
+      try {
+        await updateUploadStatus.mutateAsync({ id, status: 'rejected' });
+        toast.success(`${upload.customer_name || 'Uppladdning'} har avvisats.`);
+      } catch (error) {
+        toast.error('Misslyckades att avvisa uppladdningen');
+      }
     }
   };
 
@@ -60,6 +62,22 @@ const Uploads = () => {
         );
     }
   };
+
+  if (isLoading) {
+    return (
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full bg-background">
+          <ModernSidebar />
+          <div className="flex-1">
+            <ModernHeader />
+            <main className="p-6">
+              <div className="text-center">Loading...</div>
+            </main>
+          </div>
+        </div>
+      </SidebarProvider>
+    );
+  }
 
   const pendingCount = uploads.filter(s => s.status === "pending").length;
   const approvedCount = uploads.filter(s => s.status === "approved").length;
@@ -118,7 +136,7 @@ const Uploads = () => {
                     {/* Image */}
                     <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-muted">
                       <img 
-                        src={submission.image} 
+                        src={submission.image_url} 
                         alt="Upload submission"
                         className="w-full h-full object-cover"
                       />
@@ -128,14 +146,18 @@ const Uploads = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <h4 className="font-medium text-foreground">{submission.customerName}</h4>
-                          <p className="text-sm text-muted-foreground">{submission.email}</p>
+                          <h4 className="font-medium text-foreground">
+                            {submission.customer_name || 'Okänd kund'}
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            {submission.customer_email || 'Ingen e-post'}
+                          </p>
                         </div>
                         {getStatusBadge(submission.status)}
                       </div>
                       
                       <p className="text-sm text-muted-foreground mb-2">
-                        {submission.campaign} • {new Date(submission.submittedAt).toLocaleDateString('sv-SE')}
+                        {new Date(submission.submitted_at).toLocaleDateString('sv-SE')}
                       </p>
                       
                       {submission.message && (
@@ -150,6 +172,7 @@ const Uploads = () => {
                             size="sm" 
                             className="gap-1 bg-success hover:bg-success/90"
                             onClick={() => handleApprove(submission.id)}
+                            disabled={updateUploadStatus.isPending}
                           >
                             <Check className="h-3 w-3" />
                             Godkänn
@@ -158,6 +181,7 @@ const Uploads = () => {
                             size="sm" 
                             variant="outline"
                             onClick={() => handleReject(submission.id)}
+                            disabled={updateUploadStatus.isPending}
                           >
                             <X className="h-3 w-3" />
                             Avvisa
