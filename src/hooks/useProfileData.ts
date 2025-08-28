@@ -55,9 +55,16 @@ export const useUpsertProfile = () => {
   
   return useMutation({
     mutationFn: async (profile: Partial<Profile>) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("Du är inte inloggad.");
+      }
+
+      const payload = { ...profile, user_id: user.id };
+
       const { data, error } = await supabase
         .from("profiles")
-        .upsert(profile)
+        .upsert(payload)
         .select()
         .single();
 

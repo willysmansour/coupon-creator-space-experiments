@@ -39,9 +39,13 @@ export const useUpdateCompany = () => {
         return data;
       } else {
         // Create new company
+        const { data: authData } = await supabase.auth.getUser();
+        const user = authData?.user;
+        if (!user) throw new Error("Du är inte inloggad.");
+
         const { data, error } = await supabase
           .from("companies")
-          .insert({ name, logo })
+          .insert({ name, logo, owner_user_id: user.id })
           .select()
           .single();
 
