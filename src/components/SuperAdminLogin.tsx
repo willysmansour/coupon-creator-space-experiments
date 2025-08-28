@@ -1,33 +1,53 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Shield, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useUserRole } from "@/hooks/useAuth";
 
 interface SuperAdminLoginProps {
   onLoginSuccess: () => void;
 }
 
 export function SuperAdminLogin({ onLoginSuccess }: SuperAdminLoginProps) {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { data: userRole, isLoading: roleLoading } = useUserRole();
+
+  // Check if user is already authenticated and has super admin role
+  useEffect(() => {
+    if (!roleLoading && userRole?.role === 'super_admin') {
+      onLoginSuccess();
+    }
+  }, [userRole, roleLoading, onLoginSuccess]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simple hardcoded credentials check
-    if (username === "superadmin" && password === "superadmin") {
-      // Store admin session in localStorage
-      localStorage.setItem("superadmin_session", "true");
-      toast.success("Välkommen Super Admin!");
-      onLoginSuccess();
-    } else {
-      toast.error("Felaktigt användarnamn eller lösenord");
+    try {
+      // Authenticate with Supabase
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.user) {
+        // The useEffect will handle checking the role and calling onLoginSuccess
+        toast.success("Loggar in...");
+      }
+    } catch (error: any) {
+      console.error("Login error:", error);
+      toast.error("Felaktigt e-post eller lösenord");
     }
     
     setIsLoading(false);
@@ -46,15 +66,15 @@ export function SuperAdminLogin({ onLoginSuccess }: SuperAdminLoginProps) {
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Användarnamn</Label>
+              <Label htmlFor="email">E-post</Label>
               <Input
-                id="username"
-                type="text"
-                placeholder="superadmin"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="email"
+                type="email"
+                placeholder="admin@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
-                autoComplete="username"
+                autoComplete="email"
               />
             </div>
             
@@ -64,7 +84,7 @@ export function SuperAdminLogin({ onLoginSuccess }: SuperAdminLoginProps) {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="superadmin"
+                  placeholder="Ange ditt lösenord"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -89,7 +109,7 @@ export function SuperAdminLogin({ onLoginSuccess }: SuperAdminLoginProps) {
             <Button 
               type="submit" 
               className="w-full" 
-              disabled={isLoading}
+              disabled={isLoading || roleLoading}
             >
               {isLoading ? "Loggar in..." : "Logga in"}
             </Button>
@@ -97,8 +117,8 @@ export function SuperAdminLogin({ onLoginSuccess }: SuperAdminLoginProps) {
           
           <div className="mt-6 p-3 bg-muted/30 rounded-lg">
             <p className="text-xs text-muted-foreground text-center">
-              <strong>Användarnamn:</strong> superadmin<br />
-              <strong>Lösenord:</strong> superadmin
+              Använd ditt Super Admin-konto för att logga in.<br />
+              Kontakta systemadministratören om du har glömt dina uppgifter.
             </p>
           </div>
         </CardContent>
