@@ -33,15 +33,15 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/campaigns" element={<DiscountSettings />} />
-            <Route path="/uploads" element={<Uploads />} />
-            <Route path="/coupons" element={<Coupons />} />
-            <Route path="/analytics" element={<Analytics />} />
-            <Route path="/customers" element={<Customers />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/help" element={<Help />} />
-            <Route path="/logout" element={<Logout />} />
+            <Route path="/" element={<RequireAuth><Index /></RequireAuth>} />
+            <Route path="/campaigns" element={<RequireAuth><DiscountSettings /></RequireAuth>} />
+            <Route path="/uploads" element={<RequireAuth><Uploads /></RequireAuth>} />
+            <Route path="/coupons" element={<RequireAuth><Coupons /></RequireAuth>} />
+            <Route path="/analytics" element={<RequireAuth><Analytics /></RequireAuth>} />
+            <Route path="/customers" element={<RequireAuth><Customers /></RequireAuth>} />
+            <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
+            <Route path="/help" element={<RequireAuth><Help /></RequireAuth>} />
+            <Route path="/logout" element={<RequireAuth><Logout /></RequireAuth>} />
             <Route path="/admin" element={<RequireAuth><Admin /></RequireAuth>} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/company/:companyId" element={<CompanyWelcome />} />
