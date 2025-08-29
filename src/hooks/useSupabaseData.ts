@@ -1,53 +1,19 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
-// Types
-export interface Company {
-  id: string;
-  name: string;
-  logo?: string;
-  discount_percentage?: number;
-  content_types?: string[];
-  content_description?: string;
-  discount_active?: boolean;
-  discount_expires_at?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Upload {
-  id: string;
-  company_id: string;
-  customer_name?: string;
-  customer_email?: string;
-  image_url: string;
-  message?: string;
-  status: 'pending' | 'approved' | 'rejected';
-  submitted_at: string;
-  approved_at?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Coupon {
-  id: string;
-  upload_id: string;
-  code: string;
-  discount: string;
-  expires_at: string;
-  is_used: boolean;
-  used_at?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface UserRole {
-  role: 'super_admin' | 'company_admin' | 'customer' | 'anon';
-  company_id?: string;
-  company_name?: string;
-  email?: string;
-}
+import { 
+  Company, 
+  Upload, 
+  Coupon, 
+  UserRole, 
+  Customer, 
+  Campaign, 
+  CouponWithCompany,
+  CompanyAwareCompany,
+  RoleAssignmentData,
+  CompanyUpdateData,
+  ProfileUpdateData
+} from '@/types';
 
 // Optimized query options for better performance
 const defaultQueryOptions = {
@@ -111,7 +77,7 @@ export const useCampaigns = () => {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data as any[];
+      return data as Campaign[];
     },
     ...defaultQueryOptions,
   });
@@ -207,7 +173,7 @@ export const useCoupon = (id: string) => {
         .single();
       
       if (error) throw error;
-      return data as any;
+      return data as CouponWithCompany;
     },
     enabled: !!id,
     ...defaultQueryOptions,
@@ -446,7 +412,7 @@ export const useUpsertProfile = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (profile: any) => {
+    mutationFn: async (profile: ProfileUpdateData) => {
       const { data, error } = await supabase
         .from('profiles')
         .upsert(profile)
@@ -471,7 +437,7 @@ export const useUpdateCompany = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Company> }) => {
+    mutationFn: async ({ id, updates }: { id: string; updates: CompanyUpdateData }) => {
       const { data, error } = await supabase
         .from('companies')
         .update(updates)
@@ -532,11 +498,7 @@ export const useAssignRole = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ userId, role, companyId }: { 
-      userId: string; 
-      role: 'super_admin' | 'company_admin' | 'customer'; 
-      companyId?: string; 
-    }) => {
+    mutationFn: async ({ userId, role, companyId }: RoleAssignmentData) => {
       const { data, error } = await supabase
         .from('user_roles')
         .upsert({

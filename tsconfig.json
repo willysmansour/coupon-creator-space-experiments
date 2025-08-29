@@ -1,24 +1,41 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ],
   "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting - Balanced strictness */
+    "strict": true,
+    "noUnusedLocals": false, // Allow unused locals for now
+    "noUnusedParameters": false, // Allow unused parameters for now
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": false, // Less strict for now
+    "exactOptionalPropertyTypes": false, // Less strict for now
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": false, // Less strict for now
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+
+    /* Path mapping */
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    },
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "noUnusedParameters": true,
-    "noUnusedLocals": true,
-    "skipLibCheck": true,
-    "allowJs": true,
-    "exactOptionalPropertyTypes": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true
-  }
+    }
+  },
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

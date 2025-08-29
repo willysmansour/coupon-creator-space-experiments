@@ -97,27 +97,14 @@ const Uploads = () => {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "approved":
-        return (
-          <Badge className="bg-success/10 text-success border-success/20">
-            <Check className="h-3 w-3 mr-1" />
-            Approved
-          </Badge>
-        );
-      case "rejected":
-        return (
-          <Badge className="bg-destructive/10 text-destructive border-destructive/20">
-            <X className="h-3 w-3 mr-1" />
-            Rejected
-          </Badge>
-        );
-      case "pending":
-        return (
-          <Badge className="bg-warning/10 text-warning border-warning/20">
-            <Clock className="h-3 w-3 mr-1" />
-            Pending
-          </Badge>
-        );
+      case 'approved':
+        return <Badge variant="default">Approved</Badge>;
+      case 'rejected':
+        return <Badge variant="destructive">Rejected</Badge>;
+      case 'pending':
+        return <Badge variant="secondary">Pending</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
     }
   };
 

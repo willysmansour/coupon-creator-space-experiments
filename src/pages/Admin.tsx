@@ -109,8 +109,9 @@ const Admin = () => {
       setNewUserEmail("");
       setSelectedRole("company_admin");
       setSelectedCompany("");
-    } catch (error: any) {
-      toast.error("Kunde inte tilldela roll: " + error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Could not assign role";
+      toast.error(errorMessage);
     }
   };
 

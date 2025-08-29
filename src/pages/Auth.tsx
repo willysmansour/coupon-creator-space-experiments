@@ -23,7 +23,7 @@ const Auth = () => {
 
   const redirectTo = useMemo(() => search.get("redirect") || "/", [search]);
 
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
     document.title = mode === "signin" ? "Sign in" : "Get started with your company";
@@ -56,8 +56,9 @@ const Auth = () => {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       toast.success("Signed in successfully");
-    } catch (e: any) {
-      toast.error(e?.message || "Could not sign in");
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : "Could not sign in";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -76,8 +77,9 @@ const Auth = () => {
       });
       if (error) throw error;
       toast.success("Admin account created. Check your email for confirmation.");
-    } catch (e: any) {
-      toast.error(e?.message || "Could not create admin account");
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : "Could not create admin account";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -91,9 +93,9 @@ const Auth = () => {
         password,
         companyName
       });
-    } catch (error: any) {
-      // Error handling is now done in the hook
-      console.error("Registration error:", error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Could not register company";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -122,7 +124,7 @@ const Auth = () => {
               </p>
             </div>
           )}
-          <Tabs value={mode} onValueChange={(value) => setMode(value as any)} className="w-full">
+          <Tabs value={mode} onValueChange={(value) => setMode(value as "signin" | "company")} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="company">Get started</TabsTrigger>
               <TabsTrigger value="signin">Sign in</TabsTrigger>

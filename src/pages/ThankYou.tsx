@@ -149,9 +149,9 @@ const ThankYou = () => {
               <div>
                 <h3 className="font-medium">Discount offer</h3>
                 <p className="text-sm text-muted-foreground">
-                  {typeof (company as any)?.discount_percentage === 'number' 
-                    ? `${(company as any).discount_percentage}% off` 
-                    : 'Discount coupon'}
+                  {typeof company?.discount_percentage === 'number'
+                    ? `${company.discount_percentage}% off`
+                    : 'Special discount'}
                 </p>
               </div>
               <Badge variant={upload.status === 'approved' ? 'default' : 'secondary'}>

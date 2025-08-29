@@ -82,7 +82,7 @@ const getStatusBadge = (status: string) => {
   };
   
   return (
-    <Badge variant={variants[status as keyof typeof variants] as any}>
+    <Badge variant={variants[status as keyof typeof variants] || 'secondary'}>
       {status}
     </Badge>
   );

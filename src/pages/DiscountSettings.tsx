@@ -21,19 +21,19 @@ const DiscountSettings = () => {
   const { toast } = useToast();
 
   const [discountPercentage, setDiscountPercentage] = useState(
-    (company as any)?.discount_percentage?.toString() || '10'
+    company?.discount_percentage?.toString() || '10'
   );
   const [contentDescription, setContentDescription] = useState(
-    (company as any)?.content_description || ''
+    company?.content_description || ''
   );
   const [discountActive, setDiscountActive] = useState(
-    (company as any)?.discount_active !== false
+    company?.discount_active !== false
   );
-  const [acceptPhotos, setAcceptPhotos] = useState(
-    !(company as any)?.content_types || (company as any)?.content_types?.includes('photo')
+  const [photoEnabled, setPhotoEnabled] = useState(
+    !company?.content_types || company?.content_types?.includes('photo')
   );
-  const [acceptVideos, setAcceptVideos] = useState(
-    !(company as any)?.content_types || (company as any)?.content_types?.includes('video')
+  const [videoEnabled, setVideoEnabled] = useState(
+    !company?.content_types || company?.content_types?.includes('video')
   );
   const [isLoading, setIsLoading] = useState(false);
 
@@ -50,8 +50,8 @@ const DiscountSettings = () => {
     setIsLoading(true);
     try {
       const contentTypes = [];
-      if (acceptPhotos) contentTypes.push('photo');
-      if (acceptVideos) contentTypes.push('video');
+      if (photoEnabled) contentTypes.push('photo');
+      if (videoEnabled) contentTypes.push('video');
 
       const { error } = await supabase
         .from('companies')
@@ -186,8 +186,8 @@ const DiscountSettings = () => {
                         <span className="text-sm">Photos</span>
                       </div>
                       <Switch
-                        checked={acceptPhotos}
-                        onCheckedChange={setAcceptPhotos}
+                        checked={photoEnabled}
+                        onCheckedChange={setPhotoEnabled}
                         disabled={!discountActive}
                       />
                     </div>
@@ -198,8 +198,8 @@ const DiscountSettings = () => {
                         <span className="text-sm">Videos</span>
                       </div>
                       <Switch
-                        checked={acceptVideos}
-                        onCheckedChange={setAcceptVideos}
+                        checked={videoEnabled}
+                        onCheckedChange={setVideoEnabled}
                         disabled={!discountActive}
                       />
                     </div>
@@ -282,13 +282,13 @@ const DiscountSettings = () => {
                       {/* Content types */}
                       {discountActive && (
                         <div className="flex gap-2">
-                          {acceptPhotos && (
+                          {photoEnabled && (
                             <Badge variant="secondary" className="text-xs">
                               <Image className="w-3 h-3 mr-1" />
                               Photos
                             </Badge>
                           )}
-                          {acceptVideos && (
+                          {videoEnabled && (
                             <Badge variant="secondary" className="text-xs">
                               <Video className="w-3 h-3 mr-1" />
                               Videos

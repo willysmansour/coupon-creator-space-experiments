@@ -9,16 +9,17 @@ import { Button } from "@/components/ui/button";
 import { Users, Mail, Eye, Gift } from "lucide-react";
 import { useFilteredUploads } from "@/hooks/useFilteredSupabaseData";
 import { LoadingSection } from "@/components/ui/loading";
+import { Customer } from "@/types";
 
 const Customers = React.memo(() => {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | undefined>();
   const { data: uploads = [], isLoading } = useFilteredUploads(selectedCompanyId);
   
   // Memoized customer data processing to prevent recalculation on every render
-  const customers = useMemo(() => {
+  const customers: Customer[] = useMemo(() => {
     return uploads.reduce((acc, upload) => {
       if (upload.customer_name && upload.customer_email) {
-        const existingCustomer = acc.find(c => c.email === upload.customer_email);
+        const existingCustomer = acc.find((c: Customer) => c.email === upload.customer_email);
         if (existingCustomer) {
           existingCustomer.totalSubmissions++;
           if (upload.status === 'approved') {
@@ -39,7 +40,7 @@ const Customers = React.memo(() => {
         }
       }
       return acc;
-    }, [] as any[]);
+    }, [] as Customer[]);
   }, [uploads]);
 
   // Memoized status color function to prevent recreation

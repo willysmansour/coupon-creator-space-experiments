@@ -163,10 +163,11 @@ const Upload = () => {
     }
   };
 
-  const discountPercent = (company as any)?.discount_percentage as number | undefined;
-  const discountActive = (company as any)?.discount_active as boolean | undefined;
-  const discountExpires = (company as any)?.discount_expires_at as string | undefined;
-  const contentDescription = (company as any)?.content_description as string | undefined;
+  // Get company discount settings
+  const discountPercent = company?.discount_percentage as number | undefined;
+  const discountActive = company?.discount_active as boolean | undefined;
+  const discountExpires = company?.discount_expires_at as string | undefined;
+  const contentDescription = company?.content_description as string | undefined;
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
