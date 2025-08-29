@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { LoadingSection } from "@/components/ui/loading";
 
 const Uploads = () => {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | undefined>();
@@ -53,19 +54,19 @@ const Uploads = () => {
             
             if (emailError || !emailResult?.success) {
               console.error('Email error:', emailError || emailResult);
-              toast.success(`${upload.customer_name} har godkänts men e-post misslyckades att skickas.`);
+              toast.success(`${upload.customer_name} was approved but the email failed to send.`);
             } else {
-              toast.success(`${upload.customer_name} har godkänts och kupong-email skickat!`);
+              toast.success(`${upload.customer_name} was approved and the coupon email was sent!`);
             }
           } catch (emailError) {
             console.error('Email error:', emailError);
-            toast.success(`${upload.customer_name} har godkänts men e-post misslyckades att skickas.`);
+            toast.success(`${upload.customer_name} was approved but the email failed to send.`);
           }
         } else {
-          toast.success(`Uppladdning godkänd. Kupong skapas när kund fyller i sina detaljer.`);
+          toast.success(`Upload approved. A coupon will be created when the customer provides details.`);
         }
       } catch (error) {
-        toast.error('Misslyckades att godkänna uppladdningen');
+        toast.error('Failed to approve upload');
       }
     }
   };
@@ -75,9 +76,9 @@ const Uploads = () => {
     if (upload) {
       try {
         await updateUploadStatus.mutateAsync({ id, status: 'rejected' });
-        toast.success(`${upload.customer_name || 'Uppladdning'} har avvisats.`);
+        toast.success(`${upload.customer_name || 'Upload'} was rejected.`);
       } catch (error) {
-        toast.error('Misslyckades att avvisa uppladdningen');
+        toast.error('Failed to reject upload');
       }
     }
   };
@@ -87,9 +88,9 @@ const Uploads = () => {
     if (upload) {
       try {
         await deleteUpload.mutateAsync(id);
-        toast.success(`Uppladdning från ${upload.customer_name || 'okänd kund'} har tagits bort`);
+        toast.success(`Upload from ${upload.customer_name || 'unknown customer'} was removed`);
       } catch (error) {
-        toast.error('Misslyckades att ta bort uppladdningen');
+        toast.error('Failed to delete upload');
       }
     }
   };
@@ -100,21 +101,21 @@ const Uploads = () => {
         return (
           <Badge className="bg-success/10 text-success border-success/20">
             <Check className="h-3 w-3 mr-1" />
-            Godkänd
+            Approved
           </Badge>
         );
       case "rejected":
         return (
           <Badge className="bg-destructive/10 text-destructive border-destructive/20">
             <X className="h-3 w-3 mr-1" />
-            Avvisad
+            Rejected
           </Badge>
         );
       case "pending":
         return (
           <Badge className="bg-warning/10 text-warning border-warning/20">
             <Clock className="h-3 w-3 mr-1" />
-            Väntar
+            Pending
           </Badge>
         );
     }
@@ -125,13 +126,13 @@ const Uploads = () => {
       <SidebarProvider>
         <div className="min-h-screen flex w-full bg-background">
           <ModernSidebar />
-        <div className="flex-1">
-          <ModernHeader 
-            selectedCompanyId={selectedCompanyId}
-            onCompanyChange={setSelectedCompanyId}
-          />
+          <div className="flex-1">
+            <ModernHeader 
+              selectedCompanyId={selectedCompanyId}
+              onCompanyChange={setSelectedCompanyId}
+            />
             <main className="p-6">
-              <div className="text-center">Loading...</div>
+              <LoadingSection message="Loading uploads..." />
             </main>
           </div>
         </div>
@@ -158,36 +159,36 @@ const Uploads = () => {
             <main className="p-6 space-y-6">
               {/* Page Header */}
               <div className="mb-8">
-                <h1 className="text-2xl font-bold text-foreground mb-2">Uppladdningar</h1>
-                <p className="text-muted-foreground">
-                  Granska och godkänn kunduppladdningar för att utfärda rabattkuponger.
+                <h1 className="text-2xl font-semibold tracking-tight text-foreground mb-2">Uploads</h1>
+                <p className="text-sm text-muted-foreground">
+                  Review and approve customer uploads to issue discount coupons.
                 </p>
               </div>
 
               {/* Metrics */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <ModernMetricCard
-                  title="Totala uppladdningar"
+                  title="Total uploads"
                   value={uploads.length.toString()}
-                  change="Från alla kampanjer"
+                  change="From all campaigns"
                   variant="primary"
                 />
                 <ModernMetricCard
-                  title="Väntande granskning"
+                  title="Pending review"
                   value={pendingCount.toString()}
-                  change="Behöver åtgärd"
+                  change="Needs attention"
                   variant="accent"
                 />
                 <ModernMetricCard
-                  title="Godkända"
+                  title="Approved"
                   value={approvedCount.toString()}
-                  change={`${uploads.length > 0 ? Math.round((approvedCount / uploads.length) * 100) : 0}% av totalt`}
+                  change={`${uploads.length > 0 ? Math.round((approvedCount / uploads.length) * 100) : 0}% of total`}
                   variant="secondary"
                 />
                 <ModernMetricCard
-                  title="Avvisade"
+                  title="Rejected"
                   value={rejectedCount.toString()}
-                  change={`${uploads.length > 0 ? Math.round((rejectedCount / uploads.length) * 100) : 0}% av totalt`}
+                  change={`${uploads.length > 0 ? Math.round((rejectedCount / uploads.length) * 100) : 0}% of total`}
                   variant="secondary"
                 />
               </div>
@@ -211,17 +212,17 @@ const Uploads = () => {
                         <div className="flex items-start justify-between mb-2">
                           <div>
                             <h4 className="font-medium text-foreground">
-                              {submission.customer_name || 'Okänd kund'}
+                              {submission.customer_name || 'Unknown customer'}
                             </h4>
                             <p className="text-sm text-muted-foreground">
-                              {submission.customer_email || 'Ingen e-post'}
+                              {submission.customer_email || 'No email'}
                             </p>
                           </div>
                           {getStatusBadge(submission.status)}
                         </div>
                         
                         <p className="text-sm text-muted-foreground mb-2">
-                          {new Date(submission.submitted_at).toLocaleDateString('sv-SE')}
+                          {new Date(submission.submitted_at).toLocaleDateString('en-GB')}
                         </p>
                         
                         {submission.message && (
@@ -239,7 +240,7 @@ const Uploads = () => {
                               disabled={updateUploadStatus.isPending}
                             >
                               <Check className="h-3 w-3" />
-                              Godkänn
+                              Approve
                             </Button>
                             <Button 
                               size="sm" 
@@ -248,7 +249,7 @@ const Uploads = () => {
                               disabled={updateUploadStatus.isPending}
                             >
                               <X className="h-3 w-3" />
-                              Avvisa
+                              Reject
                             </Button>
                           </div>
                         )}
@@ -263,13 +264,13 @@ const Uploads = () => {
                                 className="gap-1"
                               >
                                 <Eye className="h-3 w-3" />
-                                Visa större
+                                View larger
                               </Button>
                             </DialogTrigger>
                             <DialogContent className="max-w-4xl">
                               <img
                                 src={submission.image_url}
-                                alt={`Bild från ${submission.customer_name || 'kund'}`}
+                                alt={`Image from ${submission.customer_name || 'customer'}`}
                                 className="w-full h-auto max-h-[80vh] object-contain"
                               />
                             </DialogContent>
@@ -284,24 +285,24 @@ const Uploads = () => {
                                 disabled={deleteUpload.isPending}
                               >
                                 <Trash2 className="h-3 w-3" />
-                                Ta bort
+                                Delete
                               </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Ta bort uppladdning</AlertDialogTitle>
+                                <AlertDialogTitle>Delete upload</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Är du säker på att du vill ta bort uppladdningen från {submission.customer_name || 'okänd kund'}? 
-                                  Detta kommer också att ta bort eventuella relaterade kuponger. Åtgärden kan inte ångras.
+                                  Are you sure you want to delete the upload from {submission.customer_name || 'unknown customer'}? 
+                                  This will also delete any related coupons. This action cannot be undone.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() => handleDelete(submission.id)}
                                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 >
-                                  Ta bort
+                                  Delete
                                 </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
@@ -313,13 +314,13 @@ const Uploads = () => {
                 ))}
                 
                 {uploads.length === 0 && (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                      <Upload className="h-8 w-8 text-muted-foreground" />
+                  <Card className="p-8 text-center">
+                    <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                      <Upload className="h-7 w-7 text-muted-foreground" />
                     </div>
-                    <p className="text-lg font-medium text-foreground mb-2">Inga uppladdningar ännu</p>
-                    <p className="text-muted-foreground">Uppladdningar från kunder kommer att visas här.</p>
-                  </div>
+                    <p className="text-base font-medium text-foreground mb-1">No uploads yet</p>
+                    <p className="text-sm text-muted-foreground">Uploads from customers will appear here.</p>
+                  </Card>
                 )}
               </div>
             </main>

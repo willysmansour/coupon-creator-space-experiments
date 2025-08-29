@@ -13,7 +13,7 @@ export const QRCodeGenerator = () => {
     return (
       <Card>
         <CardContent className="p-6">
-          <div className="text-center">Laddar...</div>
+          <div className="text-center">Loading...</div>
         </CardContent>
       </Card>
     );
@@ -26,7 +26,7 @@ export const QRCodeGenerator = () => {
       <Card>
         <CardContent className="p-6">
           <div className="text-center text-muted-foreground">
-            Du har inget företag kopplat till ditt konto. Skapa ett företag först för att få din QR-kod.
+            You do not have a company linked to your account. Create a company first to get your QR code.
           </div>
         </CardContent>
       </Card>
@@ -67,17 +67,17 @@ export const QRCodeGenerator = () => {
       // Add instruction text
       ctx.font = '16px system-ui, sans-serif';
       ctx.fillStyle = '#6B7280';
-      ctx.fillText('Skanna för att ladda upp bilder', canvas.width / 2, 550);
+      ctx.fillText('Scan to upload images', canvas.width / 2, 550);
       
       // Download
       const link = document.createElement('a');
-      link.download = `${company.name}-qr-kod.png`;
+      link.download = `${company.name}-qr-code.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
       
       toast({
-        title: "QR-kod nedladdad",
-        description: "QR-koden har sparats som PNG-fil.",
+        title: "QR code downloaded",
+        description: "The QR code has been saved as a PNG file.",
       });
     };
     
@@ -91,10 +91,10 @@ export const QRCodeGenerator = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <QrCode className="h-5 w-5" />
-          QR-kod för uppladdning
+          Upload QR code
         </CardTitle>
         <CardDescription>
-          Generera och ladda ner QR-kod som kunder kan skanna för att ladda upp bilder direkt till ditt företag
+          Generate and download a QR code customers can scan to upload images directly to your company
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -113,13 +113,13 @@ export const QRCodeGenerator = () => {
             </div>
             <div className="text-center space-y-2">
               <p className="font-medium text-foreground">{company.name}</p>
-              <p className="text-sm text-muted-foreground">Skanna för att ladda upp bilder</p>
+              <p className="text-sm text-muted-foreground">Scan to upload images</p>
             </div>
           </div>
           
           <div className="flex-1 space-y-4">
             <div className="space-y-2">
-              <h4 className="font-medium text-foreground">QR-kodens URL</h4>
+              <h4 className="font-medium text-foreground">QR code URL</h4>
               <div className="p-3 bg-muted rounded-md">
                 <code className="text-sm text-muted-foreground break-all">{qrUrl}</code>
               </div>
@@ -128,16 +128,16 @@ export const QRCodeGenerator = () => {
             <div className="space-y-3">
               <Button onClick={downloadQRCode} className="flex items-center gap-2 w-full lg:w-auto">
                 <Download className="h-4 w-4" />
-                Ladda ner QR-kod (PNG)
+                Download QR code (PNG)
               </Button>
               
               <div className="p-4 bg-accent/50 rounded-lg border border-accent">
-                <h5 className="font-medium text-accent-foreground mb-2">Så här använder du QR-koden:</h5>
+                <h5 className="font-medium text-accent-foreground mb-2">How to use the QR code:</h5>
                 <ul className="text-sm text-accent-foreground space-y-1">
-                  <li>1. Ladda ner QR-koden som PNG-fil</li>
-                  <li>2. Skriv ut den eller visa den digitalt</li>
-                  <li>3. Kunder skannar koden med sin telefon</li>
-                  <li>4. De dirigeras direkt till uppladdningssidan</li>
+                  <li>1. Download the QR code as a PNG file</li>
+                  <li>2. Print it or display it digitally</li>
+                  <li>3. Customers scan the code with their phone</li>
+                  <li>4. They are taken directly to the upload page</li>
                 </ul>
               </div>
             </div>

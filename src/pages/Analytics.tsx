@@ -24,9 +24,9 @@ const Analytics = () => {
             <main className="p-6 space-y-6">
               {/* Page Header */}
               <div className="mb-8">
-                <h1 className="text-2xl font-bold text-foreground mb-2">Analytics</h1>
-                <p className="text-muted-foreground">
-                  Se analyser och statistik för dina kampanjer här.
+                <h1 className="text-2xl font-semibold tracking-tight text-foreground mb-2">Analytics</h1>
+                <p className="text-sm text-muted-foreground">
+                  View analytics and insights for your campaigns.
                 </p>
               </div>
 
@@ -37,11 +37,11 @@ const Analytics = () => {
                 </div>
                 
                 <h2 className="text-xl font-semibold text-foreground mb-2">
-                  Ingen data att visa än
+                  No data to show yet
                 </h2>
                 
                 <p className="text-muted-foreground text-center mb-6 max-w-md">
-                  Skapa din första kampanj och börja samla in kundbilder för att se analyser och statistik här.
+                  Create your first campaign and start collecting customer content to see analytics here.
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-4xl">
@@ -49,51 +49,51 @@ const Analytics = () => {
                     <div className="p-3 rounded-lg bg-muted/30 mx-auto mb-4 w-fit">
                       <TrendingUp className="h-6 w-6 text-muted-foreground" />
                     </div>
-                    <h3 className="font-semibold text-foreground mb-2">Konverteringsgrad</h3>
+                    <h3 className="font-semibold text-foreground mb-2">Conversion rate</h3>
                     <p className="text-2xl font-bold text-muted-foreground">--%</p>
-                    <p className="text-sm text-muted-foreground mt-1">Väntar på data</p>
+                    <p className="text-sm text-muted-foreground mt-1">Waiting for data</p>
                   </Card>
                   
                   <Card className="p-6 text-center">
                     <div className="p-3 rounded-lg bg-muted/30 mx-auto mb-4 w-fit">
                       <DollarSign className="h-6 w-6 text-muted-foreground" />
                     </div>
-                    <h3 className="font-semibold text-foreground mb-2">ROI kampanjer</h3>
+                    <h3 className="font-semibold text-foreground mb-2">Campaign ROI</h3>
                     <p className="text-2xl font-bold text-muted-foreground">--%</p>
-                    <p className="text-sm text-muted-foreground mt-1">Väntar på data</p>
+                    <p className="text-sm text-muted-foreground mt-1">Waiting for data</p>
                   </Card>
                   
                   <Card className="p-6 text-center">
                     <div className="p-3 rounded-lg bg-muted/30 mx-auto mb-4 w-fit">
                       <Users className="h-6 w-6 text-muted-foreground" />
                     </div>
-                    <h3 className="font-semibold text-foreground mb-2">Aktiva kunder</h3>
+                    <h3 className="font-semibold text-foreground mb-2">Active customers</h3>
                     <p className="text-2xl font-bold text-muted-foreground">0</p>
-                    <p className="text-sm text-muted-foreground mt-1">Väntar på data</p>
+                    <p className="text-sm text-muted-foreground mt-1">Waiting for data</p>
                   </Card>
                   
                   <Card className="p-6 text-center">
                     <div className="p-3 rounded-lg bg-muted/30 mx-auto mb-4 w-fit">
                       <BarChart3 className="h-6 w-6 text-muted-foreground" />
                     </div>
-                    <h3 className="font-semibold text-foreground mb-2">Totala uppladdningar</h3>
+                    <h3 className="font-semibold text-foreground mb-2">Total uploads</h3>
                     <p className="text-2xl font-bold text-muted-foreground">0</p>
-                    <p className="text-sm text-muted-foreground mt-1">Väntar på data</p>
+                    <p className="text-sm text-muted-foreground mt-1">Waiting for data</p>
                   </Card>
                 </div>
               </div>
 
               {/* Empty Campaign Performance */}
               <Card className="p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-6">Kampanjprestanda</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-6">Campaign performance</h3>
                 
                 <div className="text-center py-8">
                   <div className="p-4 rounded-full bg-muted/30 mx-auto mb-4 w-fit">
                     <BarChart3 className="h-8 w-8 text-muted-foreground" />
                   </div>
-                  <p className="text-muted-foreground">Inga kampanjer skapade än</p>
+                  <p className="text-muted-foreground">No campaigns yet</p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Skapa din första kampanj för att se prestanda här
+                    Create your first campaign to see performance here
                   </p>
                 </div>
               </Card>

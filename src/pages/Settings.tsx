@@ -72,8 +72,8 @@ const Settings = () => {
       // Validate company name
       if (companyName && companyName.trim().length < 2) {
         toast({
-          title: "Ogiltigt företagsnamn",
-          description: "Företagsnamnet måste vara minst 2 tecken långt.",
+          title: "Invalid company name",
+          description: "Company name must be at least 2 characters.",
           variant: "destructive",
         });
         setIsLoading(false);
@@ -93,12 +93,12 @@ const Settings = () => {
           avatar_url: profileImagePreview,
         });
         profileSaved = true;
-        console.log('Profile saved successfully');
+        // Profile saved successfully
       } catch (profileError) {
         console.error('Error saving profile:', profileError);
         toast({
-          title: "Fel vid sparande av profil",
-          description: `Det gick inte att spara profilinformationen: ${profileError instanceof Error ? profileError.message : 'Okänt fel'}`,
+          title: "Error saving profile",
+          description: `Could not save profile information: ${profileError instanceof Error ? profileError.message : 'Unknown error'}`,
           variant: "destructive",
         });
         setIsLoading(false);
@@ -114,12 +114,12 @@ const Settings = () => {
             logo: logoPreview,
           });
           companySaved = true;
-          console.log('Company saved successfully');
+          // Company saved successfully
         } catch (companyError) {
           console.error('Error saving company:', companyError);
           toast({
-            title: "Fel vid sparande av företag",
-            description: `Det gick inte att spara företagsinformationen: ${companyError instanceof Error ? companyError.message : 'Okänt fel'}`,
+            title: "Error saving company",
+            description: `Could not save company information: ${companyError instanceof Error ? companyError.message : 'Unknown error'}`,
             variant: "destructive",
           });
           setIsLoading(false);
@@ -129,18 +129,18 @@ const Settings = () => {
 
       // Success message
       const savedItems = [];
-      if (profileSaved) savedItems.push('profil');
-      if (companySaved) savedItems.push('företag');
+      if (profileSaved) savedItems.push('profile');
+      if (companySaved) savedItems.push('company');
       
       toast({
-        title: "Inställningar sparade",
-        description: `Dina ändringar för ${savedItems.join(' och ')} har sparats framgångsrikt.`,
+        title: "Settings saved",
+        description: `Your changes for ${savedItems.join(' and ')} were saved successfully.`,
       });
     } catch (error) {
       console.error('Unexpected error saving settings:', error);
       toast({
-        title: "Oväntat fel",
-        description: `Ett oväntat fel inträffade: ${error instanceof Error ? error.message : 'Okänt fel'}. Försök igen.`,
+        title: "Unexpected error",
+        description: `An unexpected error occurred: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`,
         variant: "destructive",
       });
     } finally {
@@ -153,8 +153,8 @@ const Settings = () => {
     if (file) {
       if (file.size > 5 * 1024 * 1024) { // 5MB limit
         toast({
-          title: "Fil för stor",
-          description: "Logotypen får vara max 5MB.",
+          title: "File too large",
+          description: "Logo must be at most 5MB.",
           variant: "destructive"
         });
         return;
@@ -162,8 +162,8 @@ const Settings = () => {
 
       if (!file.type.startsWith('image/')) {
         toast({
-          title: "Felaktigt filformat",
-          description: "Endast bildfiler är tillåtna.",
+          title: "Invalid file format",
+          description: "Only image files are allowed.",
           variant: "destructive"
         });
         return;
@@ -175,14 +175,14 @@ const Settings = () => {
         setLogoPreview(logoUrl);
         
         toast({
-          title: "Logotyp uppladdad",
-          description: "Logotypen har laddats upp. Kom ihåg att spara för att behålla ändringarna.",
+          title: "Logo uploaded",
+          description: "The logo has been uploaded. Remember to save to keep the changes.",
         });
       } catch (error) {
         console.error('Error uploading logo:', error);
         toast({
-          title: "Fel vid uppladdning",
-          description: "Det gick inte att ladda upp logotypen. Försök igen.",
+          title: "Upload error",
+          description: "Failed to upload logo. Please try again.",
           variant: "destructive",
         });
       } finally {
@@ -196,8 +196,8 @@ const Settings = () => {
     if (file) {
       if (file.size > 2 * 1024 * 1024) { // 2MB limit for profile images
         toast({
-          title: "Fil för stor",
-          description: "Profilbilden får vara max 2MB.",
+          title: "File too large",
+          description: "Profile image must be at most 2MB.",
           variant: "destructive"
         });
         return;
@@ -205,8 +205,8 @@ const Settings = () => {
 
       if (!file.type.startsWith('image/')) {
         toast({
-          title: "Felaktigt filformat",
-          description: "Endast bildfiler är tillåtna.",
+          title: "Invalid file format",
+          description: "Only image files are allowed.",
           variant: "destructive"
         });
         return;
@@ -218,14 +218,14 @@ const Settings = () => {
         setProfileImagePreview(imageUrl);
         
         toast({
-          title: "Profilbild uppladdad",
-          description: "Profilbilden har laddats upp. Kom ihåg att spara för att behålla ändringarna.",
+          title: "Profile image uploaded",
+          description: "Profile image uploaded. Remember to save to keep the changes.",
         });
       } catch (error) {
         console.error('Error uploading profile image:', error);
         toast({
-          title: "Fel vid uppladdning",
-          description: "Det gick inte att ladda upp profilbilden. Försök igen.",
+          title: "Upload error",
+          description: "Failed to upload profile image. Please try again.",
           variant: "destructive",
         });
       } finally {
@@ -252,9 +252,9 @@ const Settings = () => {
           <main className="p-6">
             <div className="max-w-4xl mx-auto space-y-6">
               <div>
-                <h1 className="text-3xl font-bold text-foreground">Inställningar</h1>
+                <h1 className="text-3xl font-bold text-foreground">Settings</h1>
                 <p className="text-muted-foreground mt-2">
-                  Hantera dina kontoinställningar och preferenser
+                  Manage your account settings and preferences
                 </p>
               </div>
 
@@ -262,19 +262,19 @@ const Settings = () => {
                 <TabsList className="grid w-full grid-cols-6">
                   <TabsTrigger value="profile" className="flex items-center gap-2">
                     <User className="h-4 w-4" />
-                    Profil
+                    Profile
                   </TabsTrigger>
                   <TabsTrigger value="company" className="flex items-center gap-2">
                     <Building2 className="h-4 w-4" />
-                    Företag
+                    Company
                   </TabsTrigger>
                   <TabsTrigger value="security" className="flex items-center gap-2">
                     <Shield className="h-4 w-4" />
-                    Säkerhet
+                    Security
                   </TabsTrigger>
                   <TabsTrigger value="notifications" className="flex items-center gap-2">
                     <Bell className="h-4 w-4" />
-                    Notifikationer
+                    Notifications
                   </TabsTrigger>
                   <TabsTrigger value="api" className="flex items-center gap-2">
                     <Key className="h-4 w-4" />
@@ -282,16 +282,16 @@ const Settings = () => {
                   </TabsTrigger>
                   <TabsTrigger value="appearance" className="flex items-center gap-2">
                     <Palette className="h-4 w-4" />
-                    Utseende
+                    Appearance
                   </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="profile" className="space-y-4">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Profilinformation</CardTitle>
+                      <CardTitle>Profile information</CardTitle>
                       <CardDescription>
-                        Uppdatera din profil och kontoinformation
+                        Update your profile and account information
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -319,41 +319,41 @@ const Settings = () => {
                             onClick={() => profileImageInputRef.current?.click()}
                             disabled={isLoading}
                           >
-                            {isLoading ? 'Laddar upp...' : 'Ändra profilbild'}
+                            {isLoading ? 'Uploading...' : 'Change profile picture'}
                           </Button>
-                          <p className="text-xs text-muted-foreground">JPG eller PNG, max 2MB</p>
+                          <p className="text-xs text-muted-foreground">JPG or PNG, max 2MB</p>
                         </div>
                       </div>
                       
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="firstName">Förnamn</Label>
+                          <Label htmlFor="firstName">First name</Label>
                           <Input 
                             id="firstName" 
                             value={firstName}
                             onChange={(e) => setFirstName(e.target.value)}
-                            placeholder="Ditt förnamn" 
+                            placeholder="Your first name" 
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="lastName">Efternamn</Label>
+                          <Label htmlFor="lastName">Last name</Label>
                           <Input 
                             id="lastName" 
                             value={lastName}
                             onChange={(e) => setLastName(e.target.value)}
-                            placeholder="Ditt efternamn" 
+                            placeholder="Your last name" 
                           />
                         </div>
                       </div>
                       
                       <div className="space-y-2">
-                        <Label htmlFor="email">E-post</Label>
+                        <Label htmlFor="email">Email</Label>
                         <Input 
                           id="email" 
                           type="email" 
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          placeholder="din.email@exempel.se" 
+                          placeholder="your.email@example.com" 
                         />
                       </div>
                       
@@ -364,28 +364,28 @@ const Settings = () => {
                 <TabsContent value="company" className="space-y-4">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Företagsinformation</CardTitle>
+                      <CardTitle>Company information</CardTitle>
                       <CardDescription>
-                        Hantera företagets logotyp och information som visas på QR-kod landningssidan
+                        Manage the company logo and information shown on the QR landing page
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="space-y-2">
-                        <Label htmlFor="companyName">Företagsnamn</Label>
+                        <Label htmlFor="companyName">Company name</Label>
                         <Input 
                           id="companyName" 
                           value={companyName}
                           onChange={(e) => setCompanyName(e.target.value)}
-                          placeholder="Ditt företagsnamn"
+                          placeholder="Your company name"
                         />
                       </div>
                       
                       <Separator />
                       
                       <div className="space-y-4">
-                        <Label>Företagslogotyp</Label>
+                        <Label>Company logo</Label>
                         <p className="text-sm text-muted-foreground">
-                          Denna logotyp kommer att visas först när användare skannar QR-koden. Rekommenderad storlek: 200x200px eller större.
+                          This logo is shown first when users scan the QR code. Recommended size: 200x200px or larger.
                         </p>
                         
                         <div className="flex items-start gap-4">
@@ -395,7 +395,7 @@ const Settings = () => {
                                 <div className="relative w-full h-full">
                                   <img
                                     src={logoPreview}
-                                    alt="Företagslogotyp förhandsvisning"
+                                    alt="Company logo preview"
                                     className="w-full h-full object-contain rounded-lg"
                                   />
                                   <Button
@@ -410,7 +410,7 @@ const Settings = () => {
                               ) : (
                                 <div className="text-center">
                                   <Building2 className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                                  <p className="text-xs text-muted-foreground">Ingen logotyp</p>
+                                  <p className="text-xs text-muted-foreground">No logo</p>
                                 </div>
                               )}
                             </div>
@@ -431,10 +431,10 @@ const Settings = () => {
                               className="flex items-center gap-2"
                             >
                               <Upload className="h-4 w-4" />
-                              {isLoading ? 'Laddar upp...' : (logoPreview ? 'Ändra logotyp' : 'Ladda upp logotyp')}
+                              {isLoading ? 'Uploading...' : (logoPreview ? 'Change logo' : 'Upload logo')}
                             </Button>
                             <p className="text-xs text-muted-foreground">
-                              JPG, PNG eller GIF. Max 5MB.
+                              JPG, PNG or GIF. Max 5MB.
                             </p>
                           </div>
                         </div>
@@ -448,24 +448,24 @@ const Settings = () => {
                 <TabsContent value="security" className="space-y-4">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Säkerhetsinställningar</CardTitle>
+                      <CardTitle>Security settings</CardTitle>
                       <CardDescription>
-                        Hantera ditt lösenord och säkerhetsinställningar
+                        Manage your password and security settings
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="currentPassword">Nuvarande lösenord</Label>
+                        <Label htmlFor="currentPassword">Current password</Label>
                         <Input id="currentPassword" type="password" />
                       </div>
                       
                       <div className="space-y-2">
-                        <Label htmlFor="newPassword">Nytt lösenord</Label>
+                        <Label htmlFor="newPassword">New password</Label>
                         <Input id="newPassword" type="password" />
                       </div>
                       
                       <div className="space-y-2">
-                        <Label htmlFor="confirmPassword">Bekräfta nytt lösenord</Label>
+                        <Label htmlFor="confirmPassword">Confirm new password</Label>
                         <Input id="confirmPassword" type="password" />
                       </div>
                       
@@ -473,9 +473,9 @@ const Settings = () => {
                       
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                          <Label className="text-base">Tvåfaktorsautentisering</Label>
+                          <Label className="text-base">Two-factor authentication</Label>
                           <p className="text-sm text-muted-foreground">
-                            Lägg till extra säkerhet till ditt konto
+                            Add extra security to your account
                           </p>
                         </div>
                         <Switch />
@@ -487,17 +487,17 @@ const Settings = () => {
                 <TabsContent value="notifications" className="space-y-4">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Notifikationsinställningar</CardTitle>
+                      <CardTitle>Notification settings</CardTitle>
                       <CardDescription>
-                        Välj vilka notifikationer du vill få
+                        Choose which notifications you want
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                          <Label className="text-base">E-postnotifikationer</Label>
+                          <Label className="text-base">Email notifications</Label>
                           <p className="text-sm text-muted-foreground">
-                            Få uppdateringar via e-post
+                            Receive updates via email
                           </p>
                         </div>
                         <Switch defaultChecked />
@@ -505,9 +505,9 @@ const Settings = () => {
                       
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                          <Label className="text-base">Nya uppladdningar</Label>
+                          <Label className="text-base">New uploads</Label>
                           <p className="text-sm text-muted-foreground">
-                            Notifiering när nya filer laddas upp
+                            Notify when new files are uploaded
                           </p>
                         </div>
                         <Switch defaultChecked />
@@ -515,9 +515,9 @@ const Settings = () => {
                       
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                          <Label className="text-base">Kampanjuppdateringar</Label>
+                          <Label className="text-base">Campaign updates</Label>
                           <p className="text-sm text-muted-foreground">
-                            Få meddelanden om kampanjstatus
+                            Get notified about campaign status
                           </p>
                         </div>
                         <Switch />
@@ -525,9 +525,9 @@ const Settings = () => {
                       
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                          <Label className="text-base">Systemmeddelanden</Label>
+                          <Label className="text-base">System messages</Label>
                           <p className="text-sm text-muted-foreground">
-                            Viktiga systemuppdateringar
+                            Important system updates
                           </p>
                         </div>
                         <Switch defaultChecked />
@@ -539,25 +539,25 @@ const Settings = () => {
                 <TabsContent value="api" className="space-y-4">
                   <Card>
                     <CardHeader>
-                      <CardTitle>API-nycklar</CardTitle>
+                      <CardTitle>API keys</CardTitle>
                       <CardDescription>
-                        Hantera dina API-nycklar för integrationer
+                        Manage your API keys for integrations
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="space-y-2">
-                        <Label>API-nyckel</Label>
+                        <Label>API key</Label>
                         <div className="flex gap-2">
-                          <Input placeholder="Ingen API-nyckel genererad" readOnly />
-                          <Button variant="outline" disabled>Kopiera</Button>
+                          <Input placeholder="No API key generated" readOnly />
+                          <Button variant="outline" disabled>Copy</Button>
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          Generera en API-nyckel för att integrera med externa system.
+                          Generate an API key to integrate with external systems.
                         </p>
                       </div>
                       
                       <div className="flex gap-2">
-                        <Button variant="outline">Generera ny nyckel</Button>
+                        <Button variant="outline">Generate new key</Button>
                       </div>
                       
                       <Separator />
@@ -566,7 +566,7 @@ const Settings = () => {
                         <Label className="text-base">Webhook URL</Label>
                         <Input placeholder="https://yourdomain.com/webhook" />
                         <p className="text-sm text-muted-foreground">
-                          URL för att ta emot webhook-meddelanden
+                          URL to receive webhook messages
                         </p>
                       </div>
                     </CardContent>
@@ -576,17 +576,17 @@ const Settings = () => {
                 <TabsContent value="appearance" className="space-y-4">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Utseende</CardTitle>
+                      <CardTitle>Appearance</CardTitle>
                       <CardDescription>
-                        Anpassa hur applikationen ser ut
+                        Customize how the application looks
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="space-y-2">
-                        <Label className="text-base">Tema</Label>
+                        <Label className="text-base">Theme</Label>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">Ljust</Button>
-                          <Button variant="outline" size="sm">Mörkt</Button>
+                          <Button variant="outline" size="sm">Light</Button>
+                          <Button variant="outline" size="sm">Dark</Button>
                           <Button variant="default" size="sm">System</Button>
                         </div>
                       </div>
@@ -595,9 +595,9 @@ const Settings = () => {
                       
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                          <Label className="text-base">Kompakt vy</Label>
+                          <Label className="text-base">Compact view</Label>
                           <p className="text-sm text-muted-foreground">
-                            Visa mer information på mindre utrymme
+                            Show more information in less space
                           </p>
                         </div>
                         <Switch />
@@ -605,9 +605,9 @@ const Settings = () => {
                       
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                          <Label className="text-base">Animationer</Label>
+                          <Label className="text-base">Animations</Label>
                           <p className="text-sm text-muted-foreground">
-                            Aktivera smidiga övergångar
+                            Enable smooth transitions
                           </p>
                         </div>
                         <Switch defaultChecked />
@@ -624,7 +624,7 @@ const Settings = () => {
                   className="flex items-center gap-2"
                 >
                   <Save className="h-4 w-4" />
-                  {isLoading ? 'Sparar...' : 'Spara ändringar'}
+                  {isLoading ? 'Saving...' : 'Save changes'}
                 </Button>
               </div>
             </div>

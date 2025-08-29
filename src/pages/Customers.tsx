@@ -5,11 +5,41 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Users, Mail, Phone, Eye, Gift } from "lucide-react";
-
-const customers: any[] = [];
+import { Users, Mail, Eye, Gift } from "lucide-react";
+import { useFilteredUploads } from "@/hooks/useFilteredSupabaseData";
+import { useState } from "react";
+import { LoadingSection } from "@/components/ui/loading";
 
 const Customers = () => {
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | undefined>();
+  const { data: uploads = [], isLoading } = useFilteredUploads(selectedCompanyId);
+  
+  // Create customer list from uploads
+  const customers = uploads.reduce((acc, upload) => {
+    if (upload.customer_name && upload.customer_email) {
+      const existingCustomer = acc.find(c => c.email === upload.customer_email);
+      if (existingCustomer) {
+        existingCustomer.totalSubmissions++;
+        if (upload.status === 'approved') {
+          existingCustomer.totalCoupons++;
+        }
+      } else {
+        acc.push({
+          id: upload.id,
+          name: upload.customer_name,
+          email: upload.customer_email,
+          totalSubmissions: 1,
+          totalCoupons: upload.status === 'approved' ? 1 : 0,
+          status: upload.status === 'approved' ? 'active' : 'inactive',
+          joinDate: new Date(upload.created_at).toLocaleDateString('sv-SE'),
+          lastActivity: new Date(upload.updated_at).toLocaleDateString('sv-SE'),
+          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(upload.customer_name)}&background=random`
+        });
+      }
+    }
+    return acc;
+  }, [] as any[]);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "vip":
@@ -28,9 +58,9 @@ const Customers = () => {
       case "vip":
         return "VIP";
       case "active":
-        return "Aktiv";
+        return "Active";
       case "inactive":
-        return "Inaktiv";
+        return "Inactive";
       default:
         return status;
     }
@@ -52,47 +82,59 @@ const Customers = () => {
           <main className="p-6 space-y-6">
             {/* Page Header */}
             <div className="mb-8">
-              <h1 className="text-2xl font-bold text-foreground mb-2">Kunder</h1>
-              <p className="text-muted-foreground">
-                Hantera dina kunder och få insikt i deras engagemang.
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground mb-2">Customers</h1>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Manage your customers and understand their engagement.
               </p>
             </div>
 
             {/* Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <ModernMetricCard
-                title="Totala kunder"
+                title="Total customers"
                 value={customers.length.toString()}
-                change="Registrerade användare"
+                change="Registered users"
                 variant="primary"
               />
               <ModernMetricCard
-                title="Aktiva kunder"
+                title="Active customers"
                 value={activeCustomers.toString()}
-                change={`${Math.round((activeCustomers / customers.length) * 100)}% av totalt`}
+                change={`${Math.round((activeCustomers / customers.length) * 100)}% of total`}
                 variant="secondary"
               />
               <ModernMetricCard
-                title="VIP kunder"
+                title="VIP customers"
                 value={vipCustomers.toString()}
-                change="Högengagerade"
+                change="Highly engaged"
                 variant="accent"
               />
               <ModernMetricCard
-                title="Engagemang"
-                value={`${Math.round((totalCoupons / totalSubmissions) * 100)}%`}
-                change="Inlösningsgrad"
+                title="Engagement"
+                value={customers.length > 0 ? `${Math.round((totalCoupons / totalSubmissions) * 100)}%` : '0%'}
+                change="Redemption rate"
                 variant="secondary"
               />
             </div>
 
             {/* Customers List */}
             <div className="space-y-4">
-              {customers.map(customer => (
-                <Card key={customer.id} className="p-6 hover:shadow-sm transition-shadow">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full overflow-hidden bg-muted flex-shrink-0">
+              {isLoading && <LoadingSection message="Loading customers..." />}
+
+              {!isLoading && customers.length === 0 && (
+                <Card className="p-8 text-center">
+                  <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                    <Users className="h-7 w-7 text-muted-foreground" />
+                  </div>
+                  <p className="text-base font-medium text-foreground mb-1">No customers yet</p>
+                  <p className="text-sm text-muted-foreground">Customers who participate in campaigns will appear here.</p>
+                </Card>
+              )}
+
+              {!isLoading && customers.map(customer => (
+                <Card key={customer.id} className="p-6">
+                  <div className="flex items-center justify-between gap-6">
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div className="w-12 h-12 rounded-full overflow-hidden bg-muted ring-1 ring-border flex-shrink-0">
                         <img 
                           src={customer.avatar} 
                           alt={customer.name}
@@ -102,7 +144,7 @@ const Customers = () => {
                       
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-3 mb-1">
-                          <h3 className="font-semibold text-lg text-foreground">
+                          <h3 className="font-semibold text-[15px] leading-tight text-foreground truncate">
                             {customer.name}
                           </h3>
                           <Badge className={getStatusColor(customer.status)}>
@@ -110,19 +152,13 @@ const Customers = () => {
                           </Badge>
                         </div>
                         
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Mail className="h-4 w-4" />
-                            <span>{customer.email}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Phone className="h-4 w-4" />
-                            <span>{customer.phone}</span>
-                          </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Mail className="h-4 w-4" />
+                          <span className="truncate">{customer.email}</span>
                         </div>
                         
                         <p className="text-xs text-muted-foreground mt-2">
-                          Medlem sedan {customer.joinDate} • Senast aktiv {customer.lastActivity}
+                          Member since {customer.joinDate} • Last active {customer.lastActivity}
                         </p>
                       </div>
                     </div>
@@ -130,39 +166,29 @@ const Customers = () => {
                     <div className="text-right">
                       <div className="grid grid-cols-2 gap-4 mb-4">
                         <div className="text-center">
-                          <p className="text-2xl font-bold text-foreground">{customer.totalSubmissions}</p>
-                          <p className="text-xs text-muted-foreground">Uppladdningar</p>
+                          <p className="text-xl font-semibold text-foreground tabular-nums">{customer.totalSubmissions}</p>
+                          <p className="text-xs text-muted-foreground">Uploads</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-2xl font-bold text-primary">{customer.totalCoupons}</p>
-                          <p className="text-xs text-muted-foreground">Kuponger</p>
+                          <p className="text-xl font-semibold text-primary tabular-nums">{customer.totalCoupons}</p>
+                          <p className="text-xs text-muted-foreground">Coupons</p>
                         </div>
                       </div>
                       
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 justify-end">
                         <Button variant="outline" size="sm" className="gap-2">
                           <Eye className="h-4 w-4" />
-                          Visa profil
+                          View profile
                         </Button>
                         <Button variant="outline" size="sm" className="gap-2">
                           <Gift className="h-4 w-4" />
-                          Skicka erbjudande
+                          Send offer
                         </Button>
                       </div>
                     </div>
                   </div>
                 </Card>
               ))}
-              
-              {customers.length === 0 && (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                    <Users className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                  <p className="text-lg font-medium text-foreground mb-2">Inga kunder ännu</p>
-                  <p className="text-muted-foreground">Kunder som deltar i kampanjer kommer att visas här.</p>
-                </div>
-              )}
             </div>
           </main>
         </div>

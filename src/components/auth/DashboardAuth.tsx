@@ -47,11 +47,11 @@ export function DashboardAuth({ children }: DashboardAuthProps) {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <LogIn className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <CardTitle>Registrering nästan klar!</CardTitle>
+            <CardTitle>Registration almost done!</CardTitle>
             <CardDescription>
               {userRole.company_id 
-                ? "Ditt företagskonto håller på att aktiveras. Kontakta support om det tar för lång tid."
-                : "Du behöver skapa eller kopplas till ett företag för att komma åt dashboarden."
+                ? "Your company account is being activated. Contact support if it takes too long."
+                : "You need to create or be assigned to a company to access the dashboard."
               }
             </CardDescription>
           </CardHeader>
@@ -60,14 +60,14 @@ export function DashboardAuth({ children }: DashboardAuthProps) {
               onClick={() => navigate('/auth')} 
               className="w-full"
             >
-              {userRole.company_id ? "Försök igen" : "Skapa företag"}
+              {userRole.company_id ? "Try again" : "Create company"}
             </Button>
             <Button 
               onClick={() => navigate('/auth')} 
               variant="outline"
               className="w-full"
             >
-              Tillbaka till inloggning
+              Back to sign in
             </Button>
           </CardContent>
         </Card>

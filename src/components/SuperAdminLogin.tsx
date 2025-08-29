@@ -31,6 +31,8 @@ export function SuperAdminLogin({ onLoginSuccess }: SuperAdminLoginProps) {
     setIsLoading(true);
 
     try {
+      // Proactively sign out any existing session to avoid account mix-ups
+      await supabase.auth.signOut();
       // Authenticate with Supabase
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -43,11 +45,11 @@ export function SuperAdminLogin({ onLoginSuccess }: SuperAdminLoginProps) {
 
       if (data.user) {
         // The useEffect will handle checking the role and calling onLoginSuccess
-        toast.success("Loggar in...");
+        toast.success("Signing in...");
       }
     } catch (error: any) {
       console.error("Login error:", error);
-      toast.error("Felaktigt e-post eller lösenord");
+      toast.error("Incorrect email or password");
     }
     
     setIsLoading(false);
@@ -61,12 +63,12 @@ export function SuperAdminLogin({ onLoginSuccess }: SuperAdminLoginProps) {
             <Shield className="h-8 w-8 text-primary" />
           </div>
           <CardTitle className="text-2xl">Super Admin</CardTitle>
-          <p className="text-muted-foreground">Logga in för att komma åt admin-panelen</p>
+          <p className="text-muted-foreground">Sign in to access the admin panel</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">E-post</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -79,12 +81,12 @@ export function SuperAdminLogin({ onLoginSuccess }: SuperAdminLoginProps) {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password">Lösenord</Label>
+              <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Ange ditt lösenord"
+                  placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -111,14 +113,14 @@ export function SuperAdminLogin({ onLoginSuccess }: SuperAdminLoginProps) {
               className="w-full" 
               disabled={isLoading || roleLoading}
             >
-              {isLoading ? "Loggar in..." : "Logga in"}
+              {isLoading ? "Signing in..." : "Sign in"}
             </Button>
           </form>
           
           <div className="mt-6 p-3 bg-muted/30 rounded-lg">
             <p className="text-xs text-muted-foreground text-center">
-              Använd ditt Super Admin-konto för att logga in.<br />
-              Kontakta systemadministratören om du har glömt dina uppgifter.
+              Use your Super Admin account to sign in.<br />
+              Contact the system administrator if you forgot your credentials.
             </p>
           </div>
         </CardContent>

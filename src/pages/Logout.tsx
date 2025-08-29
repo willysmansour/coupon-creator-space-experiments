@@ -10,13 +10,13 @@ const Logout = () => {
   const { toast } = useToast();
 
   const handleLogout = () => {
-    // Här skulle du normalt rensa session data, tokens, etc.
+    // Normally you would clear session data, tokens, etc.
     localStorage.clear();
     sessionStorage.clear();
     
     toast({
-      title: "Utloggad",
-      description: "Du har loggats ut från ditt konto.",
+      title: "Signed out",
+      description: "You have been signed out of your account.",
     });
     
     // Simulera redirect till login-sida
@@ -26,7 +26,7 @@ const Logout = () => {
   };
 
   const handleCancel = () => {
-    navigate(-1); // Gå tillbaka till föregående sida
+    navigate(-1); // Go back
   };
 
   return (
@@ -36,15 +36,15 @@ const Logout = () => {
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
             <LogOut className="h-6 w-6 text-destructive" />
           </div>
-          <CardTitle>Logga ut</CardTitle>
+          <CardTitle>Sign out</CardTitle>
           <CardDescription>
-            Är du säker på att du vill logga ut från ditt konto?
+            Are you sure you want to sign out of your account?
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="bg-muted/50 p-4 rounded-lg">
             <p className="text-sm text-muted-foreground text-center">
-              Du kommer att behöva logga in igen för att komma åt din dashboard och dina kampanjer.
+              You will need to sign in again to access your dashboard and campaigns.
             </p>
           </div>
           
@@ -55,7 +55,7 @@ const Logout = () => {
               className="w-full flex items-center gap-2"
             >
               <LogOut className="h-4 w-4" />
-              Ja, logga ut
+              Yes, sign out
             </Button>
             
             <Button 
@@ -64,13 +64,13 @@ const Logout = () => {
               className="w-full flex items-center gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
-              Avbryt
+              Cancel
             </Button>
           </div>
           
           <div className="pt-4 border-t">
             <p className="text-xs text-muted-foreground text-center">
-              Om du loggar ut kommer du att förlora eventuellt osparade ändringar.
+              If you sign out you may lose any unsaved changes.
             </p>
           </div>
         </CardContent>

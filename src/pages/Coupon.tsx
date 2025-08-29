@@ -28,10 +28,10 @@ const Coupon = () => {
         <Card className="w-full max-w-md">
           <CardContent className="p-6 text-center">
             <AlertCircle className="w-12 h-12 mx-auto text-destructive mb-4" />
-            <h1 className="text-xl font-semibold mb-2">Kupong hittades inte</h1>
-            <p className="text-muted-foreground">Den här kupongen existerar inte eller har tagits bort.</p>
+            <h1 className="text-xl font-semibold mb-2">Coupon not found</h1>
+            <p className="text-muted-foreground">This coupon does not exist or has been removed.</p>
             <Button onClick={() => navigate('/')} className="mt-4">
-              Tillbaka till start
+              Back to home
             </Button>
           </CardContent>
         </Card>
@@ -47,8 +47,8 @@ const Coupon = () => {
     if (isUsed) {
       return {
         icon: CheckCircle,
-        title: 'Kupong använd',
-        description: `Inlöst ${coupon.used_at ? new Date(coupon.used_at).toLocaleString('sv-SE') : ''}`,
+        title: 'Coupon used',
+        description: `Redeemed ${coupon.used_at ? new Date(coupon.used_at).toLocaleString('en-GB') : ''}`,
         color: 'text-muted-foreground',
         bgColor: 'bg-muted',
         badgeVariant: 'secondary' as const
@@ -56,8 +56,8 @@ const Coupon = () => {
     } else if (isExpired) {
       return {
         icon: AlertCircle,
-        title: 'Kupong utgången',
-        description: `Gick ut ${new Date(coupon.expires_at).toLocaleDateString('sv-SE')}`,
+        title: 'Coupon expired',
+        description: `Expired on ${new Date(coupon.expires_at).toLocaleDateString('en-GB')}`,
         color: 'text-destructive',
         bgColor: 'bg-destructive/10',
         badgeVariant: 'destructive' as const
@@ -65,8 +65,8 @@ const Coupon = () => {
     } else {
       return {
         icon: Gift,
-        title: 'Aktiv kupong',
-        description: `Gäller till ${new Date(coupon.expires_at).toLocaleDateString('sv-SE')}`,
+        title: 'Active coupon',
+        description: `Valid until ${new Date(coupon.expires_at).toLocaleDateString('en-GB')}`,
         color: 'text-success',
         bgColor: 'bg-success/10',
         badgeVariant: 'default' as const
@@ -79,7 +79,7 @@ const Coupon = () => {
 
   const handleCopyCouponCode = () => {
     navigator.clipboard.writeText(coupon.code);
-    toast.success("Kupongkod kopierad till urklipp.");
+    toast.success("Coupon code copied to clipboard.");
   };
 
   const handleRedeem = async () => {
@@ -89,10 +89,10 @@ const Coupon = () => {
     
     try {
       await redeemCoupon.mutateAsync(coupon.code);
-      toast.success('🎉 Tack för din kupong! Rabatten är registrerad.');
+      toast.success('🎉 Thank you! Your discount has been applied.');
     } catch (error) {
       console.error('Redeem error:', error);
-      toast.error('Kunde inte använda kupongen. Försök igen.');
+      toast.error('Could not redeem the coupon. Please try again.');
     } finally {
       setIsRedeeming(false);
     }
@@ -107,12 +107,12 @@ const Coupon = () => {
             {coupon.company.logo && (
               <img 
                 src={coupon.company.logo} 
-                alt={`${coupon.company.name} logotyp`}
+                alt={`${coupon.company.name} logo`}
                 className="w-16 h-16 mx-auto mb-3 rounded-lg object-contain bg-white/50 backdrop-blur-sm"
               />
             )}
             <h1 className="text-xl font-bold text-foreground">{coupon.company.name}</h1>
-            <p className="text-sm text-muted-foreground mt-1">Exklusiv kupong</p>
+            <p className="text-sm text-muted-foreground mt-1">Exclusive coupon</p>
           </div>
         </div>
       )}
@@ -135,7 +135,7 @@ const Coupon = () => {
           <CardContent className="space-y-4">
             {/* Coupon Code */}
             <div className="text-center">
-              <p className="text-xs text-muted-foreground mb-2">KUPONGKOD</p>
+              <p className="text-xs text-muted-foreground mb-2">COUPON CODE</p>
               <div className="bg-muted p-3 rounded-lg font-mono text-lg font-bold tracking-wider">
                 {coupon.code}
               </div>
@@ -146,7 +146,7 @@ const Coupon = () => {
                 className="mt-2"
               >
                 <Copy className="w-4 h-4 mr-2" />
-                Kopiera kod
+                Copy code
               </Button>
             </div>
 
@@ -170,7 +170,7 @@ const Coupon = () => {
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
-              Visa denna QR-kod i kassan för att använda kupongen
+              Show this QR code at checkout to redeem the coupon
             </p>
           </CardContent>
         </Card>
@@ -180,7 +180,7 @@ const Coupon = () => {
           {isActive && (
             <div className="bg-gradient-to-r from-success/10 to-success/5 p-4 rounded-lg border border-success/20">
               <p className="text-sm text-center text-muted-foreground mb-3">
-                🏪 <strong>För kassapersonal:</strong> Tryck på knappen nedan för att använda kupongen
+                🏪 <strong>For cashier:</strong> Press the button below to redeem the coupon
               </p>
               <Button 
                 onClick={handleRedeem}
@@ -191,12 +191,12 @@ const Coupon = () => {
                 {isRedeeming ? (
                   <>
                     <Clock className="w-5 h-5 mr-2 animate-spin" />
-                    Löser in kupong...
+                    Redeeming coupon...
                   </>
                 ) : (
                   <>
                     <CheckCircle className="w-5 h-5 mr-2" />
-                    ✅ Använd kupong i kassan
+                    ✅ Redeem coupon at checkout
                   </>
                 )}
               </Button>
@@ -206,7 +206,7 @@ const Coupon = () => {
           {isUsed && (
             <div className="text-center p-4 bg-muted rounded-lg">
               <p className="text-sm text-muted-foreground">
-                🎉 Tack för din kupong! Den är nu använd.
+                🎉 Thank you! This coupon has been used.
               </p>
             </div>
           )}
@@ -214,7 +214,7 @@ const Coupon = () => {
           {isExpired && (
             <div className="text-center p-4 bg-destructive/10 rounded-lg">
               <p className="text-sm text-destructive">
-                ⏰ Denna kupong har gått ut
+                ⏰ This coupon has expired
               </p>
             </div>
           )}
@@ -224,19 +224,19 @@ const Coupon = () => {
             onClick={() => navigate('/')}
             className="w-full"
           >
-            Se fler kampanjer
+            See more campaigns
           </Button>
         </div>
 
         {/* Terms */}
         <Card>
           <CardContent className="p-4">
-            <h4 className="font-medium mb-2">Villkor</h4>
+            <h4 className="font-medium mb-2">Terms</h4>
             <ul className="text-xs text-muted-foreground space-y-1">
-              <li>• Kupongen kan endast användas en gång</li>
-              <li>• Gäller endast för fullpris-artiklar</li>
-              <li>• Kan inte kombineras med andra erbjudanden</li>
-              <li>• Visa denna kupong i kassan</li>
+              <li>• The coupon can only be used once</li>
+              <li>• Valid only for full-priced items</li>
+              <li>• Cannot be combined with other offers</li>
+              <li>• Show this coupon at checkout</li>
             </ul>
           </CardContent>
         </Card>

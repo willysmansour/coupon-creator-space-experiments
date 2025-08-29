@@ -19,13 +19,13 @@ export function ModernMetricCard({
   const getCardStyle = () => {
     switch (variant) {
       case "primary":
-        return "bg-primary text-primary-foreground";
+        return "bg-primary text-primary-foreground border-transparent";
       case "accent":
-        return "bg-accent text-accent-foreground";
+        return "bg-accent text-accent-foreground border-transparent";
       case "warning":
         return "bg-warning/10 text-warning border-warning/20";
       default:
-        return "bg-card text-card-foreground";
+        return "bg-card text-card-foreground border-border/60";
     }
   };
 
@@ -35,15 +35,17 @@ export function ModernMetricCard({
   };
 
   return (
-    <Card className={`p-6 transition-all duration-200 hover:shadow-md ${getCardStyle()}`}>
+    <Card className={`p-6 transition-all duration-200 hover:shadow-md ${getCardStyle()} relative overflow-hidden hover:ring-1 hover:ring-foreground/10`}>
+      {/* Subtil gradient highlight */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-foreground/[0.03] to-transparent" />
       <div className="flex items-start justify-between mb-4">
         <div>
-          <p className={`text-sm font-medium mb-1 ${
+          <p className={`text-xs font-medium mb-1 tracking-wide ${
             variant === "primary" ? "text-primary-foreground/80" : "text-muted-foreground"
           }`}>
             {title}
           </p>
-          <p className={`text-3xl font-bold ${
+          <p className={`text-[28px] leading-none font-bold tabular-nums ${
             variant === "primary" ? "text-primary-foreground" : "text-foreground"
           }`}>
             {value}
@@ -55,7 +57,7 @@ export function ModernMetricCard({
       </div>
       
       {change && (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 mt-1">
           <TrendingUp className={`h-3 w-3 ${getTrendColor()}`} />
           <span className={`text-sm ${getTrendColor()}`}>
             {change}

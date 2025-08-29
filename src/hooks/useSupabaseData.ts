@@ -311,29 +311,22 @@ export const useRedeemCoupon = () => {
   
   return useMutation({
     mutationFn: async (code: string) => {
-      const { data, error } = await supabase
-        .from('coupons')
-        .update({ 
-          is_used: true, 
-          used_at: new Date().toISOString() 
-        })
-        .eq('code', code)
-        .eq('is_used', false)
-        .select()
-        .single();
-      
+      // Use secure Edge Function to redeem to avoid exposing table writes
+      const { data, error } = await supabase.functions.invoke('redeem-coupon', {
+        body: { code }
+      });
       if (error) throw error;
-      return data as Coupon;
+      return (data?.coupon ?? null) as Coupon;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['coupons'] });
       if (data?.id) {
         queryClient.invalidateQueries({ queryKey: ['coupon', data.id] });
       }
-      toast.success('Tack för din kupong!');
+      toast.success('Thank you! Your coupon has been redeemed.');
     },
     onError: (error) => {
-      toast.error('Kunde inte använda kupongen: ' + error.message);
+      toast.error('Could not redeem the coupon: ' + error.message);
     }
   });
 };

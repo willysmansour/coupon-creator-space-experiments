@@ -18,6 +18,7 @@ import { useFilteredUploads } from "@/hooks/useFilteredSupabaseData";
 import { useDeleteUpload } from "@/hooks/useSupabaseData";
 import { useUserRole } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { LoadingSection } from "@/components/ui/loading";
 
 interface FilteredImageGalleryProps {
   selectedCompanyId?: string;
@@ -28,21 +29,52 @@ export const FilteredImageGallery = ({ selectedCompanyId }: FilteredImageGallery
   const { data: userRole } = useUserRole();
   const deleteUpload = useDeleteUpload();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [brokenMap, setBrokenMap] = useState<Record<string, boolean>>({});
   
   // Filter only approved uploads
   const approvedImages = uploads.filter(upload => upload.status === 'approved');
 
-  const handleDownload = (imageUrl: string, customerName: string) => {
-    const link = document.createElement('a');
-    link.href = imageUrl;
-    link.download = `${customerName || 'bild'}.jpg`;
-    link.click();
+  const handleDownload = async (imageUrl: string, customerName: string) => {
+    try {
+      // Fetch image as blob
+      const response = await fetch(imageUrl);
+      if (!response.ok) {
+        throw new Error('Kunde inte hämta bilden');
+      }
+      
+      const blob = await response.blob();
+      
+      // Skapa en blob URL
+      const blobUrl = URL.createObjectURL(blob);
+      
+      // Create a temporary download link
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      
+      // Generera filnamn med datum
+      const date = new Date().toISOString().split('T')[0];
+      const filename = `${customerName || 'customer'}_${date}.jpg`;
+      link.download = filename;
+      
+      // Ladda ner filen
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Rensa blob URL
+      URL.revokeObjectURL(blobUrl);
+      
+      toast.success('Image downloaded successfully');
+    } catch (error) {
+      console.error('Nedladdningsfel:', error);
+      toast.error('Misslyckades att ladda ner bilden');
+    }
   };
 
   const handleDelete = async (uploadId: string, customerName: string) => {
     try {
       await deleteUpload.mutateAsync(uploadId);
-      toast.success(`Bild från ${customerName} har tagits bort`);
+      toast.success(`Image from ${customerName} has been removed`);
     } catch (error) {
       toast.error('Misslyckades att ta bort bilden');
     }
@@ -51,23 +83,23 @@ export const FilteredImageGallery = ({ selectedCompanyId }: FilteredImageGallery
   // Show which company's data is being displayed
   const getHeaderText = () => {
     if (userRole?.role === 'company_admin' && userRole.company_name) {
-      return `Kundbilder - ${userRole.company_name}`;
+      return `Customer images - ${userRole.company_name}`;
     } else if (userRole?.role === 'super_admin' && selectedCompanyId) {
       // We could add company name lookup here, but for now just show filtered
-      return "Kundbilder - Filtrerade";
+      return "Customer images - Filtered";
     }
-    return "Kundbilder";
+    return "Customer images";
   };
 
   const getSubHeaderText = () => {
     if (userRole?.role === 'company_admin') {
-      return "Bilder som era kunder har delat via QR-kod scanning";
+      return "Images your customers have shared via QR code scanning";
     } else if (userRole?.role === 'super_admin' && selectedCompanyId) {
-      return "Bilder från det valda företaget";
+      return "Images from the selected company";
     } else if (userRole?.role === 'super_admin') {
-      return "Bilder från alla företag - välj ett företag för att filtrera";
+      return "Images from all companies – select a company to filter";
     }
-    return "Bilder som kunder har delat via QR-kod scanning";
+    return "Images customers have shared via QR code scanning";
   };
 
   return (
@@ -80,9 +112,7 @@ export const FilteredImageGallery = ({ selectedCompanyId }: FilteredImageGallery
       </div>
 
       {isLoading ? (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">Laddar bilder...</p>
-        </div>
+        <LoadingSection message="Loading images..." />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {approvedImages.length === 0 ? (
@@ -90,8 +120,8 @@ export const FilteredImageGallery = ({ selectedCompanyId }: FilteredImageGallery
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
                 <Download className="h-8 w-8 text-muted-foreground" />
               </div>
-              <p className="text-lg font-medium text-foreground mb-2">Inga godkända bilder ännu</p>
-              <p className="text-muted-foreground">Bilder som kunder laddar upp och godkänns kommer att visas här.</p>
+              <p className="text-lg font-medium text-foreground mb-2">No approved images yet</p>
+              <p className="text-muted-foreground">Images that customers upload and get approved will appear here.</p>
             </div>
           ) : (
             approvedImages.map((image) => (
@@ -101,20 +131,28 @@ export const FilteredImageGallery = ({ selectedCompanyId }: FilteredImageGallery
               >
                 <CardContent className="p-0">
                   <div className="relative">
-                    <img
-                      src={image.image_url}
-                      alt={`Bild från ${image.customer_name || 'kund'}`}
-                      className="w-full h-80 object-cover"
-                    />
+                    {brokenMap[image.id] ? (
+                      <div className="w-full h-80 flex items-center justify-center bg-muted text-muted-foreground text-sm">
+                        Image deleted from storage
+                      </div>
+                    ) : (
+                      <img
+                        src={image.image_url}
+                        alt={`Image from ${image.customer_name || 'customer'}`}
+                        className="w-full h-80 object-cover"
+                        onError={() => setBrokenMap(prev => ({ ...prev, [image.id]: true }))}
+                      />
+                    )}
                     
-                     {/* Overlay med åtgärder */}
-                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
+                     {/* Overlay with actions */}
+                     <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3">
                        <Dialog>
                          <DialogTrigger asChild>
                            <Button
                              variant="ghost"
                              size="sm"
-                             className="text-white hover:bg-white/20 h-10 w-10 p-0"
+                             className="text-white/95 hover:bg-white/20 h-10 w-10 p-0"
+                             disabled={!!brokenMap[image.id]}
                            >
                              <Eye className="h-5 w-5" />
                            </Button>
@@ -122,7 +160,7 @@ export const FilteredImageGallery = ({ selectedCompanyId }: FilteredImageGallery
                          <DialogContent className="max-w-4xl">
                            <img
                              src={image.image_url}
-                             alt={`Bild från ${image.customer_name || 'kund'}`}
+                             alt={`Image from ${image.customer_name || 'customer'}`}
                              className="w-full h-auto max-h-[80vh] object-contain"
                            />
                          </DialogContent>
@@ -131,8 +169,9 @@ export const FilteredImageGallery = ({ selectedCompanyId }: FilteredImageGallery
                        <Button
                          variant="ghost"
                          size="sm"
-                         onClick={() => handleDownload(image.image_url, image.customer_name || 'kund')}
-                         className="text-white hover:bg-white/20 h-10 w-10 p-0"
+                         onClick={() => handleDownload(image.image_url, image.customer_name || 'customer')}
+                         className="text-white/95 hover:bg-white/20 h-10 w-10 p-0"
+                         disabled={!!brokenMap[image.id]}
                        >
                          <Download className="h-5 w-5" />
                        </Button>
@@ -142,26 +181,26 @@ export const FilteredImageGallery = ({ selectedCompanyId }: FilteredImageGallery
                            <Button
                              variant="ghost"
                              size="sm"
-                             className="text-white hover:bg-red-500/20 h-10 w-10 p-0"
+                             className="text-white/95 hover:bg-red-500/20 h-10 w-10 p-0"
                            >
                              <Trash2 className="h-5 w-5" />
                            </Button>
                          </AlertDialogTrigger>
                          <AlertDialogContent>
                            <AlertDialogHeader>
-                             <AlertDialogTitle>Ta bort bild</AlertDialogTitle>
+                             <AlertDialogTitle>Delete image</AlertDialogTitle>
                              <AlertDialogDescription>
-                               Är du säker på att du vill ta bort bilden från {image.customer_name || 'okänd kund'}? 
-                               Detta kommer också att ta bort eventuella relaterade kuponger. Åtgärden kan inte ångras.
+                               Are you sure you want to delete the image from {image.customer_name || 'unknown customer'}? 
+                               This will also remove any related coupons. This action cannot be undone.
                              </AlertDialogDescription>
                            </AlertDialogHeader>
                            <AlertDialogFooter>
-                             <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                             <AlertDialogCancel>Cancel</AlertDialogCancel>
                              <AlertDialogAction
-                               onClick={() => handleDelete(image.id, image.customer_name || 'okänd kund')}
+                               onClick={() => handleDelete(image.id, image.customer_name || 'unknown customer')}
                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                              >
-                               Ta bort
+                               Delete
                              </AlertDialogAction>
                            </AlertDialogFooter>
                          </AlertDialogContent>
@@ -174,10 +213,10 @@ export const FilteredImageGallery = ({ selectedCompanyId }: FilteredImageGallery
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <h3 className="font-semibold text-foreground text-sm mb-1">
-                          {image.customer_name || 'Okänd kund'}
+                          {image.customer_name || 'Unknown customer'}
                         </h3>
                         <p className="text-xs text-muted-foreground mb-2">
-                          {new Date(image.submitted_at).toLocaleDateString('sv-SE')}
+                          {new Date(image.submitted_at).toLocaleDateString('en-GB')}
                         </p>
                         {image.message && (
                           <p className="text-xs text-muted-foreground italic">

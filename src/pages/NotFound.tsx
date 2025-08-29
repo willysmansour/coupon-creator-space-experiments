@@ -21,9 +21,9 @@ const NotFound = () => {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
             <span className="text-4xl font-bold text-muted-foreground">404</span>
           </div>
-          <CardTitle className="text-2xl">Sidan hittades inte</CardTitle>
+          <CardTitle className="text-2xl">Page not found</CardTitle>
           <CardDescription>
-            Sidan du letar efter finns inte eller har flyttats
+            The page you are looking for doesn't exist or has moved
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -37,7 +37,7 @@ const NotFound = () => {
             <Button asChild className="w-full">
               <Link to="/" className="flex items-center gap-2">
                 <Home className="h-4 w-4" />
-                Tillbaka till startsidan
+                Back to home
               </Link>
             </Button>
             
@@ -47,7 +47,7 @@ const NotFound = () => {
               className="w-full flex items-center gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
-              Gå tillbaka
+              Go back
             </Button>
           </div>
         </CardContent>

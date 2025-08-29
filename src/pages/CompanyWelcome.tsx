@@ -17,7 +17,7 @@ const CompanyWelcome = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">Laddar...</p>
+          <p className="mt-2 text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -28,8 +28,8 @@ const CompanyWelcome = () => {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardContent className="p-6 text-center">
-            <h1 className="text-xl font-semibold mb-2">Företaget kunde inte hittas</h1>
-            <p className="text-muted-foreground">Det här företaget existerar inte.</p>
+            <h1 className="text-xl font-semibold mb-2">Company not found</h1>
+            <p className="text-muted-foreground">This company does not exist.</p>
           </CardContent>
         </Card>
       </div>
@@ -41,8 +41,8 @@ const CompanyWelcome = () => {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardContent className="p-6 text-center">
-            <h1 className="text-xl font-semibold mb-2">Ingen aktiv rabatt</h1>
-            <p className="text-muted-foreground">Det finns ingen aktiv rabatt för detta företag just nu.</p>
+            <h1 className="text-xl font-semibold mb-2">No active discount</h1>
+            <p className="text-muted-foreground">There is no active discount for this company right now.</p>
           </CardContent>
         </Card>
       </div>
@@ -76,7 +76,7 @@ const CompanyWelcome = () => {
           
           <div>
             <h1 className="text-2xl font-bold text-foreground">{company.name}</h1>
-            <p className="text-muted-foreground">Välkommen till vår kampanj!</p>
+            <p className="text-muted-foreground">Welcome to our campaign!</p>
           </div>
         </div>
 
@@ -84,9 +84,9 @@ const CompanyWelcome = () => {
         <Card className="border-primary/20 shadow-lg">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Rabatterbjudande</CardTitle>
+              <CardTitle className="text-lg">Discount offer</CardTitle>
               <Badge variant="secondary" className="bg-success/10 text-success border-success/20">
-                Aktiv
+                Active
               </Badge>
             </div>
           </CardHeader>
@@ -100,14 +100,14 @@ const CompanyWelcome = () => {
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2 text-primary">
                 <Gift className="h-4 w-4" />
-                <span className="font-semibold">{company.discount_percentage}% rabatt</span>
+                <span className="font-semibold">{company.discount_percentage}% off</span>
               </div>
               
               <div className="flex items-center gap-2 text-muted-foreground">
                 {company.content_types?.includes('photo') && (
                   <div className="flex items-center gap-1">
                     <Camera className="h-4 w-4" />
-                    <span>Foto</span>
+                    <span>Photo</span>
                   </div>
                 )}
                 {company.content_types?.includes('video') && (
@@ -124,19 +124,19 @@ const CompanyWelcome = () => {
         {/* Instructions */}
         <Card className="bg-accent/30 border-accent">
           <CardContent className="p-4">
-            <h3 className="font-semibold text-foreground mb-2">Så här gör du:</h3>
+            <h3 className="font-semibold text-foreground mb-2">How it works:</h3>
             <ol className="text-sm text-muted-foreground space-y-1">
               <li className="flex items-start gap-2">
                 <span className="font-bold text-primary min-w-[1rem]">1.</span>
-                <span>Klicka på "Fortsätt" nedan</span>
+                <span>Click "Continue" below</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="font-bold text-primary min-w-[1rem]">2.</span>
-                <span>Ladda upp din bild eller video</span>
+                <span>Upload your image or video</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="font-bold text-primary min-w-[1rem]">3.</span>
-                <span>Få din rabattkupong direkt!</span>
+                <span>Get your discount coupon!</span>
               </li>
             </ol>
           </CardContent>
@@ -149,12 +149,12 @@ const CompanyWelcome = () => {
           size="lg"
         >
           <Upload className="h-5 w-5 mr-2" />
-          Fortsätt till uppladdning
+          Continue to upload
         </Button>
 
         {/* Footer */}
         <p className="text-center text-xs text-muted-foreground">
-          Genom att fortsätta godkänner du villkoren för kampanjen
+          By continuing you agree to the campaign terms
         </p>
       </div>
     </div>

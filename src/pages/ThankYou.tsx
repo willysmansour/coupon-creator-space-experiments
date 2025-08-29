@@ -26,7 +26,12 @@ const ThankYou = () => {
   if (uploadLoading || companyLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">Loading...</div>
+        <div className="flex flex-col items-center gap-3">
+          <div className="p-3 rounded-full bg-muted">
+            <Gift className="h-6 w-6 text-muted-foreground animate-pulse" />
+          </div>
+          <p className="text-sm text-muted-foreground">Fetching information...</p>
+        </div>
       </div>
     );
   }
@@ -36,10 +41,10 @@ const ThankYou = () => {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardContent className="p-6 text-center">
-            <h1 className="text-xl font-semibold mb-2">Något gick fel</h1>
-            <p className="text-muted-foreground">Vi kunde inte hitta ditt bidrag.</p>
+            <h1 className="text-xl font-semibold mb-2">Something went wrong</h1>
+            <p className="text-muted-foreground">We could not find your submission.</p>
             <Button onClick={() => navigate('/')} className="mt-4">
-              Tillbaka till start
+              Back to home
             </Button>
           </CardContent>
         </Card>
@@ -51,24 +56,24 @@ const ThankYou = () => {
     if (upload.status === 'approved' || coupon) {
       return {
         icon: CheckCircle,
-        title: 'Tack för ditt bidrag!',
-        description: 'Ditt bidrag har godkänts och din kupong är klar.',
+        title: 'Thank you for your contribution!',
+        description: 'Your submission has been approved and your coupon is ready.',
         color: 'text-success',
         bgColor: 'bg-success/10'
       };
     } else if (upload.status === 'pending') {
       return {
         icon: Clock,
-        title: 'Tack för ditt bidrag!',
-        description: 'Vi granskar ditt bidrag och återkommer snart.',
+        title: 'Thank you for your contribution!',
+        description: 'We are reviewing your submission and will get back soon.',
         color: 'text-warning',
         bgColor: 'bg-warning/10'
       };
     } else {
       return {
         icon: Clock,
-        title: 'Tack för ditt bidrag!',
-        description: 'Vi granskar ditt bidrag.',
+        title: 'Thank you for your contribution!',
+        description: 'We are reviewing your submission.',
         color: 'text-muted-foreground',
         bgColor: 'bg-muted'
       };
@@ -79,7 +84,12 @@ const ThankYou = () => {
   const StatusIcon = statusInfo.icon;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Subtil bakgrundsgradient */}
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 h-[420px] w-[720px] rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute bottom-[-20%] right-[-10%] h-[360px] w-[560px] rounded-full bg-accent/40 blur-3xl" />
+      </div>
       {/* Header */}
       <div className="bg-card border-b">
         <div className="max-w-md mx-auto p-4">
@@ -95,7 +105,7 @@ const ThankYou = () => {
             )}
             <div>
               <h1 className="font-semibold text-foreground">{company?.name}</h1>
-              <p className="text-sm text-muted-foreground">Tack för ditt bidrag</p>
+              <p className="text-sm text-muted-foreground">Thank you for your contribution</p>
             </div>
           </div>
         </div>
@@ -103,6 +113,18 @@ const ThankYou = () => {
 
       {/* Main Content */}
       <div className="max-w-md mx-auto p-4 space-y-6">
+        {/* Hero */}
+        <div className="text-center space-y-2 mt-2">
+          <div className="mx-auto h-16 w-16 rounded-2xl bg-card border shadow-sm grid place-items-center">
+            {company?.logo ? (
+              <img src={company.logo} alt={company.name} className="h-10 w-10 object-cover rounded" />
+            ) : (
+              <span className="text-lg font-bold text-foreground">{company?.name.charAt(0)}</span>
+            )}
+          </div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{company?.name}</h1>
+          <p className="text-sm text-muted-foreground">Thank you for your contribution</p>
+        </div>
         {/* Status Card */}
         <Card>
           <CardHeader>
@@ -125,16 +147,16 @@ const ThankYou = () => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-medium">Rabatterbjudande</h3>
+                <h3 className="font-medium">Discount offer</h3>
                 <p className="text-sm text-muted-foreground">
                   {typeof (company as any)?.discount_percentage === 'number' 
-                    ? `${(company as any).discount_percentage}% rabatt` 
-                    : 'Rabattkupong'}
+                    ? `${(company as any).discount_percentage}% off` 
+                    : 'Discount coupon'}
                 </p>
               </div>
               <Badge variant={upload.status === 'approved' ? 'default' : 'secondary'}>
-                {upload.status === 'approved' ? 'Godkänt' : 
-                 upload.status === 'pending' ? 'Under granskning' : 'Väntar'}
+                {upload.status === 'approved' ? 'Approved' : 
+                 upload.status === 'pending' ? 'Under review' : 'Pending'}
               </Badge>
             </div>
           </CardContent>
@@ -143,7 +165,7 @@ const ThankYou = () => {
         {/* Upload Preview */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Ditt bidrag</CardTitle>
+            <CardTitle className="text-base">Your submission</CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0">
             <div className="space-y-3">
@@ -158,8 +180,8 @@ const ThankYou = () => {
               )}
               <p className="text-sm">{upload.message}</p>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span>Skickat:</span>
-                <span>{new Date(upload.submitted_at).toLocaleString('sv-SE')}</span>
+                <span>Submitted:</span>
+                <span>{new Date(upload.submitted_at).toLocaleString('en-GB')}</span>
               </div>
             </div>
           </CardContent>
@@ -169,32 +191,32 @@ const ThankYou = () => {
         {showForm && !upload?.customer_name && !upload?.customer_email && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Få din kupong via e-post</CardTitle>
+              <CardTitle className="text-base">Get your coupon via email</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="name" className="text-sm font-medium">
-                  Namn *
+                  Name *
                 </Label>
                 <Input
                   id="name"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  placeholder="Ditt namn"
+                  placeholder="Your name"
                   className="mt-1"
                 />
               </div>
               
               <div>
                 <Label htmlFor="email" className="text-sm font-medium">
-                  E-post *
+                  Email *
                 </Label>
                 <Input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="din@email.se"
+                  placeholder="your@email.com"
                   className="mt-1"
                 />
               </div>
@@ -202,7 +224,7 @@ const ThankYou = () => {
               <Button
                 onClick={async () => {
                   if (!customerName.trim() || !email.trim()) {
-                    toast.error('Vänligen fyll i både namn och e-post');
+                    toast.error('Please fill in both name and email');
                     return;
                   }
                   
@@ -231,17 +253,17 @@ const ThankYou = () => {
                       console.error('Email error:', emailError || emailResult);
                       if (emailResult?.needsApproval) {
                         setShowForm(false);
-                        toast.success('Detaljer sparade! Du får en kupong när ditt bidrag godkänns.');
+                        toast.success('Details saved! You will receive a coupon when your submission is approved.');
                       } else {
-                        toast.error('Detaljer sparade men e-post misslyckades att skickas');
+                        toast.error('Details saved but the email failed to send');
                       }
                     } else {
                       setShowForm(false);
-                      toast.success('Detaljer sparade! Din kupong skickas till din e-post inom kort.');
+                      toast.success('Details saved! Your coupon will be sent to your email shortly.');
                     }
                   } catch (error) {
                     console.error('Error:', error);
-                    toast.error('Misslyckades att spara detaljer');
+                    toast.error('Failed to save details');
                   } finally {
                     setIsSubmitting(false);
                   }
@@ -249,7 +271,7 @@ const ThankYou = () => {
                 className="w-full"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Sparar..." : "Få kupong"}
+                {isSubmitting ? "Saving..." : "Get coupon"}
               </Button>
             </CardContent>
           </Card>
@@ -271,7 +293,7 @@ const ThankYou = () => {
           {!coupon && upload.status === 'pending' && !showForm && (
             <div className="text-center p-4 bg-accent rounded-lg">
               <p className="text-sm text-accent-foreground">
-                Ditt bidrag granskas. Du får en kupong när det godkänns.
+                Your submission is under review. You will receive a coupon when it is approved.
               </p>
             </div>
           )}
@@ -281,9 +303,21 @@ const ThankYou = () => {
             onClick={() => navigate(`/company/${company?.id}`)}
             className="w-full"
           >
-            Tillbaka till företaget
+            Back to company
           </Button>
         </div>
+
+        {/* Next steps */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">What happens next?</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground space-y-2">
+            <p>• We will review your submission shortly.</p>
+            <p>• Once approved, your coupon will be sent to your email.</p>
+            <p>• Need to change anything? Reply to the email you receive.</p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

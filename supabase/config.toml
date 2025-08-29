@@ -3,5 +3,12 @@ project_id = "mbpghmizndwixvuqrvmu"
 [functions.send-coupon-email]
 verify_jwt = false
 
+[functions.redeem-coupon]
+verify_jwt = false
+
+
 [functions.bootstrap-admin]
+verify_jwt = false
+
+[functions.secure-upload]
 verify_jwt = false

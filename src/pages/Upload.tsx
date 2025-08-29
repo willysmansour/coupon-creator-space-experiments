@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Upload as UploadIcon, ImageIcon, VideoIcon, Gift } from 'lucide-react';
+import { Upload as UploadIcon, ImageIcon, VideoIcon, Gift, User, Mail, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Upload = () => {
@@ -20,6 +20,12 @@ const Upload = () => {
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [customerName, setCustomerName] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const step1Done = !!file;
+  const step2Done = !!customerName.trim() && !!customerEmail.trim() && emailRegex.test(customerEmail);
+
 
   if (companyLoading) {
     return (
@@ -34,8 +40,8 @@ const Upload = () => {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardContent className="p-6 text-center">
-            <h1 className="text-xl font-semibold mb-2">Företaget kunde inte hittas</h1>
-            <p className="text-muted-foreground">Det här företaget existerar inte.</p>
+            <h1 className="text-xl font-semibold mb-2">Company not found</h1>
+            <p className="text-muted-foreground">This company does not exist.</p>
           </CardContent>
         </Card>
       </div>
@@ -70,15 +76,39 @@ const Upload = () => {
     const maxSize = 20 * 1024 * 1024; // 20MB
 
     if (!validTypes.includes(file.type)) {
-      toast.error("Endast JPG, PNG och MP4 filer är tillåtna.");
+      toast.error("Only JPG, PNG and MP4 files are allowed.");
       return false;
     }
 
     if (file.size > maxSize) {
-      toast.error("Filen får max vara 20MB stor.");
+      toast.error("File must be at most 20MB.");
       return false;
     }
 
+    return true;
+  };
+
+  const validateForm = (): boolean => {
+    if (!customerName.trim()) {
+      toast.error('Please enter your name.');
+      return false;
+    }
+    
+    if (!customerEmail.trim()) {
+      toast.error('Please enter your email.');
+      return false;
+    }
+    
+    if (!emailRegex.test(customerEmail)) {
+      toast.error('Please enter a valid email address.');
+      return false;
+    }
+    
+    if (!file) {
+      toast.error('Please choose an image or video to upload.');
+      return false;
+    }
+    
     return true;
   };
 
@@ -94,27 +124,39 @@ const Upload = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!file) {
-      toast.error('Vänligen välj en bild eller video att ladda upp.');
+    if (!validateForm()) {
       return;
     }
     
     setIsLoading(true);
     
     try {
-      // Upload file to Supabase Storage
-      const imageUrl = await uploadFile(file);
-      
-      // Create upload record with minimal data
-      const upload = await createUpload.mutateAsync({
-        company_id: company.id,
-        image_url: imageUrl,
-        message: message || 'Uploaded content',
+      // Använd Edge Function för säker uppladdning (kringgår RLS)
+      const formData = new FormData();
+      formData.append('file', file!);
+      formData.append('companyId', company.id);
+      formData.append('customerName', customerName.trim());
+      formData.append('customerEmail', customerEmail.trim().toLowerCase());
+      formData.append('message', message || 'Uploaded content');
+
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/secure-upload`, {
+        method: 'POST',
+        body: formData,
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
       
-      navigate(`/thank-you/${upload.id}`);
+      if (result.success) {
+        navigate(`/thank-you/${result.upload.id}`);
+      } else {
+        throw new Error(result.error || 'Upload failed');
+      }
     } catch (error) {
-      toast.error('Ett fel uppstod när bilden skulle skickas in.');
+      toast.error('An error occurred while submitting your upload.');
       console.error('Upload error:', error);
     } finally {
       setIsLoading(false);
@@ -127,7 +169,12 @@ const Upload = () => {
   const contentDescription = (company as any)?.content_description as string | undefined;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Subtil bakgrundsgradient */}
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 h-[420px] w-[720px] rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute bottom-[-20%] right-[-10%] h-[360px] w-[560px] rounded-full bg-accent/40 blur-3xl" />
+      </div>
       {/* Header */}
       <div className="bg-card border-b">
         <div className="max-w-md mx-auto p-4">
@@ -143,7 +190,7 @@ const Upload = () => {
             )}
             <div>
               <h1 className="font-semibold text-foreground">{company?.name}</h1>
-              <p className="text-sm text-muted-foreground">Dela ditt bidrag</p>
+              <p className="text-sm text-muted-foreground">Share your contribution</p>
             </div>
           </div>
         </div>
@@ -151,41 +198,122 @@ const Upload = () => {
 
       {/* Main Content */}
       <div className="max-w-md mx-auto p-4 space-y-6">
-        {/* Offer Info */}
+        {/* Hero */}
+        <div className="text-center space-y-3 mt-2">
+          <div className="mx-auto h-16 w-16 rounded-2xl bg-card border shadow-sm grid place-items-center">
+            {company?.logo ? (
+              <img src={company.logo} alt={company.name} className="h-10 w-10 object-cover rounded" />
+            ) : (
+              <span className="text-lg font-bold text-foreground">{company?.name.charAt(0)}</span>
+            )}
+          </div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{company?.name}</h1>
+          <p className="text-sm text-muted-foreground">Welcome to our campaign!</p>
+        </div>
+        {/* Stepper */}
+        <div className="grid grid-cols-3 items-start gap-2">
+          {[{label:'Choose file', done: step1Done}, {label:'Your details', done: step2Done}, {label:'Submit', done: step1Done && step2Done}].map((s, i) => (
+            <div key={s.label} className="flex flex-col items-center text-center">
+              <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-medium border ${s.done ? 'bg-primary text-primary-foreground border-transparent' : 'bg-secondary text-foreground/80 border-border'}`}>
+                {s.done ? <Check className="h-4 w-4" /> : i+1}
+              </div>
+              <span className="mt-2 text-xs text-muted-foreground">{s.label}</span>
+            </div>
+          ))}
+        </div>
+        {/* Offer + Info */}
         <Card>
           <CardHeader>
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-full bg-primary/10">
-                <Gift className="w-6 h-6 text-primary" />
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-full bg-primary/10">
+                  <Gift className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Discount offer</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {typeof discountPercent === 'number' ? `${discountPercent}% off` : 'Discount coupon'}
+                    {discountExpires ? ` • Valid until ${new Date(discountExpires).toLocaleDateString('en-GB')}` : ''}
+                  </p>
+                  {contentDescription && (
+                    <p className="text-sm text-muted-foreground mt-2">{contentDescription}</p>
+                  )}
+                </div>
               </div>
               <div>
-                <CardTitle className="text-lg">{discountActive === false ? 'Erbjudandet är pausat' : 'Få en rabattkupong'}</CardTitle>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {typeof discountPercent === 'number' ? `Ladda upp innehåll och få ${discountPercent}% rabatt` : 'Ladda upp innehåll för att få en kupong'}
-                  {discountExpires ? ` • Gäller till ${new Date(discountExpires).toLocaleDateString('sv-SE')}` : ''}
-                </p>
-                {contentDescription && (
-                  <p className="text-sm text-muted-foreground mt-2">{contentDescription}</p>
-                )}
+                <span className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs font-medium ${
+                  discountActive === false ? 'bg-warning/10 text-warning border-warning/20' : 'bg-success/10 text-success border-success/20'
+                }`}>
+                  {discountActive === false ? 'Paused' : 'Active'}
+                </span>
               </div>
             </div>
           </CardHeader>
         </Card>
 
+        {/* Steps card */}
+        <Card className="border-dashed">
+          <CardHeader>
+            <CardTitle className="text-sm">How it works</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ol className="text-sm space-y-2 text-muted-foreground">
+              <li>1. Click "Choose file" below</li>
+              <li>2. Upload your image or video</li>
+              <li>3. Enter your name and email to receive the coupon</li>
+            </ol>
+          </CardContent>
+        </Card>
+
         {/* Upload Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Customer Information */}
+          <div className="space-y-3">
+            <div>
+              <Label htmlFor="customer-name" className="text-sm font-medium flex items-center gap-2">
+                <User className="w-4 h-4" />
+                Your name *
+              </Label>
+              <Input
+                id="customer-name"
+                type="text"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                placeholder="Enter your name"
+                className="mt-1"
+                required
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="customer-email" className="text-sm font-medium flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                Your email *
+              </Label>
+              <Input
+                id="customer-email"
+                type="email"
+                value={customerEmail}
+                onChange={(e) => setCustomerEmail(e.target.value)}
+                placeholder="name@email.com"
+                className="mt-1"
+                required
+              />
+            </div>
+          </div>
+
           {/* File Upload */}
           <div>
             <Label htmlFor="file-upload" className="text-sm font-medium">
-              Ladda upp bild eller video *
+              Upload image or video *
             </Label>
             <div
-              className={`mt-2 border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+              className={`mt-2 border-2 border-dashed rounded-lg p-6 text-center transition-all ${
                 dragActive
-                  ? 'border-primary bg-accent'
+                  ? 'border-primary bg-accent shadow-sm'
                   : file
-                  ? 'border-success bg-success/5'
-                  : 'border-border hover:border-primary'
+                  ? 'border-success bg-success/5 shadow-sm'
+                  : 'border-border hover:border-primary/70 hover:shadow-sm'
               }`}
               onDragEnter={handleDrag}
               onDragLeave={handleDrag}
@@ -216,7 +344,7 @@ const Upload = () => {
                     size="sm"
                     onClick={() => document.getElementById('file-upload')?.click()}
                   >
-                    Byt fil
+                    Change file
                   </Button>
                 </div>
               ) : (
@@ -224,10 +352,10 @@ const Upload = () => {
                   <UploadIcon className="w-8 h-8 mx-auto text-muted-foreground" />
                   <div>
                     <p className="text-sm font-medium">
-                      Klicka eller dra för att ladda upp
+                      Click or drag to upload
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      JPG, PNG eller MP4 (max 20MB)
+                      JPG, PNG or MP4 (max 20MB)
                     </p>
                   </div>
                   <Button
@@ -236,7 +364,7 @@ const Upload = () => {
                     size="sm"
                     onClick={() => document.getElementById('file-upload')?.click()}
                   >
-                    Välj fil
+                    Choose file
                   </Button>
                 </div>
               )}
@@ -246,13 +374,13 @@ const Upload = () => {
           {/* Optional message */}
           <div>
             <Label htmlFor="message" className="text-sm font-medium">
-              Meddelande (valfritt)
+              Message (optional)
             </Label>
             <Textarea
               id="message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Berätta något om ditt bidrag..."
+              placeholder="Tell us something about your submission..."
               className="mt-1"
             />
           </div>
@@ -264,7 +392,7 @@ const Upload = () => {
             className="w-full h-12 text-base"
             disabled={isLoading || discountActive === false}
           >
-            {discountActive === false ? 'Erbjudande pausat' : isLoading ? 'Laddar upp...' : 'Ladda upp'}
+            {discountActive === false ? 'Offer paused' : isLoading ? 'Uploading...' : 'Upload'}
           </Button>
         </form>
       </div>

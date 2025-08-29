@@ -40,8 +40,8 @@ const DiscountSettings = () => {
   const handleSave = async () => {
     if (!company) {
       toast({
-        title: "Fel",
-        description: "Du måste skapa ett företag först i Inställningar.",
+        title: "Error",
+        description: "You must create a company first in Settings.",
         variant: "destructive"
       });
       return;
@@ -69,14 +69,14 @@ const DiscountSettings = () => {
       await refetch();
 
       toast({
-        title: "Sparad!",
-        description: "Dina rabattinställningar har uppdaterats."
+        title: "Saved!",
+        description: "Your discount settings have been updated."
       });
     } catch (error) {
       console.error('Error saving discount settings:', error);
       toast({
-        title: "Fel",
-        description: "Kunde inte spara inställningarna.",
+        title: "Error",
+        description: "Could not save settings.",
         variant: "destructive"
       });
     } finally {
@@ -94,12 +94,12 @@ const DiscountSettings = () => {
             <main className="p-6">
               <Card className="max-w-md mx-auto">
                 <CardContent className="p-6 text-center">
-                  <h1 className="text-xl font-semibold mb-2">Inget företag hittat</h1>
+                  <h1 className="text-xl font-semibold mb-2">No company found</h1>
                   <p className="text-muted-foreground mb-4">
-                    Du måste skapa ett företag först i Inställningar.
+                    You must create a company first in Settings.
                   </p>
                   <Button onClick={() => window.location.href = '/settings'}>
-                    Gå till Inställningar
+                    Go to Settings
                   </Button>
                 </CardContent>
               </Card>
@@ -128,10 +128,10 @@ const DiscountSettings = () => {
                 <div className="p-2 rounded-lg bg-primary/10">
                   <Settings className="h-6 w-6 text-primary" />
                 </div>
-                <h1 className="text-2xl font-bold text-foreground">Rabattinställningar</h1>
+                <h1 className="text-2xl font-bold text-foreground">Discount settings</h1>
               </div>
               <p className="text-muted-foreground">
-                Hantera hur kunder kan få rabattkuponger genom att ladda upp innehåll.
+                Manage how customers can receive discount coupons by uploading content.
               </p>
             </div>
 
@@ -141,16 +141,16 @@ const DiscountSettings = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Gift className="h-5 w-5" />
-                    Rabattinställningar
+                    Discount settings
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {/* Active Toggle */}
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label className="text-sm font-medium">Aktivt erbjudande</Label>
+                      <Label className="text-sm font-medium">Active offer</Label>
                       <p className="text-xs text-muted-foreground">
-                        Tillåt kunder att ladda upp innehåll för rabatt
+                        Allow customers to upload content for a discount
                       </p>
                     </div>
                     <Switch
@@ -161,7 +161,7 @@ const DiscountSettings = () => {
 
                   {/* Discount Percentage */}
                   <div className="space-y-2">
-                    <Label htmlFor="discount">Rabatt (%)</Label>
+                    <Label htmlFor="discount">Discount (%)</Label>
                     <Input
                       id="discount"
                       type="number"
@@ -172,18 +172,18 @@ const DiscountSettings = () => {
                       disabled={!discountActive}
                     />
                     <p className="text-xs text-muted-foreground">
-                      Procent rabatt som kunder får när deras innehåll godkänns
+                      Percentage off when customer content is approved
                     </p>
                   </div>
 
                   {/* Content Types */}
                   <div className="space-y-3">
-                    <Label className="text-sm font-medium">Accepterat innehåll</Label>
+                    <Label className="text-sm font-medium">Accepted content</Label>
                     
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Image className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">Foton</span>
+                        <span className="text-sm">Photos</span>
                       </div>
                       <Switch
                         checked={acceptPhotos}
@@ -207,12 +207,12 @@ const DiscountSettings = () => {
 
                   {/* Description */}
                   <div className="space-y-2">
-                    <Label htmlFor="description">Instruktioner (valfritt)</Label>
+                    <Label htmlFor="description">Instructions (optional)</Label>
                     <Textarea
                       id="description"
                       value={contentDescription}
                       onChange={(e) => setContentDescription(e.target.value)}
-                      placeholder="Beskriv vilken typ av innehåll du vill ha..."
+                      placeholder="Describe what type of content you want..."
                       disabled={!discountActive}
                     />
                   </div>
@@ -223,7 +223,7 @@ const DiscountSettings = () => {
                     disabled={isLoading}
                   >
                     <Save className="h-4 w-4 mr-2" />
-                    {isLoading ? 'Sparar...' : 'Spara inställningar'}
+                    {isLoading ? 'Saving...' : 'Save settings'}
                   </Button>
                 </CardContent>
               </Card>
@@ -231,9 +231,9 @@ const DiscountSettings = () => {
               {/* Preview */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Förhandsvisning</CardTitle>
+                  <CardTitle>Preview</CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    Så här ser ditt erbjudande ut för kunder
+                    What your offer looks like to customers
                   </p>
                 </CardHeader>
                 <CardContent>
@@ -251,7 +251,7 @@ const DiscountSettings = () => {
                       )}
                       <div>
                         <h3 className="font-semibold">{company.name}</h3>
-                        <p className="text-xs text-muted-foreground">Dela ditt bidrag</p>
+                        <p className="text-xs text-muted-foreground">Share your contribution</p>
                       </div>
                     </div>
 
@@ -263,12 +263,12 @@ const DiscountSettings = () => {
                         </div>
                         <div>
                           <h4 className="font-medium text-sm">
-                            {discountActive ? 'Få en rabattkupong' : 'Erbjudandet är pausat'}
+                            {discountActive ? 'Get a discount coupon' : 'Offer is paused'}
                           </h4>
                           <p className="text-xs text-muted-foreground">
                             {discountActive 
-                              ? `Ladda upp innehåll och få ${discountPercentage}% rabatt`
-                              : 'Erbjudandet är för tillfället inte aktivt'
+                              ? `Upload content and get ${discountPercentage}% off`
+                              : 'The offer is currently not active'
                             }
                           </p>
                           {contentDescription && discountActive && (
@@ -285,7 +285,7 @@ const DiscountSettings = () => {
                           {acceptPhotos && (
                             <Badge variant="secondary" className="text-xs">
                               <Image className="w-3 h-3 mr-1" />
-                              Foton
+                              Photos
                             </Badge>
                           )}
                           {acceptVideos && (

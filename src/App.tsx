@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppProvider } from "@/contexts/AppContext";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import DiscountSettings from "./pages/DiscountSettings";
 import Uploads from "./pages/Uploads";
@@ -14,7 +15,7 @@ import Settings from "./pages/Settings";
 import Help from "./pages/Help";
 import Logout from "./pages/Logout";
 import NotFound from "./pages/NotFound";
-import Landing from "./pages/Landing";
+
 import Upload from "./pages/Upload";
 import CompanyWelcome from "./pages/CompanyWelcome";
 import ThankYou from "./pages/ThankYou";
@@ -23,15 +24,33 @@ import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import { RequireAuth } from "./components/auth/RequireAuth";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error) => {
+        // Don't retry on 4xx errors
+        if (error?.status >= 400 && error?.status < 500) {
+          return false;
+        }
+        return failureCount < 3;
+      },
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false,
+    },
+    mutations: {
+      retry: false,
+    },
+  },
+});
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AppProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AppProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
           <Routes>
             <Route path="/" element={<RequireAuth><Index /></RequireAuth>} />
             <Route path="/campaigns" element={<RequireAuth><DiscountSettings /></RequireAuth>} />
@@ -51,10 +70,11 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
-      </AppProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+          </BrowserRouter>
+        </AppProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;

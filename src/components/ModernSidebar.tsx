@@ -30,18 +30,18 @@ import {
 const getMenuItems = (userRole?: string) => {
   const mainItems = [
     { title: "Dashboard", url: "/", icon: Home, roles: ['super_admin', 'company_admin'] },
-    { title: "Rabattinställningar", url: "/campaigns", icon: Gift, roles: ['super_admin', 'company_admin'] },
-    { title: "Uppladdningar", url: "/uploads", icon: Upload, roles: ['super_admin', 'company_admin'] },
-    { title: "Kuponger", url: "/coupons", icon: CheckCircle, roles: ['super_admin', 'company_admin'] },
+    { title: "Discount Settings", url: "/campaigns", icon: Gift, roles: ['super_admin', 'company_admin'] },
+    { title: "Uploads", url: "/uploads", icon: Upload, roles: ['super_admin', 'company_admin'] },
+    { title: "Coupons", url: "/coupons", icon: CheckCircle, roles: ['super_admin', 'company_admin'] },
     { title: "Analytics", url: "/analytics", icon: BarChart3, roles: ['super_admin', 'company_admin'] },
-    { title: "Kunder", url: "/customers", icon: Users, roles: ['super_admin', 'company_admin'] },
+    { title: "Customers", url: "/customers", icon: Users, roles: ['super_admin', 'company_admin'] },
     // Admin Panel is hidden from navigation - only accessible via direct URL for super admins
   ];
 
   const generalItems = [
-    { title: "Inställningar", url: "/settings", icon: Settings, roles: ['super_admin', 'company_admin'] },
-    { title: "Hjälp", url: "/help", icon: HelpCircle, roles: ['super_admin', 'company_admin'] },
-    { title: "Logga ut", url: "/logout", icon: LogOut, roles: ['super_admin', 'company_admin'] },
+    { title: "Settings", url: "/settings", icon: Settings, roles: ['super_admin', 'company_admin'] },
+    { title: "Help", url: "/help", icon: HelpCircle, roles: ['super_admin', 'company_admin'] },
+    { title: "Log out", url: "/logout", icon: LogOut, roles: ['super_admin', 'company_admin'] },
   ];
 
   return {
@@ -64,7 +64,7 @@ export function ModernSidebar() {
 
   return (
     <Sidebar className={collapsed ? "w-16" : "w-64"} collapsible="icon">
-      <SidebarContent className="px-4 py-6 bg-card border-r">
+      <SidebarContent className="px-4 py-6 bg-card border-r shadow-[inset_-1px_0_0_hsl(var(--border))]">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">

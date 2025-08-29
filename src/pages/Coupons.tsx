@@ -9,10 +9,11 @@ import { Gift, CheckCircle, Clock, Eye, Download } from "lucide-react";
 import { useFilteredCoupons } from "@/hooks/useFilteredSupabaseData";
 import { DashboardAuth } from "@/components/auth/DashboardAuth";
 import { useState } from "react";
+import { LoadingSection } from "@/components/ui/loading";
 
 const Coupons = () => {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | undefined>();
-  const { data: coupons = [] } = useFilteredCoupons(selectedCompanyId);
+  const { data: coupons = [], isLoading } = useFilteredCoupons(selectedCompanyId);
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
@@ -29,11 +30,11 @@ const Coupons = () => {
   const getStatusText = (status: string) => {
     switch (status) {
       case "active":
-        return "Aktiv";
+        return "Active";
       case "used":
-        return "Använd";
+        return "Used";
       case "expired":
-        return "Utgången";
+        return "Expired";
       default:
         return status;
     }
@@ -59,36 +60,36 @@ const Coupons = () => {
             <main className="p-6 space-y-6">
               {/* Page Header */}
               <div className="mb-8">
-                <h1 className="text-2xl font-bold text-foreground mb-2">Kuponger</h1>
-                <p className="text-muted-foreground">
-                  Övervaka utfärdade rabattkuponger och deras användning.
+                <h1 className="text-2xl font-semibold tracking-tight text-foreground mb-2">Coupons</h1>
+                <p className="text-sm text-muted-foreground">
+                  Monitor issued discount coupons and their usage.
                 </p>
               </div>
 
               {/* Metrics */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <ModernMetricCard
-                  title="Totala kuponger"
+                  title="Total coupons"
                   value={totalCoupons.toString()}
-                  change="Alla utfärdade"
+                  change="All issued"
                   variant="primary"
                 />
                 <ModernMetricCard
-                  title="Aktiva kuponger"
+                  title="Active coupons"
                   value={activeCoupons.toString()}
-                  change="Kan användas"
+                  change="Can be used"
                   variant="secondary"
                 />
                 <ModernMetricCard
-                  title="Använda kuponger"
+                  title="Used coupons"
                   value={usedCoupons.toString()}
-                  change={totalCoupons > 0 ? `${Math.round((usedCoupons / totalCoupons) * 100)}% inlösningsgrad` : "0% inlösningsgrad"}
+                  change={totalCoupons > 0 ? `${Math.round((usedCoupons / totalCoupons) * 100)}% redemption rate` : "0% redemption rate"}
                   variant="accent"
                 />
                 <ModernMetricCard
-                  title="Utgångna"
+                  title="Expired"
                   value={expiredCoupons.toString()}
-                  change="Ej använda"
+                  change="Not used"
                   variant="secondary"
                 />
               </div>
@@ -97,16 +98,17 @@ const Coupons = () => {
               <div className="flex gap-4 mb-6">
                 <Button className="gap-2">
                   <Download className="h-4 w-4" />
-                  Exportera kuponger
+                  Export coupons
                 </Button>
                 <Button variant="outline" className="gap-2">
                   <Eye className="h-4 w-4" />
-                  Visa statistik
+                  View stats
                 </Button>
               </div>
 
               {/* Coupons List */}
               <div className="space-y-4">
+                {isLoading && <LoadingSection message="Loading coupons..." />}
                 {coupons.map(coupon => {
                   const isExpired = new Date(coupon.expires_at) < new Date();
                   const isUsed = coupon.is_used;
@@ -131,12 +133,12 @@ const Coupons = () => {
                             </div>
                             
                             <p className="text-sm text-muted-foreground">
-                              Utfärdad {new Date(coupon.created_at).toLocaleDateString('sv-SE')}
+                              Issued {new Date(coupon.created_at).toLocaleDateString('en-GB')}
                             </p>
                             
                             {isUsed && coupon.used_at && (
                               <p className="text-sm text-success font-medium mt-1">
-                                ✓ Använd {new Date(coupon.used_at).toLocaleDateString('sv-SE')}
+                                ✓ Used {new Date(coupon.used_at).toLocaleDateString('sv-SE')}
                               </p>
                             )}
                           </div>
@@ -147,18 +149,18 @@ const Coupons = () => {
                             {coupon.discount}
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            Utgår: {new Date(coupon.expires_at).toLocaleDateString('sv-SE')}
+                            Expires: {new Date(coupon.expires_at).toLocaleDateString('en-GB')}
                           </div>
                           {status === "active" && (
                             <div className="flex items-center gap-1 text-xs text-success mt-1">
                               <CheckCircle className="h-3 w-3" />
-                              Giltig
+                              Valid
                             </div>
                           )}
                           {status === "expired" && (
                             <div className="flex items-center gap-1 text-xs text-destructive mt-1">
                               <Clock className="h-3 w-3" />
-                              Utgången
+                              Expired
                             </div>
                           )}
                         </div>
@@ -167,14 +169,14 @@ const Coupons = () => {
                   );
                 })}
                 
-                {coupons.length === 0 && (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                      <Gift className="h-8 w-8 text-muted-foreground" />
+                {!isLoading && coupons.length === 0 && (
+                  <Card className="p-8 text-center">
+                    <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                      <Gift className="h-7 w-7 text-muted-foreground" />
                     </div>
-                    <p className="text-lg font-medium text-foreground mb-2">Inga kuponger utfärdade</p>
-                    <p className="text-muted-foreground">Kuponger kommer att visas här när de utfärdas.</p>
-                  </div>
+                    <p className="text-base font-medium text-foreground mb-1">No coupons issued</p>
+                    <p className="text-sm text-muted-foreground">Coupons will appear here once they are issued.</p>
+                  </Card>
                 )}
               </div>
             </main>

@@ -18,7 +18,7 @@ const mockImages = [
     uploadDate: "2024-08-20",
     size: "2.4 MB",
     type: "image/jpeg",
-    status: "Godkänd",
+    status: "Approved",
     previewUrl: "/placeholder.svg"
   },
   {
@@ -27,7 +27,7 @@ const mockImages = [
     uploadDate: "2024-08-19",
     size: "1.8 MB",
     type: "image/png",
-    status: "Väntar",
+    status: "Pending",
     previewUrl: "/placeholder.svg"
   },
   {
@@ -36,7 +36,7 @@ const mockImages = [
     uploadDate: "2024-08-18",
     size: "8.7 MB",
     type: "video/mp4",
-    status: "Godkänd",
+    status: "Approved",
     previewUrl: "/placeholder.svg"
   },
   {
@@ -45,7 +45,7 @@ const mockImages = [
     uploadDate: "2024-08-17",
     size: "3.2 MB",
     type: "image/jpeg",
-    status: "Godkänd",
+    status: "Approved",
     previewUrl: "/placeholder.svg"
   },
   {
@@ -54,7 +54,7 @@ const mockImages = [
     uploadDate: "2024-08-16",
     size: "1.1 MB",
     type: "application/pdf",
-    status: "Godkänd",
+    status: "Approved",
     previewUrl: "/placeholder.svg"
   },
   {
@@ -63,7 +63,7 @@ const mockImages = [
     uploadDate: "2024-08-15",
     size: "4.5 MB",
     type: "image/jpeg",
-    status: "Avvisad",
+    status: "Rejected",
     previewUrl: "/placeholder.svg"
   }
 ];
@@ -76,9 +76,9 @@ const getFileIcon = (type: string) => {
 
 const getStatusBadge = (status: string) => {
   const variants = {
-    "Godkänd": "default",
-    "Väntar": "secondary",
-    "Avvisad": "destructive"
+    "Approved": "default",
+    "Pending": "secondary",
+    "Rejected": "destructive"
   };
   
   return (
@@ -90,7 +90,6 @@ const getStatusBadge = (status: string) => {
 
 const handleDownload = (filename: string) => {
   // Placeholder for download functionality
-  console.log(`Laddar ner: ${filename}`);
   // In a real app, this would trigger an actual download
 };
 
@@ -98,9 +97,9 @@ export const ImageDownloadTable = () => {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold">Uppladdade Filer</CardTitle>
+        <CardTitle className="text-2xl font-bold">Uploaded Files</CardTitle>
         <p className="text-muted-foreground">
-          Hantera och ladda ner filer som kunder har laddat upp via QR-kod scanning
+          Manage and download files that customers have uploaded via QR code scanning
         </p>
       </CardHeader>
       <CardContent>
@@ -108,12 +107,12 @@ export const ImageDownloadTable = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-16">Förhandsgranskning</TableHead>
-                <TableHead>Filnamn</TableHead>
-                <TableHead>Uppladdningsdatum</TableHead>
-                <TableHead>Storlek</TableHead>
+                <TableHead className="w-16">Preview</TableHead>
+                <TableHead>Filename</TableHead>
+                <TableHead>Upload Date</TableHead>
+                <TableHead>Size</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="w-24">Åtgärder</TableHead>
+                <TableHead className="w-24">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -136,11 +135,11 @@ export const ImageDownloadTable = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDownload(file.filename)}
-                      disabled={file.status !== "Godkänd"}
+                      disabled={file.status !== "Approved"}
                       className="h-8 w-8 p-0"
                     >
                       <Download className="h-4 w-4" />
-                      <span className="sr-only">Ladda ner {file.filename}</span>
+                      <span className="sr-only">Download {file.filename}</span>
                     </Button>
                   </TableCell>
                 </TableRow>

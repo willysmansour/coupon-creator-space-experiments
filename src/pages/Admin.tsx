@@ -91,7 +91,7 @@ const Admin = () => {
         .maybeSingle();
         
       if (error) {
-        console.log('Cannot access user data:', error);
+        // Cannot access user data - no permission
         toast.error("Kan inte tilldela roll - kontrollera att användaren finns");
         return;
       }

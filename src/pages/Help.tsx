@@ -19,43 +19,43 @@ const Help = () => {
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     toast({
-      title: "Meddelande skickat",
-      description: "Vi återkommer till dig inom 24 timmar.",
+      title: "Message sent",
+      description: "We will get back to you within 24 hours.",
     });
   };
 
   const faqItems = [
     {
-      question: "Hur laddar jag upp bilder till systemet?",
-      answer: "Du kan ladda upp bilder genom att gå till 'Uppladdningar' i menyn och dra och släppa dina filer eller klicka på 'Välj filer'. Systemet stöder JPG, PNG, GIF och MP4-format."
+      question: "How do I upload images to the system?",
+      answer: "Go to 'Uploads' in the menu and drag & drop your files or click 'Choose files'. Supported formats: JPG, PNG, GIF and MP4."
     },
     {
-      question: "Vilka filformat stöds?",
-      answer: "Vi stöder följande format: JPEG (.jpg, .jpeg), PNG (.png), GIF (.gif), och MP4 (.mp4) för videor. Maximal filstorlek är 50MB per fil."
+      question: "Which file formats are supported?",
+      answer: "We support JPEG (.jpg, .jpeg), PNG (.png), GIF (.gif), and MP4 (.mp4). Maximum file size is 50MB per file."
     },
     {
-      question: "Hur skapar jag en ny kampanj?",
-      answer: "Klicka på 'Skapa kampanj' i headern eller gå till 'Kampanjer'-sidan. Fyll i kampanjdetaljer som titel, rabatt, och giltighetstid. Din kampanj kommer att generera QR-koder automatiskt."
+      question: "How do I create a new campaign?",
+      answer: "Click 'Create campaign' in the header or go to the Campaigns page. Fill in title, discount, validity. QR codes are generated automatically."
     },
     {
-      question: "Kan jag se vem som har laddat ner mina bilder?",
-      answer: "Ja, i 'Analytics'-sektionen kan du se detaljerad statistik över nedladdningar, inklusive tidpunkt och geografisk plats för nedladdningarna."
+      question: "Can I see who downloaded my images?",
+      answer: "Yes, in Analytics you can see detailed download stats including time and location."
     },
     {
-      question: "Hur fungerar QR-koderna?",
-      answer: "Varje kampanj genererar unika QR-koder som kunder kan skanna. Detta leder dem till en sida där de kan ladda upp bilder och få rabattkuponger."
+      question: "How do the QR codes work?",
+      answer: "Each campaign generates unique QR codes. Customers scan them to upload content and receive discount coupons."
     },
     {
-      question: "Kan jag anpassa utseendet på uppladdningssidan?",
-      answer: "Ja, i 'Inställningar' kan du anpassa färger, logotyp och text som visas för dina kunder när de skannar QR-koden."
+      question: "Can I customize the upload page?",
+      answer: "Yes, in Settings you can customize colors, logo and copy shown to customers after scanning the QR code."
     },
     {
-      question: "Hur hanteras kunders personuppgifter?",
-      answer: "Vi följer GDPR och all data krypteras. Kundernas bilder sparas säkert och du kan ställa in automatisk radering efter en viss tid."
+      question: "How is personal data handled?",
+      answer: "We follow GDPR and encrypt all data. Customer images are stored securely and can be auto-deleted after a set time."
     },
     {
-      question: "Kan jag exportera data från systemet?",
-      answer: "Ja, du kan exportera kampanjdata, kundstatistik och bildmetadata i CSV- eller Excel-format från Analytics-sektionen."
+      question: "Can I export data?",
+      answer: "Yes, export campaign data, customer stats and image metadata in CSV/Excel from Analytics."
     }
   ];
 
@@ -75,9 +75,9 @@ const Help = () => {
           <main className="p-6">
             <div className="max-w-4xl mx-auto space-y-6">
               <div>
-                <h1 className="text-3xl font-bold text-foreground">Hjälp & Support</h1>
+                <h1 className="text-3xl font-bold text-foreground">Help & Support</h1>
                 <p className="text-muted-foreground mt-2">
-                  Hitta svar på vanliga frågor eller kontakta oss för hjälp
+                  Find answers to common questions or contact us for help
                 </p>
               </div>
 
@@ -89,31 +89,31 @@ const Help = () => {
                   </TabsTrigger>
                   <TabsTrigger value="contact" className="flex items-center gap-2">
                     <Mail className="h-4 w-4" />
-                    Kontakt
+                    Contact
                   </TabsTrigger>
                   <TabsTrigger value="guides" className="flex items-center gap-2">
                     <FileText className="h-4 w-4" />
-                    Guider
+                    Guides
                   </TabsTrigger>
                   <TabsTrigger value="videos" className="flex items-center gap-2">
                     <Video className="h-4 w-4" />
-                    Videor
+                    Videos
                   </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="faq" className="space-y-4">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Vanliga frågor</CardTitle>
+                      <CardTitle>Frequently asked questions</CardTitle>
                       <CardDescription>
-                        Sök efter svar på dina frågor
+                        Search for answers to your questions
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="relative">
                         <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                         <Input
-                          placeholder="Sök i FAQ..."
+                          placeholder="Search the FAQ..."
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           className="pl-10"
@@ -135,7 +135,7 @@ const Help = () => {
                       
                       {filteredFaq.length === 0 && (
                         <div className="text-center py-8 text-muted-foreground">
-                          Inga frågor hittades. Prova en annan sökning eller kontakta oss direkt.
+                          No questions found. Try another search or contact us directly.
                         </div>
                       )}
                     </CardContent>
@@ -146,35 +146,35 @@ const Help = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Card>
                       <CardHeader>
-                        <CardTitle>Kontakta oss</CardTitle>
+                        <CardTitle>Contact us</CardTitle>
                         <CardDescription>
-                          Skicka ett meddelande så återkommer vi
+                          Send a message and we will get back to you
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
                         <form onSubmit={handleContactSubmit} className="space-y-4">
                           <div className="space-y-2">
-                            <Label htmlFor="name">Namn</Label>
+                            <Label htmlFor="name">Name</Label>
                             <Input id="name" required />
                           </div>
                           
                           <div className="space-y-2">
-                            <Label htmlFor="email">E-post</Label>
+                            <Label htmlFor="email">Email</Label>
                             <Input id="email" type="email" required />
                           </div>
                           
                           <div className="space-y-2">
-                            <Label htmlFor="subject">Ämne</Label>
+                            <Label htmlFor="subject">Subject</Label>
                             <Input id="subject" required />
                           </div>
                           
                           <div className="space-y-2">
-                            <Label htmlFor="message">Meddelande</Label>
+                            <Label htmlFor="message">Message</Label>
                             <Textarea id="message" rows={5} required />
                           </div>
                           
                           <Button type="submit" className="w-full">
-                            Skicka meddelande
+                            Send message
                           </Button>
                         </form>
                       </CardContent>
@@ -182,7 +182,7 @@ const Help = () => {
 
                     <Card>
                       <CardHeader>
-                        <CardTitle>Kontaktinformation</CardTitle>
+                        <CardTitle>Contact information</CardTitle>
                         <CardDescription>
                           Andra sätt att nå oss
                         </CardDescription>
@@ -191,7 +191,7 @@ const Help = () => {
                         <div className="flex items-center gap-3">
                           <Mail className="h-5 w-5 text-primary" />
                           <div>
-                            <p className="font-medium">E-post</p>
+                            <p className="font-medium">Email</p>
                             <p className="text-sm text-muted-foreground">
                               support@donezo.se
                             </p>
@@ -201,7 +201,7 @@ const Help = () => {
                         <div className="flex items-center gap-3">
                           <Phone className="h-5 w-5 text-primary" />
                           <div>
-                            <p className="font-medium">Telefon</p>
+                            <p className="font-medium">Phone</p>
                             <p className="text-sm text-muted-foreground">
                               +46 8 123 45 67
                             </p>
@@ -213,13 +213,13 @@ const Help = () => {
                           <div>
                             <p className="font-medium">Live Chat</p>
                             <p className="text-sm text-muted-foreground">
-                              Måndag-Fredag 9:00-17:00
+                              Mon–Fri 9:00–17:00
                             </p>
                           </div>
                         </div>
                         
                         <Button variant="outline" className="w-full mt-4">
-                          Starta Live Chat
+                          Start Live Chat
                         </Button>
                       </CardContent>
                     </Card>
@@ -230,51 +230,51 @@ const Help = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Card className="cursor-pointer hover:shadow-md transition-shadow">
                       <CardHeader>
-                        <CardTitle className="text-lg">Komma igång</CardTitle>
+                        <CardTitle className="text-lg">Getting started</CardTitle>
                         <CardDescription>
-                          Lär dig grunderna i att använda Donezo
+                          Learn the basics of using Donezo
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
                         <p className="text-sm text-muted-foreground">
-                          En steg-för-steg guide som visar hur du skapar din första kampanj och kommer igång med systemet.
+                          A step-by-step guide to create your first campaign and get started.
                         </p>
                         <Button variant="outline" className="mt-3">
-                          Läs guide
+                          Read guide
                         </Button>
                       </CardContent>
                     </Card>
 
                     <Card className="cursor-pointer hover:shadow-md transition-shadow">
                       <CardHeader>
-                        <CardTitle className="text-lg">Kampanjhantering</CardTitle>
+                        <CardTitle className="text-lg">Campaign management</CardTitle>
                         <CardDescription>
-                          Skapa och hantera effektiva kampanjer
+                          Create and manage effective campaigns
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
                         <p className="text-sm text-muted-foreground">
-                          Lär dig hur du skapar engagerande kampanjer, optimerar QR-koder och ökar kundengagemang.
+                          Learn how to create engaging campaigns, optimize QR codes and increase engagement.
                         </p>
                         <Button variant="outline" className="mt-3">
-                          Läs guide
+                          Read guide
                         </Button>
                       </CardContent>
                     </Card>
 
                     <Card className="cursor-pointer hover:shadow-md transition-shadow">
                       <CardHeader>
-                        <CardTitle className="text-lg">Analytics & Rapporter</CardTitle>
+                        <CardTitle className="text-lg">Analytics & Reports</CardTitle>
                         <CardDescription>
-                          Förstå dina kampanjresultat
+                          Understand your campaign results
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
                         <p className="text-sm text-muted-foreground">
-                          Upptäck hur du tolkar data, skapar rapporter och optimerar dina kampanjer baserat på resultat.
+                          Discover how to interpret data, build reports and optimize based on results.
                         </p>
                         <Button variant="outline" className="mt-3">
-                          Läs guide
+                          Read guide
                         </Button>
                       </CardContent>
                     </Card>
@@ -283,15 +283,15 @@ const Help = () => {
                       <CardHeader>
                         <CardTitle className="text-lg">API Integration</CardTitle>
                         <CardDescription>
-                          Integrera med dina system
+                          Integrate with your systems
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
                         <p className="text-sm text-muted-foreground">
-                          Teknisk dokumentation för att integrera Donezo med dina befintliga system och verktyg.
+                          Technical documentation for integrating Donezo with your systems and tools.
                         </p>
                         <Button variant="outline" className="mt-3">
-                          Läs guide
+                          Read guide
                         </Button>
                       </CardContent>
                     </Card>
@@ -302,72 +302,72 @@ const Help = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-lg">Introduktionsvideo</CardTitle>
-                        <CardDescription>5 minuter</CardDescription>
+                        <CardTitle className="text-lg">Introduction video</CardTitle>
+                        <CardDescription>5 minutes</CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="aspect-video bg-muted rounded-lg flex items-center justify-center mb-3">
                           <Video className="h-12 w-12 text-muted-foreground" />
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          En snabb genomgång av Donezos huvudfunktioner och hur du kommer igång.
+                          A quick overview of Donezo's main features and how to get started.
                         </p>
                         <Button variant="outline" className="mt-3 w-full">
-                          Spela video
+                          Play video
                         </Button>
                       </CardContent>
                     </Card>
 
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-lg">Skapa din första kampanj</CardTitle>
-                        <CardDescription>8 minuter</CardDescription>
+                        <CardTitle className="text-lg">Create your first campaign</CardTitle>
+                        <CardDescription>8 minutes</CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="aspect-video bg-muted rounded-lg flex items-center justify-center mb-3">
                           <Video className="h-12 w-12 text-muted-foreground" />
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          Steg-för-steg genomgång av hur du skapar och lanserar din första kampanj.
+                          Step-by-step walkthrough on creating and launching your first campaign.
                         </p>
                         <Button variant="outline" className="mt-3 w-full">
-                          Spela video
+                          Play video
                         </Button>
                       </CardContent>
                     </Card>
 
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-lg">Analytics djupdykning</CardTitle>
-                        <CardDescription>12 minuter</CardDescription>
+                        <CardTitle className="text-lg">Analytics deep dive</CardTitle>
+                        <CardDescription>12 minutes</CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="aspect-video bg-muted rounded-lg flex items-center justify-center mb-3">
                           <Video className="h-12 w-12 text-muted-foreground" />
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          Lär dig tolka och använda analytics-data för att optimera dina kampanjer.
+                          Learn to interpret and use analytics data to optimize campaigns.
                         </p>
                         <Button variant="outline" className="mt-3 w-full">
-                          Spela video
+                          Play video
                         </Button>
                       </CardContent>
                     </Card>
 
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-lg">Avancerade funktioner</CardTitle>
-                        <CardDescription>15 minuter</CardDescription>
+                        <CardTitle className="text-lg">Advanced features</CardTitle>
+                        <CardDescription>15 minutes</CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="aspect-video bg-muted rounded-lg flex items-center justify-center mb-3">
                           <Video className="h-12 w-12 text-muted-foreground" />
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          Upptäck avancerade funktioner som API-integration, webhooks och automatisering.
+                          Discover advanced features like API integration, webhooks and automation.
                         </p>
                         <Button variant="outline" className="mt-3 w-full">
-                          Spela video
+                          Play video
                         </Button>
                       </CardContent>
                     </Card>
