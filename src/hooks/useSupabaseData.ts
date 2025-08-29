@@ -20,14 +20,12 @@ const defaultQueryOptions = {
   staleTime: 5 * 60 * 1000, // 5 minutes
   gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
   refetchOnWindowFocus: false,
-  refetchOnMount: false,
-  refetchOnReconnect: false,
+  refetchOnMount: true, // ✅ Fix: Always refetch on mount for mobile
+  refetchOnReconnect: true, // ✅ Fix: Refetch on reconnect for mobile
   retry: (failureCount: number, error: any) => {
-    // Don't retry on 4xx errors
-    if (error?.status >= 400 && error?.status < 500) {
-      return false;
-    }
-    return failureCount < 2; // Reduced retry count for better performance
+    // ✅ Fix: Retry on all errors for mobile compatibility
+    if (failureCount >= 3) return false; // Max 3 retries
+    return true; // Always retry for mobile compatibility
   },
 };
 
