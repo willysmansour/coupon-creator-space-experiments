@@ -10,7 +10,15 @@ import { toast } from 'sonner';
 const Coupon = () => {
   const { couponId } = useParams<{ couponId: string }>();
   const navigate = useNavigate();
-  const { data: coupon, isLoading } = useCoupon(couponId || '');
+  
+  // Debug logging för mobil
+  console.log('🔍 Coupon component mounted with ID:', couponId);
+  
+  const { data: coupon, isLoading, error } = useCoupon(couponId || '');
+  
+  // Debug logging för useCoupon resultat
+  console.log('🔍 useCoupon result:', { coupon, isLoading, error, couponId });
+  
   const redeemCoupon = useRedeemCoupon();
   const [isRedeeming, setIsRedeeming] = useState(false);
 

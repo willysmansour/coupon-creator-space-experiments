@@ -153,9 +153,13 @@ export const useCouponByUpload = (uploadId: string) => {
 
 // Add back the missing useCoupon hook
 export const useCoupon = (id: string) => {
+  console.log('🔍 useCoupon called with ID:', id);
+  
   return useQuery({
     queryKey: ['coupon', id],
     queryFn: async () => {
+      console.log('🔍 useCoupon queryFn executing for ID:', id);
+      
       const { data, error } = await supabase
         .from('coupons')
         .select(`
@@ -170,7 +174,14 @@ export const useCoupon = (id: string) => {
         .eq('id', id)
         .single();
       
-      if (error) throw error;
+      console.log('🔍 useCoupon Supabase result:', { data, error, id });
+      
+      if (error) {
+        console.error('🔍 useCoupon Supabase error:', error);
+        throw error;
+      }
+      
+      console.log('🔍 useCoupon returning data:', data);
       return data as CouponWithCompany;
     },
     enabled: !!id,
