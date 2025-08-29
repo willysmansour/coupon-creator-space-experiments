@@ -1,3 +1,4 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -11,7 +12,7 @@ interface ModernHeaderProps {
   onCompanyChange?: (companyId: string | undefined) => void;
 }
 
-export function ModernHeader({ selectedCompanyId, onCompanyChange }: ModernHeaderProps = {}) {
+export const ModernHeader = React.memo(({ selectedCompanyId, onCompanyChange }: ModernHeaderProps = {}) => {
   const { data: userRole } = useUserRole();
 
   const getRoleDisplay = () => {
@@ -91,4 +92,6 @@ export function ModernHeader({ selectedCompanyId, onCompanyChange }: ModernHeade
       </div>
     </header>
   );
-}
+});
+
+ModernHeader.displayName = 'ModernHeader';

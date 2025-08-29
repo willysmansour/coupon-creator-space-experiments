@@ -1,3 +1,4 @@
+import React, { useState, useMemo } from "react";
 import { ModernSidebar } from "@/components/ModernSidebar";
 import { ModernHeader } from "@/components/ModernHeader";
 import { ModernMetricCard } from "@/components/ModernMetricCard";
@@ -7,40 +8,42 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Users, Mail, Eye, Gift } from "lucide-react";
 import { useFilteredUploads } from "@/hooks/useFilteredSupabaseData";
-import { useState } from "react";
 import { LoadingSection } from "@/components/ui/loading";
 
-const Customers = () => {
+const Customers = React.memo(() => {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | undefined>();
   const { data: uploads = [], isLoading } = useFilteredUploads(selectedCompanyId);
   
-  // Create customer list from uploads
-  const customers = uploads.reduce((acc, upload) => {
-    if (upload.customer_name && upload.customer_email) {
-      const existingCustomer = acc.find(c => c.email === upload.customer_email);
-      if (existingCustomer) {
-        existingCustomer.totalSubmissions++;
-        if (upload.status === 'approved') {
-          existingCustomer.totalCoupons++;
+  // Memoized customer data processing to prevent recalculation on every render
+  const customers = useMemo(() => {
+    return uploads.reduce((acc, upload) => {
+      if (upload.customer_name && upload.customer_email) {
+        const existingCustomer = acc.find(c => c.email === upload.customer_email);
+        if (existingCustomer) {
+          existingCustomer.totalSubmissions++;
+          if (upload.status === 'approved') {
+            existingCustomer.totalCoupons++;
+          }
+        } else {
+          acc.push({
+            id: upload.id,
+            name: upload.customer_name,
+            email: upload.customer_email,
+            totalSubmissions: 1,
+            totalCoupons: upload.status === 'approved' ? 1 : 0,
+            status: upload.status === 'approved' ? 'active' : 'inactive',
+            joinDate: new Date(upload.created_at).toLocaleDateString('en-GB'),
+            lastActivity: new Date(upload.updated_at).toLocaleDateString('en-GB'),
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(upload.customer_name)}&background=random`
+          });
         }
-      } else {
-        acc.push({
-          id: upload.id,
-          name: upload.customer_name,
-          email: upload.customer_email,
-          totalSubmissions: 1,
-          totalCoupons: upload.status === 'approved' ? 1 : 0,
-          status: upload.status === 'approved' ? 'active' : 'inactive',
-          joinDate: new Date(upload.created_at).toLocaleDateString('sv-SE'),
-          lastActivity: new Date(upload.updated_at).toLocaleDateString('sv-SE'),
-          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(upload.customer_name)}&background=random`
-        });
       }
-    }
-    return acc;
-  }, [] as any[]);
+      return acc;
+    }, [] as any[]);
+  }, [uploads]);
 
-  const getStatusColor = (status: string) => {
+  // Memoized status color function to prevent recreation
+  const getStatusColor = useMemo(() => (status: string) => {
     switch (status) {
       case "vip":
         return "bg-primary/10 text-primary border-primary/20";
@@ -51,9 +54,10 @@ const Customers = () => {
       default:
         return "bg-muted text-muted-foreground";
     }
-  };
+  }, []);
 
-  const getStatusText = (status: string) => {
+  // Memoized status text function to prevent recreation
+  const getStatusText = useMemo(() => (status: string) => {
     switch (status) {
       case "vip":
         return "VIP";
@@ -64,12 +68,17 @@ const Customers = () => {
       default:
         return status;
     }
-  };
+  }, []);
 
-  const activeCustomers = customers.filter(c => c.status !== "inactive").length;
-  const vipCustomers = customers.filter(c => c.status === "vip").length;
-  const totalSubmissions = customers.reduce((sum, c) => sum + c.totalSubmissions, 0);
-  const totalCoupons = customers.reduce((sum, c) => sum + c.totalCoupons, 0);
+  // Memoized statistics to prevent recalculation
+  const stats = useMemo(() => {
+    const activeCustomers = customers.filter(c => c.status !== "inactive").length;
+    const vipCustomers = customers.filter(c => c.status === "vip").length;
+    const totalSubmissions = customers.reduce((sum, c) => sum + c.totalSubmissions, 0);
+    const totalCoupons = customers.reduce((sum, c) => sum + c.totalCoupons, 0);
+    
+    return { activeCustomers, vipCustomers, totalSubmissions, totalCoupons };
+  }, [customers]);
 
   return (
     <SidebarProvider>
@@ -98,19 +107,19 @@ const Customers = () => {
               />
               <ModernMetricCard
                 title="Active customers"
-                value={activeCustomers.toString()}
-                change={`${Math.round((activeCustomers / customers.length) * 100)}% of total`}
+                value={stats.activeCustomers.toString()}
+                change={`${Math.round((stats.activeCustomers / customers.length) * 100)}% of total`}
                 variant="secondary"
               />
               <ModernMetricCard
                 title="VIP customers"
-                value={vipCustomers.toString()}
+                value={stats.vipCustomers.toString()}
                 change="Highly engaged"
                 variant="accent"
               />
               <ModernMetricCard
                 title="Engagement"
-                value={customers.length > 0 ? `${Math.round((totalCoupons / totalSubmissions) * 100)}%` : '0%'}
+                value={customers.length > 0 ? `${Math.round((stats.totalCoupons / stats.totalSubmissions) * 100)}%` : '0%'}
                 change="Redemption rate"
                 variant="secondary"
               />
@@ -139,6 +148,7 @@ const Customers = () => {
                           src={customer.avatar} 
                           alt={customer.name}
                           className="w-full h-full object-cover"
+                          loading="lazy"
                         />
                       </div>
                       
@@ -195,6 +205,8 @@ const Customers = () => {
       </div>
     </SidebarProvider>
   );
-};
+});
+
+Customers.displayName = 'Customers';
 
 export default Customers;

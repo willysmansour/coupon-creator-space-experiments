@@ -2,15 +2,16 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-export interface Campaign {
+// Types
+export interface Company {
   id: string;
-  company_id: string;
-  title: string;
-  description?: string;
-  discount: string;
-  valid_from: string;
-  valid_to: string;
-  status: 'draft' | 'active' | 'ended';
+  name: string;
+  logo?: string;
+  discount_percentage?: number;
+  content_types?: string[];
+  content_description?: string;
+  discount_active?: boolean;
+  discount_expires_at?: string;
   created_at: string;
   updated_at: string;
 }
@@ -41,29 +42,28 @@ export interface Coupon {
   updated_at: string;
 }
 
-export interface Company {
-  id: string;
-  name: string;
-  logo?: string;
-  discount_percentage?: number;
-  content_types?: string[];
-  content_description?: string;
-  discount_active?: boolean;
-  discount_expires_at?: string;
-  created_at: string;
-  updated_at: string;
+export interface UserRole {
+  role: 'super_admin' | 'company_admin' | 'customer' | 'anon';
+  company_id?: string;
+  company_name?: string;
+  email?: string;
 }
 
-export interface CouponCompany {
-  id: string;
-  name: string;
-  logo?: string;
-  discount_percentage?: number;
-}
-
-export interface CouponWithCompany extends Coupon {
-  company: CouponCompany;
-}
+// Optimized query options for better performance
+const defaultQueryOptions = {
+  staleTime: 5 * 60 * 1000, // 5 minutes
+  gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+  refetchOnWindowFocus: false,
+  refetchOnMount: false,
+  refetchOnReconnect: false,
+  retry: (failureCount: number, error: any) => {
+    // Don't retry on 4xx errors
+    if (error?.status >= 400 && error?.status < 500) {
+      return false;
+    }
+    return failureCount < 2; // Reduced retry count for better performance
+  },
+};
 
 // Companies hooks
 export const useCompanies = () => {
@@ -77,7 +77,8 @@ export const useCompanies = () => {
       
       if (error) throw error;
       return data as Company[];
-    }
+    },
+    ...defaultQueryOptions,
   });
 };
 
@@ -94,7 +95,8 @@ export const useCompany = (id: string) => {
       if (error) throw error;
       return data as Company;
     },
-    enabled: !!id
+    enabled: !!id,
+    ...defaultQueryOptions,
   });
 };
 
@@ -109,47 +111,9 @@ export const useCampaigns = () => {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data as Campaign[];
-    }
-  });
-};
-
-export const useActiveCampaigns = (companyId?: string) => {
-  return useQuery({
-    queryKey: ['campaigns', 'active', companyId],
-    queryFn: async () => {
-      let query = supabase
-        .from('campaigns')
-        .select('*')
-        .eq('status', 'active')
-        .order('created_at', { ascending: false });
-      
-      if (companyId) {
-        query = query.eq('company_id', companyId);
-      }
-      
-      const { data, error } = await query;
-      
-      if (error) throw error;
-      return data as Campaign[];
-    }
-  });
-};
-
-export const useCampaign = (id: string) => {
-  return useQuery({
-    queryKey: ['campaign', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('campaigns')
-        .select('*')
-        .eq('id', id)
-        .single();
-      
-      if (error) throw error;
-      return data as Campaign;
+      return data as any[];
     },
-    enabled: !!id
+    ...defaultQueryOptions,
   });
 };
 
@@ -161,11 +125,12 @@ export const useUploads = () => {
       const { data, error } = await supabase
         .from('uploads')
         .select('*')
-        .order('submitted_at', { ascending: false });
+        .order('created_at', { ascending: false });
       
       if (error) throw error;
       return data as Upload[];
-    }
+    },
+    ...defaultQueryOptions,
   });
 };
 
@@ -182,7 +147,8 @@ export const useUpload = (id: string) => {
       if (error) throw error;
       return data as Upload;
     },
-    enabled: !!id
+    enabled: !!id,
+    ...defaultQueryOptions,
   });
 };
 
@@ -198,10 +164,30 @@ export const useCoupons = () => {
       
       if (error) throw error;
       return data as Coupon[];
-    }
+    },
+    ...defaultQueryOptions,
   });
 };
 
+export const useCouponByUpload = (uploadId: string) => {
+  return useQuery({
+    queryKey: ['coupon-by-upload', uploadId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('coupons')
+        .select('*')
+        .eq('upload_id', uploadId)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows returned
+      return data as Coupon | null;
+    },
+    enabled: !!uploadId,
+    ...defaultQueryOptions,
+  });
+};
+
+// Add back the missing useCoupon hook
 export const useCoupon = (id: string) => {
   return useQuery({
     queryKey: ['coupon', id],
@@ -221,51 +207,96 @@ export const useCoupon = (id: string) => {
         .single();
       
       if (error) throw error;
-      return data as CouponWithCompany;
+      return data as any;
     },
-    enabled: !!id
+    enabled: !!id,
+    ...defaultQueryOptions,
   });
 };
 
-export const useCouponByUpload = (uploadId: string) => {
+// User roles hook
+export const useUserRole = () => {
   return useQuery({
-    queryKey: ['coupon', 'upload', uploadId],
+    queryKey: ['user-role'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('coupons')
-        .select('*')
-        .eq('upload_id', uploadId)
-        .maybeSingle();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
       
-      if (error) throw error;
-      return data as Coupon | null;
+      if (userError || !user) {
+        return { role: 'anon' as const };
+      }
+
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select(`
+          role,
+          company_id,
+          companies(name)
+        `)
+        .eq('user_id', user.id)
+        .single();
+
+      if (roleError && roleError.code !== 'PGRST116') {
+        console.error('Role lookup error:', roleError);
+      }
+
+      if (roleData) {
+        return {
+          role: roleData.role,
+          company_id: roleData.company_id,
+          company_name: (roleData.companies as any)?.name,
+          email: user.email,
+        } as UserRole;
+      }
+
+      return { role: 'customer' as const, email: user.email };
     },
-    enabled: !!uploadId
+    enabled: true,
+    retry: 1, // Reduced retry for auth queries
+    staleTime: 2 * 60 * 1000, // 2 minutes for auth data
   });
+};
+
+// File upload function
+export const uploadFile = async (file: File): Promise<string> => {
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+  
+  const { data, error } = await supabase.storage
+    .from('uploads')
+    .upload(fileName, file);
+
+  if (error) throw error;
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('uploads')
+    .getPublicUrl(fileName);
+
+  return publicUrl;
 };
 
 // Mutation hooks
 export const useCreateUpload = () => {
   const queryClient = useQueryClient();
   
-return useMutation({
-  mutationFn: async (upload: {
-    company_id: string;
-    customer_name?: string;
-    customer_email?: string;
-    image_url: string;
-    message?: string;
-  }) => {
-    const { data, error } = await supabase
-      .from('uploads')
-      .insert(upload)
-      .select()
-      .single();
-      
-      if (error) throw error;
-      return data as Upload;
+  return useMutation({
+    mutationFn: async (upload: {
+      company_id: string;
+      customer_name?: string;
+      customer_email?: string;
+      image_url: string;
+      message?: string;
+    }) => {
+      const { data, error } = await supabase
+        .from('uploads')
+        .insert(upload)
+        .select()
+        .single();
+        
+        if (error) throw error;
+        return data as Upload;
     },
     onSuccess: () => {
+      // Optimize cache invalidation
       queryClient.invalidateQueries({ queryKey: ['uploads'] });
       toast.success('Upload submitted successfully!');
     },
@@ -296,6 +327,7 @@ export const useUpdateUploadStatus = () => {
       return data as Upload;
     },
     onSuccess: (data) => {
+      // Optimize cache updates
       queryClient.invalidateQueries({ queryKey: ['uploads'] });
       queryClient.invalidateQueries({ queryKey: ['upload', data.id] });
       toast.success(`Upload ${data.status} successfully!`);
@@ -319,6 +351,7 @@ export const useRedeemCoupon = () => {
       return (data?.coupon ?? null) as Coupon;
     },
     onSuccess: (data) => {
+      // Optimize cache invalidation
       queryClient.invalidateQueries({ queryKey: ['coupons'] });
       if (data?.id) {
         queryClient.invalidateQueries({ queryKey: ['coupon', data.id] });
@@ -342,10 +375,7 @@ export const useUpdateUploadWithCustomer = () => {
     }) => {
       const { data, error } = await supabase
         .from('uploads')
-        .update({ 
-          customer_name, 
-          customer_email 
-        })
+        .update({ customer_name, customer_email })
         .eq('id', id)
         .select()
         .single();
@@ -354,12 +384,13 @@ export const useUpdateUploadWithCustomer = () => {
       return data as Upload;
     },
     onSuccess: (data) => {
+      // Optimize cache updates
       queryClient.invalidateQueries({ queryKey: ['uploads'] });
       queryClient.invalidateQueries({ queryKey: ['upload', data.id] });
-      toast.success('Customer details saved successfully!');
+      toast.success('Customer details updated successfully!');
     },
     onError: (error) => {
-      toast.error('Failed to save customer details: ' + error.message);
+      toast.error('Failed to update customer details: ' + error.message);
     }
   });
 };
@@ -368,51 +399,19 @@ export const useDeleteUpload = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (uploadId: string) => {
-      // First get the upload to get the image URL for cleanup
-      const { data: upload, error: fetchError } = await supabase
-        .from('uploads')
-        .select('image_url')
-        .eq('id', uploadId)
-        .single();
-        
-      if (fetchError) throw fetchError;
-      
-      // Delete related coupons first (if any)
-      const { error: couponError } = await supabase
-        .from('coupons')
-        .delete()
-        .eq('upload_id', uploadId);
-        
-      if (couponError) console.warn('Failed to delete related coupons:', couponError);
-      
-      // Delete the upload record
-      const { error: deleteError } = await supabase
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
         .from('uploads')
         .delete()
-        .eq('id', uploadId);
-        
-      if (deleteError) throw deleteError;
+        .eq('id', id);
       
-      // Try to delete the image from storage (optional cleanup)
-      if (upload?.image_url) {
-        try {
-          const fileName = upload.image_url.split('/').pop();
-          if (fileName) {
-            await supabase.storage
-              .from('uploads')
-              .remove([fileName]);
-          }
-        } catch (storageError) {
-          console.warn('Failed to delete image from storage:', storageError);
-        }
-      }
-      
-      return uploadId;
+      if (error) throw error;
+      return id;
     },
-    onSuccess: () => {
+    onSuccess: (id) => {
+      // Optimize cache updates
       queryClient.invalidateQueries({ queryKey: ['uploads'] });
-      queryClient.invalidateQueries({ queryKey: ['coupons'] });
+      queryClient.removeQueries({ queryKey: ['upload', id] });
       toast.success('Upload deleted successfully!');
     },
     onError: (error) => {
@@ -421,20 +420,142 @@ export const useDeleteUpload = () => {
   });
 };
 
-// File upload helper
-export const uploadFile = async (file: File, bucket = 'uploads'): Promise<string> => {
-  const fileExt = file.name.split('.').pop();
-  const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+// Profile hooks
+export const useCurrentProfile = () => {
+  return useQuery({
+    queryKey: ['profile'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      return data;
+    },
+    enabled: true,
+    ...defaultQueryOptions,
+  });
+};
+
+export const useUpsertProfile = () => {
+  const queryClient = useQueryClient();
   
-  const { data, error } = await supabase.storage
-    .from(bucket)
-    .upload(fileName, file);
-    
-  if (error) throw error;
+  return useMutation({
+    mutationFn: async (profile: any) => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .upsert(profile)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+      toast.success('Profile updated successfully!');
+    },
+    onError: (error) => {
+      toast.error('Failed to update profile: ' + error.message);
+    }
+  });
+};
+
+// Company management hooks
+export const useUpdateCompany = () => {
+  const queryClient = useQueryClient();
   
-  const { data: { publicUrl } } = supabase.storage
-    .from(bucket)
-    .getPublicUrl(fileName);
-    
-  return publicUrl;
+  return useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Company> }) => {
+      const { data, error } = await supabase
+        .from('companies')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data as Company;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['companies'] });
+      queryClient.invalidateQueries({ queryKey: ['company', data.id] });
+      toast.success('Company updated successfully!');
+    },
+    onError: (error) => {
+      toast.error('Failed to update company: ' + error.message);
+    }
+  });
+};
+
+// Company-aware data hooks
+export const useCompanyAwareCompanies = () => {
+  const { data: userRole } = useUserRole();
+  
+  return useQuery({
+    queryKey: ['company-aware-companies', userRole?.company_id],
+    queryFn: async () => {
+      if (userRole?.role === 'super_admin') {
+        // Super admin can see all companies
+        const { data, error } = await supabase
+          .from('companies')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        return data as Company[];
+      } else if (userRole?.company_id) {
+        // Company admin can only see their own company
+        const { data, error } = await supabase
+          .from('companies')
+          .select('*')
+          .eq('id', userRole.company_id);
+        
+        if (error) throw error;
+        return data as Company[];
+      }
+      
+      return [];
+    },
+    enabled: !!userRole,
+    ...defaultQueryOptions,
+  });
+};
+
+// Role assignment hook (super admin only)
+export const useAssignRole = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ userId, role, companyId }: { 
+      userId: string; 
+      role: 'super_admin' | 'company_admin' | 'customer'; 
+      companyId?: string; 
+    }) => {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .upsert({
+          user_id: userId,
+          role,
+          company_id: companyId,
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-role'] });
+      toast.success('Role assigned successfully!');
+    },
+    onError: (error) => {
+      toast.error('Failed to assign role: ' + error.message);
+    }
+  });
 };

@@ -1,3 +1,4 @@
+import React from "react";
 import { 
   BarChart3, 
   Gift, 
@@ -50,7 +51,7 @@ const getMenuItems = (userRole?: string) => {
   };
 };
 
-export function ModernSidebar() {
+export const ModernSidebar = React.memo(() => {
   const { state } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
@@ -59,7 +60,7 @@ export function ModernSidebar() {
 
   const menuItems = getMenuItems(userRole?.role);
   const isActive = (path: string) => currentPath === path;
-  const getNavCls = ({ isActive }: { isActive: boolean }) =>
+  const getNavCls = (isActive: boolean) =>
     isActive ? "bg-primary text-primary-foreground font-medium shadow-sm" : "hover:bg-accent text-muted-foreground hover:text-foreground";
 
   return (
@@ -89,7 +90,7 @@ export function ModernSidebar() {
                       to={item.url} 
                       end 
                       className={({ isActive }) => 
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${getNavCls({ isActive })}`
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${getNavCls(isActive)}`
                       }
                     >
                       <item.icon className="h-5 w-5" />
@@ -113,8 +114,9 @@ export function ModernSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink 
                       to={item.url} 
+                      end 
                       className={({ isActive }) => 
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${getNavCls({ isActive })}`
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${getNavCls(isActive)}`
                       }
                     >
                       <item.icon className="h-5 w-5" />
@@ -129,4 +131,6 @@ export function ModernSidebar() {
       </SidebarContent>
     </Sidebar>
   );
-}
+});
+
+ModernSidebar.displayName = 'ModernSidebar';

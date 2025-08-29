@@ -5,29 +5,31 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppProvider } from "@/contexts/AppContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import Index from "./pages/Index";
-import DiscountSettings from "./pages/DiscountSettings";
-import Uploads from "./pages/Uploads";
-import Coupons from "./pages/Coupons";
-import Analytics from "./pages/Analytics";
-import Customers from "./pages/Customers";
-import Settings from "./pages/Settings";
-import Help from "./pages/Help";
-import Logout from "./pages/Logout";
-import NotFound from "./pages/NotFound";
+import { Suspense, lazy } from "react";
+import { LoadingPage } from "@/components/ui/loading";
 
-import Upload from "./pages/Upload";
-import CompanyWelcome from "./pages/CompanyWelcome";
-import ThankYou from "./pages/ThankYou";
-import Coupon from "./pages/Coupon";
-import Auth from "./pages/Auth";
-import Admin from "./pages/Admin";
-import { RequireAuth } from "./components/auth/RequireAuth";
+// Lazy load heavy pages for better performance
+const Index = lazy(() => import("./pages/Index"));
+const DiscountSettings = lazy(() => import("./pages/DiscountSettings"));
+const Uploads = lazy(() => import("./pages/Uploads"));
+const Coupons = lazy(() => import("./pages/Coupons"));
+const Analytics = lazy(() => import("./pages/Analytics"));
+const Customers = lazy(() => import("./pages/Customers"));
+const Settings = lazy(() => import("./pages/Settings"));
+const Help = lazy(() => import("./pages/Help"));
+const Logout = lazy(() => import("./pages/Logout"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Upload = lazy(() => import("./pages/Upload"));
+const CompanyWelcome = lazy(() => import("./pages/CompanyWelcome"));
+const ThankYou = lazy(() => import("./pages/ThankYou"));
+const Coupon = lazy(() => import("./pages/Coupon"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Admin = lazy(() => import("./pages/Admin"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: (failureCount, error) => {
+      retry: (failureCount, error: any) => {
         // Don't retry on 4xx errors
         if (error?.status >= 400 && error?.status < 500) {
           return false;
@@ -43,6 +45,9 @@ const queryClient = new QueryClient({
   },
 });
 
+// Loading fallback component
+const PageLoader = () => <LoadingPage message="Loading page..." />;
+
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
@@ -51,25 +56,89 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<RequireAuth><Index /></RequireAuth>} />
-            <Route path="/campaigns" element={<RequireAuth><DiscountSettings /></RequireAuth>} />
-            <Route path="/uploads" element={<RequireAuth><Uploads /></RequireAuth>} />
-            <Route path="/coupons" element={<RequireAuth><Coupons /></RequireAuth>} />
-            <Route path="/analytics" element={<RequireAuth><Analytics /></RequireAuth>} />
-            <Route path="/customers" element={<RequireAuth><Customers /></RequireAuth>} />
-            <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
-            <Route path="/help" element={<RequireAuth><Help /></RequireAuth>} />
-            <Route path="/logout" element={<RequireAuth><Logout /></RequireAuth>} />
-            <Route path="/admin" element={<RequireAuth><Admin /></RequireAuth>} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/company/:companyId" element={<CompanyWelcome />} />
-            <Route path="/company/:companyId/upload" element={<Upload />} />
-            <Route path="/thank-you/:uploadId" element={<ThankYou />} />
-            <Route path="/coupon/:couponId" element={<Coupon />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+            <Routes>
+              <Route path="/" element={
+                <Suspense fallback={<PageLoader />}>
+                  <Index />
+                </Suspense>
+              } />
+              <Route path="/campaigns" element={
+                <Suspense fallback={<PageLoader />}>
+                  <DiscountSettings />
+                </Suspense>
+              } />
+              <Route path="/uploads" element={
+                <Suspense fallback={<PageLoader />}>
+                  <Uploads />
+                </Suspense>
+              } />
+              <Route path="/coupons" element={
+                <Suspense fallback={<PageLoader />}>
+                  <Coupons />
+                </Suspense>
+              } />
+              <Route path="/analytics" element={
+                <Suspense fallback={<PageLoader />}>
+                  <Analytics />
+                </Suspense>
+              } />
+              <Route path="/customers" element={
+                <Suspense fallback={<PageLoader />}>
+                  <Customers />
+                </Suspense>
+              } />
+              <Route path="/settings" element={
+                <Suspense fallback={<PageLoader />}>
+                  <Settings />
+                </Suspense>
+              } />
+              <Route path="/help" element={
+                <Suspense fallback={<PageLoader />}>
+                  <Help />
+                </Suspense>
+              } />
+              <Route path="/logout" element={
+                <Suspense fallback={<PageLoader />}>
+                  <Logout />
+                </Suspense>
+              } />
+              <Route path="/admin" element={
+                <Suspense fallback={<PageLoader />}>
+                  <Admin />
+                </Suspense>
+              } />
+              <Route path="/auth" element={
+                <Suspense fallback={<PageLoader />}>
+                  <Auth />
+                </Suspense>
+              } />
+              <Route path="/company/:companyId" element={
+                <Suspense fallback={<PageLoader />}>
+                  <CompanyWelcome />
+                </Suspense>
+              } />
+              <Route path="/company/:companyId/upload" element={
+                <Suspense fallback={<PageLoader />}>
+                  <Upload />
+                </Suspense>
+              } />
+              <Route path="/thank-you/:uploadId" element={
+                <Suspense fallback={<PageLoader />}>
+                  <ThankYou />
+                </Suspense>
+              } />
+              <Route path="/coupon/:couponId" element={
+                <Suspense fallback={<PageLoader />}>
+                  <Coupon />
+                </Suspense>
+              } />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={
+                <Suspense fallback={<PageLoader />}>
+                  <NotFound />
+                </Suspense>
+              } />
+            </Routes>
           </BrowserRouter>
         </AppProvider>
       </TooltipProvider>

@@ -116,4 +116,59 @@ All colors MUST be HSL.
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+
+  /* Performance optimizations */
+  img {
+    /* Optimize image rendering */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    /* Prevent layout shift */
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Optimize animations for users who prefer reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Optimize scrolling performance */
+  html {
+    scroll-behavior: smooth;
+    /* Enable hardware acceleration */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Optimize focus indicators for better accessibility */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* Optimize button and input interactions */
+  button, input, textarea, select {
+    /* Prevent text selection on double-click */
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Optimize table rendering */
+  table {
+    /* Prevent layout shifts */
+    table-layout: fixed;
+    width: 100%;
+  }
+
+  /* Optimize form elements */
+  input, textarea, select {
+    /* Prevent zoom on iOS */
+    font-size: 16px;
+  }
 }
