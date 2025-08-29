@@ -160,7 +160,12 @@ export const useCoupon = (id: string) => {
     queryFn: async () => {
       console.log('🔍 useCoupon queryFn executing for ID:', id);
       
-      const { data, error } = await supabase
+      // ✅ Fix: Add timeout for mobile compatibility
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Request timeout - please try again')), 10000);
+      });
+      
+      const supabasePromise = supabase
         .from('coupons')
         .select(`
           *,
@@ -174,15 +179,23 @@ export const useCoupon = (id: string) => {
         .eq('id', id)
         .single();
       
-      console.log('🔍 useCoupon Supabase result:', { data, error, id });
-      
-      if (error) {
-        console.error('🔍 useCoupon Supabase error:', error);
+      try {
+        const result = await Promise.race([supabasePromise, timeoutPromise]);
+        const { data, error } = result as any;
+        
+        console.log('🔍 useCoupon Supabase result:', { data, error, id });
+        
+        if (error) {
+          console.error('🔍 useCoupon Supabase error:', error);
+          throw error;
+        }
+        
+        console.log('🔍 useCoupon returning data:', data);
+        return data as CouponWithCompany;
+      } catch (error) {
+        console.error('🔍 useCoupon error:', error);
         throw error;
       }
-      
-      console.log('🔍 useCoupon returning data:', data);
-      return data as CouponWithCompany;
     },
     enabled: !!id,
     ...defaultQueryOptions,
