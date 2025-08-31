@@ -22,7 +22,7 @@ serve(async (req) => {
       )
     }
 
-    // Create Supabase client with service role (bypasses RLS)
+    // Create Supabase client with service role (bypasses RLS completely)
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
