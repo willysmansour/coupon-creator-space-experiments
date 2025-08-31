@@ -4,25 +4,51 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { LogOut, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Logout = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const handleLogout = () => {
-    // Normally you would clear session data, tokens, etc.
-    localStorage.clear();
-    sessionStorage.clear();
-    
-    toast({
-      title: "Signed out",
-      description: "You have been signed out of your account.",
-    });
-    
-    // Simulera redirect till login-sida
-    setTimeout(() => {
+  const handleLogout = async () => {
+    try {
+      // Properly sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Logout error:', error);
+        toast({
+          title: "Logout error",
+          description: "Failed to sign out properly. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Clear React Query cache
+      queryClient.clear();
+      
+      // Clear local storage
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      toast({
+        title: "Signed out",
+        description: "You have been signed out of your account.",
+      });
+      
+      // Redirect to home page
       navigate("/");
-    }, 2000);
+    } catch (error) {
+      console.error('Unexpected logout error:', error);
+      toast({
+        title: "Unexpected error",
+        description: "An unexpected error occurred during logout.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleCancel = () => {

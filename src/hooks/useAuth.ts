@@ -64,9 +64,13 @@ export const useAuth = () => {
         setUser(session?.user ?? null);
         setLoading(false);
         
-        // Invalidate user role query on auth changes
-        if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+        // Handle auth state changes
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          // Invalidate user role query on sign in
           queryClient.invalidateQueries({ queryKey: ['user-role'] });
+        } else if (event === 'SIGNED_OUT') {
+          // Clear all queries and cache on sign out
+          queryClient.clear();
         }
       }
     );

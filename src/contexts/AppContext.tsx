@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 // Types
 export interface Campaign {
@@ -94,6 +95,29 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const saved = localStorage.getItem('company');
     return saved ? JSON.parse(saved) : initialCompany;
   });
+
+  // Clear localStorage data when component unmounts
+  useEffect(() => {
+    return () => {
+      localStorage.removeItem('company');
+    };
+  }, []);
+
+  // Listen for auth state changes to clear data on logout
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string) => {
+      if (event === 'SIGNED_OUT') {
+        // Clear all local state on logout
+        setCampaigns(initialCampaigns);
+        setUploads(initialUploads);
+        setCoupons(initialCoupons);
+        setCompany(initialCompany);
+        localStorage.removeItem('company');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const addCampaign = (campaignData: Omit<Campaign, 'id' | 'submissions' | 'couponsIssued' | 'createdAt'>) => {
     const newCampaign: Campaign = {
