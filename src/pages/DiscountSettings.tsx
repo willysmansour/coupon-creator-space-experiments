@@ -20,14 +20,6 @@ const DiscountSettings = () => {
   const company = companies[0]; // Get first company
   const { toast } = useToast();
 
-  // ✅ Fix: Debug logging för att se vad som händer med företagsdata
-  console.log('🔍 DiscountSettings - companies:', companies);
-  console.log('🔍 DiscountSettings - selected company:', company);
-  console.log('🔍 DiscountSettings - company name:', company?.name);
-  console.log('🔍 DiscountSettings - company logo:', company?.logo);
-  console.log('🔍 DiscountSettings - loading:', companiesLoading);
-  console.log('🔍 DiscountSettings - error:', companiesError);
-
   const [discountPercentage, setDiscountPercentage] = useState(
     company?.discount_percentage?.toString() || '10'
   );
@@ -265,15 +257,6 @@ const DiscountSettings = () => {
                   </p>
                 </CardHeader>
                 <CardContent>
-                  {/* ✅ Fix: Debug info för preview */}
-                  <div className="mb-4 p-2 bg-muted rounded text-xs">
-                    <p><strong>Debug Info:</strong></p>
-                    <p>Company: {company?.name || 'undefined'}</p>
-                    <p>Logo: {company?.logo ? 'Yes' : 'No'}</p>
-                    <p>Discount: {discountPercentage}%</p>
-                    <p>Active: {discountActive ? 'Yes' : 'No'}</p>
-                  </div>
-                  
                   <div className="border rounded-lg p-4 space-y-4">
                     {/* Company Header */}
                     <div className="flex items-center gap-3 pb-3 border-b">

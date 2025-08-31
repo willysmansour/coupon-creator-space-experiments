@@ -11,13 +11,7 @@ const Coupon = () => {
   const { couponId } = useParams<{ couponId: string }>();
   const navigate = useNavigate();
   
-  // Debug logging för mobil
-  console.log('🔍 Coupon component mounted with ID:', couponId);
-  
   const { data: coupon, isLoading, error } = useCoupon(couponId || '');
-  
-  // Debug logging för useCoupon resultat
-  console.log('🔍 useCoupon result:', { coupon, isLoading, error, couponId });
   
   const redeemCoupon = useRedeemCoupon();
   const [isRedeeming, setIsRedeeming] = useState(false);
@@ -31,9 +25,9 @@ const Coupon = () => {
   }
 
   if (!coupon) {
-    // ✅ Fix: Better error handling for mobile
+    // Better error handling for mobile
     if (error) {
-      console.error('🔍 Coupon error details:', error);
+      console.error('Coupon error details:', error);
       
       // Check if it's a network/timeout error
       const isNetworkError = error.message?.includes('timeout') || 

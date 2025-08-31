@@ -9,7 +9,7 @@ if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
   throw new Error('Missing Supabase environment variables. Please check your .env file.');
 }
 
-// ✅ Fix: Enforce HTTPS for Supabase in production
+// Enforce HTTPS for Supabase in production
 const getSecureSupabaseUrl = (url: string) => {
   if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
     // Force HTTPS for production
@@ -20,7 +20,7 @@ const getSecureSupabaseUrl = (url: string) => {
 
 const secureSupabaseUrl = getSecureSupabaseUrl(SUPABASE_URL);
 
-// ✅ Fix: Better mobile storage handling
+// Better mobile storage handling
 const getStorage = () => {
   if (typeof window === 'undefined') return undefined;
   
@@ -35,9 +35,6 @@ const getStorage = () => {
   
   return undefined;
 };
-
-// Import the supabase client like this:
-// import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(secureSupabaseUrl, SUPABASE_PUBLISHABLE_KEY, {
   auth: {

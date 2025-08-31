@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { getNetworkInfo } from '@/lib/utils';
 import { toast } from 'sonner';
 import type {
   Upload,
@@ -22,10 +21,10 @@ const defaultQueryOptions = {
   staleTime: 5 * 60 * 1000, // 5 minutes
   gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
   refetchOnWindowFocus: false,
-  refetchOnMount: true, // ✅ Fix: Always refetch on mount for mobile
-  refetchOnReconnect: true, // ✅ Fix: Refetch on reconnect for mobile
+  refetchOnMount: true, // Always refetch on mount for mobile
+  refetchOnReconnect: true, // Refetch on reconnect for mobile
   retry: (failureCount: number, error: any) => {
-    // ✅ Fix: Retry on all errors for mobile compatibility
+    // Retry on all errors for mobile compatibility
     if (failureCount >= 3) return false; // Max 3 retries
     return true; // Always retry for mobile compatibility
   },
@@ -155,28 +154,15 @@ export const useCouponByUpload = (uploadId: string) => {
 
 // Add back the missing useCoupon hook
 export const useCoupon = (id: string) => {
-  console.log('🔍 useCoupon called with ID:', id);
-  
-  // ✅ Fix: Log network info for mobile debugging
-  const networkInfo = getNetworkInfo();
-  console.log('🔍 Network info:', networkInfo);
-  
   return useQuery({
     queryKey: ['coupon', id],
     queryFn: async () => {
-      console.log('🔍 useCoupon queryFn executing for ID:', id);
-      
-      // ✅ Fix: Check network status before making request
-      if (!networkInfo.isOnline) {
-        throw new Error('No internet connection - please check your network');
-      }
-      
-      // ✅ Fix: Add timeout for mobile compatibility
+      // Add timeout for mobile compatibility
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('Request timeout - please try again')), 10000);
       });
       
-      // ✅ Fix: Use simple query that should work with RLS
+      // Use simple query that works with RLS
       const supabasePromise = supabase
         .from('coupons')
         .select('*')
@@ -187,12 +173,8 @@ export const useCoupon = (id: string) => {
         const result = await Promise.race([supabasePromise, timeoutPromise]);
         const { data, error } = result as any;
         
-        console.log('🔍 useCoupon Supabase result:', { data, error, id });
-        
         if (error) {
-          console.error('🔍 useCoupon Supabase error:', error);
-          
-          // ✅ Fix: Better error messages for mobile
+          // Better error messages for mobile
           if (error.code === 'PGRST116') {
             throw new Error('Coupon not found');
           } else if (error.message?.includes('fetch')) {
@@ -204,7 +186,7 @@ export const useCoupon = (id: string) => {
           }
         }
         
-        // ✅ Fix: Get company data separately if needed
+        // Get company data separately if needed
         let companyData = null;
         if (data && data.company_id) {
           try {
@@ -218,7 +200,7 @@ export const useCoupon = (id: string) => {
               companyData = company;
             }
           } catch (companyError) {
-            console.warn('🔍 Could not fetch company data:', companyError);
+            console.warn('Could not fetch company data:', companyError);
             // Don't fail the whole request if company data fails
           }
         }
@@ -229,10 +211,9 @@ export const useCoupon = (id: string) => {
           company: companyData
         };
         
-        console.log('🔍 useCoupon returning data:', couponWithCompany);
         return couponWithCompany as CouponWithCompany;
       } catch (error) {
-        console.error('🔍 useCoupon error:', error);
+        console.error('useCoupon error:', error);
         throw error;
       }
     },

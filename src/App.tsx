@@ -29,7 +29,7 @@ const Admin = lazy(() => import("./pages/Admin"));
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // ✅ Fix: Consistent with useSupabaseData.ts
+      // Consistent with useSupabaseData.ts
       retry: (failureCount, error: any) => {
         // Always retry for mobile compatibility
         if (failureCount >= 3) return false;
@@ -37,8 +37,8 @@ const queryClient = new QueryClient({
       },
       staleTime: 5 * 60 * 1000, // 5 minutes
       refetchOnWindowFocus: false,
-      refetchOnMount: true, // ✅ Fix: Always refetch on mount
-      refetchOnReconnect: true, // ✅ Fix: Refetch on reconnect
+      refetchOnMount: true, // Always refetch on mount
+      refetchOnReconnect: true, // Refetch on reconnect
     },
     mutations: {
       retry: false,
