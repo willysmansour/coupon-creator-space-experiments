@@ -34,7 +34,17 @@ export const useUserRole = () => {
         .limit(1)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching user role:', error);
+        // Return default customer role instead of throwing
+        return {
+          id: user.id,
+          email: user.email,
+          role: 'customer' as const,
+          company_id: undefined,
+          company_name: undefined
+        } as UserWithRole;
+      }
 
       return {
         id: user.id,
@@ -45,7 +55,10 @@ export const useUserRole = () => {
       } as UserWithRole;
     },
     enabled: true,
-    retry: 1
+    retry: 2,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: true
   });
 };
 
