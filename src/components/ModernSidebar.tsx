@@ -11,7 +11,8 @@ import {
   LogOut,
   Home,
   Shield,
-  Building2
+  Building2,
+  Mail
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useUserRole } from "@/hooks/useAuth";
@@ -45,6 +46,7 @@ const getMenuItems = (userRole?: string) => {
   const generalItems = [
     { title: "Settings", url: "/settings", icon: Settings, roles: ['super_admin', 'company_admin'] },
     { title: "Help", url: "/help", icon: HelpCircle, roles: ['super_admin', 'company_admin'] },
+    { title: "Test Email", url: "/test-email", icon: Mail, roles: ['super_admin', 'company_admin'] },
     { title: "Log out", url: "/logout", icon: LogOut, roles: ['super_admin', 'company_admin'] },
   ];
 

@@ -25,6 +25,7 @@ const ThankYou = lazy(() => import("./pages/ThankYou"));
 const Coupon = lazy(() => import("./pages/Coupon"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Admin = lazy(() => import("./pages/Admin"));
+const TestEmail = lazy(() => import("./pages/TestEmail"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -106,6 +107,11 @@ const App = () => (
               <Route path="/admin" element={
                 <Suspense fallback={<PageLoader />}>
                   <Admin />
+                </Suspense>
+              } />
+              <Route path="/test-email" element={
+                <Suspense fallback={<PageLoader />}>
+                  <TestEmail />
                 </Suspense>
               } />
               <Route path="/auth" element={
