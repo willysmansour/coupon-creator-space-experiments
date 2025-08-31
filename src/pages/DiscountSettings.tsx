@@ -11,14 +11,22 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Gift, Save, Settings, Image, Video } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useCompanies } from "@/hooks/useSupabaseData";
+import { useCompanyAwareCompanies } from "@/hooks/useCompanyAwareData";
 import { supabase } from "@/integrations/supabase/client";
 
 const DiscountSettings = () => {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | undefined>();
-  const { data: companies = [], refetch } = useCompanies();
+  const { data: companies = [], refetch, isLoading: companiesLoading, error: companiesError } = useCompanyAwareCompanies();
   const company = companies[0]; // Get first company
   const { toast } = useToast();
+
+  // ✅ Fix: Debug logging för att se vad som händer med företagsdata
+  console.log('🔍 DiscountSettings - companies:', companies);
+  console.log('🔍 DiscountSettings - selected company:', company);
+  console.log('🔍 DiscountSettings - company name:', company?.name);
+  console.log('🔍 DiscountSettings - company logo:', company?.logo);
+  console.log('🔍 DiscountSettings - loading:', companiesLoading);
+  console.log('🔍 DiscountSettings - error:', companiesError);
 
   const [discountPercentage, setDiscountPercentage] = useState(
     company?.discount_percentage?.toString() || '10'
@@ -94,13 +102,33 @@ const DiscountSettings = () => {
             <main className="p-6">
               <Card className="max-w-md mx-auto">
                 <CardContent className="p-6 text-center">
-                  <h1 className="text-xl font-semibold mb-2">No company found</h1>
-                  <p className="text-muted-foreground mb-4">
-                    You must create a company first in Settings.
-                  </p>
-                  <Button onClick={() => window.location.href = '/settings'}>
-                    Go to Settings
-                  </Button>
+                  {companiesLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                      <h1 className="text-xl font-semibold mb-2">Loading company...</h1>
+                      <p className="text-muted-foreground">Please wait while we load your company information.</p>
+                    </>
+                  ) : companiesError ? (
+                    <>
+                      <h1 className="text-xl font-semibold mb-2">Error loading company</h1>
+                      <p className="text-muted-foreground mb-4">
+                        {companiesError.message || 'Could not load company information.'}
+                      </p>
+                      <Button onClick={() => refetch()} className="w-full">
+                        Try Again
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <h1 className="text-xl font-semibold mb-2">No company found</h1>
+                      <p className="text-muted-foreground mb-4">
+                        You must create a company first in Settings.
+                      </p>
+                      <Button onClick={() => window.location.href = '/settings'} className="w-full">
+                        Go to Settings
+                      </Button>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             </main>
@@ -237,6 +265,15 @@ const DiscountSettings = () => {
                   </p>
                 </CardHeader>
                 <CardContent>
+                  {/* ✅ Fix: Debug info för preview */}
+                  <div className="mb-4 p-2 bg-muted rounded text-xs">
+                    <p><strong>Debug Info:</strong></p>
+                    <p>Company: {company?.name || 'undefined'}</p>
+                    <p>Logo: {company?.logo ? 'Yes' : 'No'}</p>
+                    <p>Discount: {discountPercentage}%</p>
+                    <p>Active: {discountActive ? 'Yes' : 'No'}</p>
+                  </div>
+                  
                   <div className="border rounded-lg p-4 space-y-4">
                     {/* Company Header */}
                     <div className="flex items-center gap-3 pb-3 border-b">
