@@ -54,11 +54,11 @@ export const useUserRole = () => {
         company_name: roleData?.companies?.name
       } as UserWithRole;
     },
-    enabled: true,
+    enabled: false, // Don't run automatically - wait for auth state
     retry: 2,
     staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnWindowFocus: false,
-    refetchOnMount: true
+    refetchOnMount: false // Don't refetch on mount automatically
   });
 };
 
@@ -79,8 +79,9 @@ export const useAuth = () => {
         
         // Handle auth state changes
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          // Invalidate user role query on sign in
+          // Invalidate and refetch user role query on sign in
           queryClient.invalidateQueries({ queryKey: ['user-role'] });
+          queryClient.refetchQueries({ queryKey: ['user-role'] });
         } else if (event === 'SIGNED_OUT') {
           // Clear all queries and cache on sign out
           queryClient.clear();
@@ -93,6 +94,12 @@ export const useAuth = () => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      
+      // If we have a session, invalidate and refetch user role
+      if (session?.user) {
+        queryClient.invalidateQueries({ queryKey: ['user-role'] });
+        queryClient.refetchQueries({ queryKey: ['user-role'] });
+      }
     });
 
     return () => subscription.unsubscribe();
