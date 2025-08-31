@@ -74,6 +74,8 @@ export type Database = {
           logo: string | null
           name: string
           owner_user_id: string | null
+          qr_code_url: string | null
+          qr_code_created_at: string | null
           updated_at: string
         }
         Insert: {
@@ -88,6 +90,8 @@ export type Database = {
           logo?: string | null
           name: string
           owner_user_id?: string | null
+          qr_code_url?: string | null
+          qr_code_created_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -102,6 +106,8 @@ export type Database = {
           logo?: string | null
           name?: string
           owner_user_id?: string | null
+          qr_code_url?: string | null
+          qr_code_created_at?: string | null
           updated_at?: string
         }
         Relationships: []

@@ -199,11 +199,31 @@ export const useRegisterCompany = () => {
 
       if (roleError) throw roleError;
 
-      return { user: authData.user, company: companyData };
+      // Create QR code data for the company
+      const qrUrl = `${window.location.origin}/company/${companyData.id}`;
+      
+      // Store QR code data in companies table (optional - for future use)
+      await supabase
+        .from('companies')
+        .update({ 
+          qr_code_url: qrUrl,
+          qr_code_created_at: new Date().toISOString()
+        })
+        .eq('id', companyData.id);
+
+      return { user: authData.user, company: companyData, qrCodeUrl: qrUrl };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['user-role'] });
-      toast.success('Company registered successfully! Please check your email for verification.');
+      queryClient.invalidateQueries({ queryKey: ['company-aware-companies'] });
+      
+      // Show success message with QR code info
+      toast.success(`Company registered successfully! Your QR code is ready at: ${data.qrCodeUrl}`);
+      
+      // Show additional info about the QR code
+      toast.info('Your QR code has been automatically generated and is ready to use!', {
+        duration: 5000,
+      });
     },
     onError: (error: any) => {
       const message = getErrorMessage(error);

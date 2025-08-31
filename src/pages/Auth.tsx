@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { useRegisterCompany } from "@/hooks/useAuth";
+import QRCode from 'react-qr-code';
 
 const Auth = () => {
   const [mode, setMode] = useState<"signin" | "company">("company");
@@ -16,6 +17,8 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showQRCode, setShowQRCode] = useState(false);
+  const [qrCodeData, setQrCodeData] = useState<{ companyId: string; companyName: string; qrUrl: string } | null>(null);
   
   const [search] = useSearchParams();
   const navigate = useNavigate();
@@ -36,7 +39,11 @@ const Auth = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ userId: session.user.id }),
         }).catch(() => {});
-        navigate(redirectTo, { replace: true });
+        
+        // Don't auto-navigate if we're showing QR code
+        if (!showQRCode) {
+          navigate(redirectTo, { replace: true });
+        }
       }
     });
 
@@ -46,7 +53,7 @@ const Auth = () => {
     });
 
     return () => listener.subscription.unsubscribe();
-  }, [mode, navigate, redirectTo]);
+  }, [mode, navigate, redirectTo, showQRCode]);
 
   const onSignIn = async () => {
     setLoading(true);
@@ -88,11 +95,21 @@ const Auth = () => {
   const onCompanyRegister = async () => {
     setLoading(true);
     try {
-      await registerCompany.mutateAsync({
+      const result = await registerCompany.mutateAsync({
         email,
         password,
         companyName
       });
+      
+      // Show QR code after successful registration
+      if (result.company && result.qrCodeUrl) {
+        setQrCodeData({
+          companyId: result.company.id,
+          companyName: result.company.name,
+          qrUrl: result.qrCodeUrl
+        });
+        setShowQRCode(true);
+      }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Could not register company";
       toast.error(errorMessage);
@@ -100,6 +117,65 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
+  const handleContinueToDashboard = () => {
+    setShowQRCode(false);
+    navigate("/");
+  };
+
+  if (showQRCode && qrCodeData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-6">
+        <main className="w-full max-w-md">
+          <Card className="p-6 space-y-6">
+            <div className="text-center space-y-4">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+                <svg className="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h1 className="text-2xl font-semibold text-foreground">Company Created Successfully!</h1>
+              <p className="text-sm text-muted-foreground">
+                Your company "{qrCodeData.companyName}" has been created and your QR code is ready!
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="text-center">
+                <h3 className="font-medium text-foreground mb-3">Your QR Code</h3>
+                <div className="p-4 bg-card rounded-lg border-2 border-border inline-block">
+                  <QRCode
+                    value={qrCodeData.qrUrl}
+                    size={200}
+                    style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                    viewBox="0 0 256 256"
+                    bgColor="white"
+                    fgColor="#111827"
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">{qrCodeData.companyName}</p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="p-4 bg-accent/50 rounded-lg border border-accent">
+                  <h4 className="font-medium text-accent-foreground mb-2">What's next?</h4>
+                  <ul className="text-sm text-accent-foreground space-y-1">
+                    <li>• Your QR code is automatically generated</li>
+                    <li>• Customers can scan it to upload images</li>
+                    <li>• Access your dashboard to manage everything</li>
+                  </ul>
+                </div>
+
+                <Button onClick={handleContinueToDashboard} className="w-full">
+                  Continue to Dashboard
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-6">
