@@ -16,6 +16,7 @@ import { useCurrentProfile, useUpsertProfile, uploadProfileImage } from "@/hooks
 import { useUpdateCompany, uploadCompanyLogo } from "@/hooks/useCompanyData";
 import { useState, useRef, useEffect } from "react";
 import { QRCodeGenerator } from "@/components/QRCodeGenerator";
+import { useMobile } from "@/hooks/use-mobile";
 
 const Settings = () => {
   const { toast } = useToast();
@@ -23,6 +24,7 @@ const Settings = () => {
   const { data: currentProfile } = useCurrentProfile();
   const upsertProfile = useUpsertProfile();
   const updateCompany = useUpdateCompany();
+  const { isMobile } = useMobile();
   
   const company = companies[0]; // Get the user's company
   
@@ -269,40 +271,40 @@ const Settings = () => {
         <div className="flex-1">
           <ModernHeader />
           
-          <main className="p-6">
-            <div className="max-w-4xl mx-auto space-y-6">
+          <main className={`${isMobile ? 'p-3' : 'p-6'}`}>
+            <div className={`${isMobile ? 'max-w-full' : 'max-w-4xl'} mx-auto space-y-6`}>
               <div>
-                <h1 className="text-3xl font-bold text-foreground">Settings</h1>
+                <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-foreground`}>Settings</h1>
                 <p className="text-muted-foreground mt-2">
                   Manage your account settings and preferences
                 </p>
               </div>
 
               <Tabs defaultValue="profile" className="space-y-4">
-                <TabsList className="grid w-full grid-cols-6">
-                  <TabsTrigger value="profile" className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    Profile
+                <TabsList className={`grid w-full ${isMobile ? 'grid-cols-3 gap-2' : 'grid-cols-6'}`}>
+                  <TabsTrigger value="profile" className={`flex items-center gap-2 ${isMobile ? 'text-xs' : ''}`}>
+                    <User className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'}`} />
+                    {!isMobile && 'Profile'}
                   </TabsTrigger>
-                  <TabsTrigger value="company" className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4" />
-                    Company
+                  <TabsTrigger value="company" className={`flex items-center gap-2 ${isMobile ? 'text-xs' : ''}`}>
+                    <Building2 className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'}`} />
+                    {!isMobile && 'Company'}
                   </TabsTrigger>
-                  <TabsTrigger value="security" className="flex items-center gap-2">
-                    <Shield className="h-4 w-4" />
-                    Security
+                  <TabsTrigger value="security" className={`flex items-center gap-2 ${isMobile ? 'text-xs' : ''}`}>
+                    <Shield className={`${isMobile ? 'h-3 w-3' : 'h-4 w-3'}`} />
+                    {!isMobile && 'Security'}
                   </TabsTrigger>
-                  <TabsTrigger value="notifications" className="flex items-center gap-2">
-                    <Bell className="h-4 w-4" />
-                    Notifications
+                  <TabsTrigger value="notifications" className={`flex items-center gap-2 ${isMobile ? 'text-xs' : ''}`}>
+                    <Bell className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'}`} />
+                    {!isMobile && 'Notifications'}
                   </TabsTrigger>
-                  <TabsTrigger value="api" className="flex items-center gap-2">
-                    <Key className="h-4 w-4" />
-                    API
+                  <TabsTrigger value="api" className={`flex items-center gap-2 ${isMobile ? 'text-xs' : ''}`}>
+                    <Key className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'}`} />
+                    {!isMobile && 'API'}
                   </TabsTrigger>
-                  <TabsTrigger value="appearance" className="flex items-center gap-2">
-                    <Palette className="h-4 w-4" />
-                    Appearance
+                  <TabsTrigger value="appearance" className={`flex items-center gap-2 ${isMobile ? 'text-xs' : ''}`}>
+                    <Palette className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'}`} />
+                    {!isMobile && 'Appearance'}
                   </TabsTrigger>
                 </TabsList>
 

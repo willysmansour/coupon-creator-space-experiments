@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { useRegisterCompany } from "@/hooks/useAuth";
 import QRCode from 'react-qr-code';
+import { useMobile } from "@/hooks/use-mobile";
 
 const Auth = () => {
   const [mode, setMode] = useState<"signin" | "company">("signin");
@@ -23,6 +24,7 @@ const Auth = () => {
   const [search] = useSearchParams();
   const navigate = useNavigate();
   const registerCompany = useRegisterCompany();
+  const { isMobile } = useMobile();
 
   const redirectTo = useMemo(() => search.get("redirect") || "/", [search]);
 
@@ -125,9 +127,9 @@ const Auth = () => {
 
   if (showQRCode && qrCodeData) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-6">
-        <main className="w-full max-w-md">
-          <Card className="p-6 space-y-6">
+      <div className={`min-h-screen flex items-center justify-center bg-background ${isMobile ? 'p-3' : 'p-6'}`}>
+        <main className={`w-full ${isMobile ? 'max-w-sm' : 'max-w-md'}`}>
+          <Card className={`${isMobile ? 'p-4' : 'p-6'} space-y-6`}>
             <div className="text-center space-y-4">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
                 <svg className="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,21 +142,21 @@ const Auth = () => {
               </p>
             </div>
 
-            <div className="space-y-4">
-              <div className="text-center">
-                <h3 className="font-medium text-foreground mb-3">Your QR Code</h3>
-                <div className="p-4 bg-card rounded-lg border-2 border-border inline-block">
-                  <QRCode
-                    value={qrCodeData.qrUrl}
-                    size={200}
-                    style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-                    viewBox="0 0 256 256"
-                    bgColor="white"
-                    fgColor="#111827"
-                  />
+                          <div className="space-y-4">
+                <div className="text-center">
+                  <h3 className="font-medium text-foreground mb-3">Your QR Code</h3>
+                  <div className={`${isMobile ? 'p-3' : 'p-4'} bg-card rounded-lg border-2 border-border inline-block`}>
+                    <QRCode
+                      value={qrCodeData.qrUrl}
+                      size={isMobile ? 150 : 200}
+                      style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                      viewBox="0 0 256 256"
+                      bgColor="white"
+                      fgColor="#111827"
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">{qrCodeData.companyName}</p>
                 </div>
-                <p className="text-sm text-muted-foreground mt-2">{qrCodeData.companyName}</p>
-              </div>
 
               <div className="space-y-3">
                 <div className="p-4 bg-accent/50 rounded-lg border border-accent">
@@ -178,9 +180,9 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-6">
-      <main className="w-full max-w-md">
-        <Card className="p-6 space-y-6">
+    <div className={`min-h-screen flex items-center justify-center bg-background ${isMobile ? 'p-3' : 'p-6'}`}>
+      <main className={`w-full ${isMobile ? 'max-w-sm' : 'max-w-md'}`}>
+        <Card className={`${isMobile ? 'p-4' : 'p-6'} space-y-6`}>
           {currentUser && (
             <div className="bg-muted/50 p-4 rounded-lg border space-y-3">
               <div className="text-sm">
@@ -201,9 +203,9 @@ const Auth = () => {
             </div>
           )}
           <Tabs value={mode} onValueChange={(value) => setMode(value as "signin" | "company")} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign in</TabsTrigger>
-              <TabsTrigger value="company">Get started</TabsTrigger>
+            <TabsList className={`grid w-full grid-cols-2 ${isMobile ? 'h-10' : 'h-10'}`}>
+              <TabsTrigger value="signin" className={isMobile ? 'text-sm' : ''}>Sign in</TabsTrigger>
+              <TabsTrigger value="company" className={isMobile ? 'text-sm' : ''}>Get started</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin" className="space-y-4">

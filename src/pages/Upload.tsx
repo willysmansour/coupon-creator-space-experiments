@@ -8,10 +8,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Upload as UploadIcon, ImageIcon, VideoIcon, Gift, User, Mail, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import { useMobile } from '@/hooks/use-mobile';
 
 const Upload = () => {
   const { companyId } = useParams<{ companyId?: string }>();
   const navigate = useNavigate();
+  const { isMobile } = useMobile();
 
   const { data: company, isLoading: companyLoading } = useCompany(companyId || '');
   const createUpload = useCreateUpload();
@@ -37,10 +39,10 @@ const Upload = () => {
 
   if (!company) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-6 text-center">
-            <h1 className="text-xl font-semibold mb-2">Company not found</h1>
+      <div className={`min-h-screen bg-background flex items-center justify-center ${isMobile ? 'p-3' : 'p-4'}`}>
+        <Card className={`w-full ${isMobile ? 'max-w-sm' : 'max-w-md'}`}>
+          <CardContent className={`${isMobile ? 'p-4' : 'p-6'} text-center`}>
+            <h1 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold mb-2`}>Company not found</h1>
             <p className="text-muted-foreground">This company does not exist.</p>
           </CardContent>
         </Card>
