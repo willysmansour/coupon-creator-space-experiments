@@ -72,20 +72,25 @@ export const ModernSidebar = React.memo(() => {
     <Sidebar className={collapsed ? "w-16" : "w-64"} collapsible="icon">
       <SidebarContent className="px-4 py-6 bg-card border-r shadow-[inset_-1px_0_0_hsl(var(--border))]">
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex flex-col items-center gap-3 mb-6">
             {company?.logo ? (
               <img 
                 src={company.logo} 
                 alt={company.name} 
-                className="w-8 h-8 rounded-lg object-cover"
+                className="w-12 h-12 rounded-lg object-cover mx-auto"
               />
             ) : (
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <Gift className="h-4 w-4 text-primary-foreground" />
+              <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center mx-auto">
+                <Gift className="h-6 w-6 text-primary-foreground" />
               </div>
             )}
             {!collapsed && (
-              <h2 className="font-bold text-lg text-foreground">{company?.name || 'Donezo'}</h2>
+              <div className="text-center">
+                <h2 className="font-bold text-lg text-foreground">{company?.name || 'Donezo'}</h2>
+                {company?.name && (
+                  <p className="text-xs text-muted-foreground mt-1">Company</p>
+                )}
+              </div>
             )}
           </div>
         </div>
