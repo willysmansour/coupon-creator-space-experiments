@@ -54,11 +54,11 @@ export const useUserRole = () => {
         company_name: roleData?.companies?.name
       } as UserWithRole;
     },
-    enabled: false, // Don't run automatically - wait for auth state
+    enabled: true, // Enable it to work properly
     retry: 2,
     staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnWindowFocus: false,
-    refetchOnMount: false // Don't refetch on mount automatically
+    refetchOnMount: true // Allow refetch on mount
   });
 };
 
@@ -82,6 +82,9 @@ export const useAuth = () => {
           // Invalidate and refetch user role query on sign in
           queryClient.invalidateQueries({ queryKey: ['user-role'] });
           queryClient.refetchQueries({ queryKey: ['user-role'] });
+          // Also invalidate company and profile data
+          queryClient.invalidateQueries({ queryKey: ['company-aware-companies'] });
+          queryClient.invalidateQueries({ queryKey: ['current-profile'] });
         } else if (event === 'SIGNED_OUT') {
           // Clear all queries and cache on sign out
           queryClient.clear();
@@ -99,6 +102,9 @@ export const useAuth = () => {
       if (session?.user) {
         queryClient.invalidateQueries({ queryKey: ['user-role'] });
         queryClient.refetchQueries({ queryKey: ['user-role'] });
+        // Also invalidate company and profile data
+        queryClient.invalidateQueries({ queryKey: ['company-aware-companies'] });
+        queryClient.invalidateQueries({ queryKey: ['current-profile'] });
       }
     });
 
