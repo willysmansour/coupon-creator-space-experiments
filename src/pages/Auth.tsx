@@ -12,7 +12,7 @@ import { useRegisterCompany } from "@/hooks/useAuth";
 import QRCode from 'react-qr-code';
 
 const Auth = () => {
-  const [mode, setMode] = useState<"signin" | "company">("company");
+  const [mode, setMode] = useState<"signin" | "company">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [companyName, setCompanyName] = useState("");
