@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserRole } from './useAuth';
-import type { Upload, Coupon, Campaign, Company } from './useSupabaseData';
+import type { Upload, Coupon, Campaign, Company } from '@/types';
 
 // Enhanced hooks that support super admin company filtering
 export const useFilteredUploads = (selectedCompanyId?: string) => {

@@ -75,14 +75,14 @@ const getFileIcon = (type: string) => {
 };
 
 const getStatusBadge = (status: string) => {
-  const variants = {
+  const variants: Record<string, "default" | "secondary" | "destructive"> = {
     "Approved": "default",
     "Pending": "secondary",
     "Rejected": "destructive"
   };
   
   return (
-    <Badge variant={variants[status as keyof typeof variants] || 'secondary'}>
+    <Badge variant={variants[status] || 'secondary'}>
       {status}
     </Badge>
   );
