@@ -161,33 +161,6 @@ export const useCoupon = (id: string) => {
   const networkInfo = getNetworkInfo();
   console.log('🔍 Network info:', networkInfo);
   
-  // ✅ Fix: Log attempt to Edge Function for debugging
-  const logToEdgeFunction = async (success: boolean, error?: string) => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/log-coupon-debug`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-        },
-        body: JSON.stringify({
-          couponId: id,
-          userAgent: navigator.userAgent,
-          url: window.location.href,
-          error,
-          success,
-          networkInfo
-        })
-      });
-      
-      if (!response.ok) {
-        console.warn('🔍 Could not log to Edge Function:', response.status);
-      }
-    } catch (logError) {
-      console.warn('🔍 Could not log to Edge Function:', logError);
-    }
-  };
-  
   return useQuery({
     queryKey: ['coupon', id],
     queryFn: async () => {
@@ -195,85 +168,31 @@ export const useCoupon = (id: string) => {
       
       // ✅ Fix: Check network status before making request
       if (!networkInfo.isOnline) {
-        const error = 'No internet connection - please check your network';
-        await logToEdgeFunction(false, error);
-        throw new Error(error);
+        throw new Error('No internet connection - please check your network');
       }
       
-      // ✅ Fix: Add timeout for mobile compatibility
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Request timeout - please try again')), 10000);
+      // ✅ Fix: Use Edge Function to bypass RLS issues
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-coupon-public`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({ couponId: id })
       });
       
-      // ✅ Fix: Simplified query without company data to avoid RLS issues
-      const supabasePromise = supabase
-        .from('coupons')
-        .select('*') // Only select coupon data, not company data
-        .eq('id', id)
-        .single();
-      
-      try {
-        const result = await Promise.race([supabasePromise, timeoutPromise]);
-        const { data, error } = result as any;
-        
-        console.log('🔍 useCoupon Supabase result:', { data, error, id });
-        
-        if (error) {
-          console.error('🔍 useCoupon Supabase error:', error);
-          
-          // ✅ Fix: Log error to Edge Function
-          await logToEdgeFunction(false, error.message || 'Unknown Supabase error');
-          
-          // ✅ Fix: Better error messages for mobile
-          if (error.code === 'PGRST116') {
-            throw new Error('Coupon not found');
-          } else if (error.message?.includes('fetch')) {
-            throw new Error('Network error - please check your connection');
-          } else if (error.message?.includes('timeout')) {
-            throw new Error('Request timeout - please try again');
-          } else {
-            throw new Error(`Database error: ${error.message}`);
-          }
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Coupon not found');
+        } else {
+          throw new Error(`HTTP error: ${response.status}`);
         }
-        
-        // ✅ Fix: Get company data separately if needed
-        let companyData = null;
-        if (data && data.company_id) {
-          try {
-            const { data: company, error: companyError } = await supabase
-              .from('companies')
-              .select('id, name, logo, discount_percentage')
-              .eq('id', data.company_id)
-              .single();
-            
-            if (!companyError && company) {
-              companyData = company;
-            }
-          } catch (companyError) {
-            console.warn('🔍 Could not fetch company data:', companyError);
-            // Don't fail the whole request if company data fails
-          }
-        }
-        
-        // Combine coupon and company data
-        const couponWithCompany = {
-          ...data,
-          company: companyData
-        };
-        
-        // ✅ Fix: Log success to Edge Function
-        await logToEdgeFunction(true);
-        
-        console.log('🔍 useCoupon returning data:', couponWithCompany);
-        return couponWithCompany as CouponWithCompany;
-      } catch (error) {
-        console.error('🔍 useCoupon error:', error);
-        
-        // ✅ Fix: Log final error to Edge Function
-        await logToEdgeFunction(false, error instanceof Error ? error.message : 'Unknown error');
-        
-        throw error;
       }
+      
+      const data = await response.json();
+      console.log('🔍 useCoupon Edge Function result:', data);
+      
+      return data as CouponWithCompany;
     },
     enabled: !!id,
     ...defaultQueryOptions,
