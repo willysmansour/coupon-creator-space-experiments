@@ -176,17 +176,10 @@ export const useCoupon = (id: string) => {
         setTimeout(() => reject(new Error('Request timeout - please try again')), 10000);
       });
       
+      // ✅ Fix: Simplified query without company data to avoid RLS issues
       const supabasePromise = supabase
         .from('coupons')
-        .select(`
-          *,
-          company:company_id (
-            id,
-            name,
-            logo,
-            discount_percentage
-          )
-        `)
+        .select('*') // Only select coupon data, not company data
         .eq('id', id)
         .single();
       
@@ -211,8 +204,33 @@ export const useCoupon = (id: string) => {
           }
         }
         
-        console.log('🔍 useCoupon returning data:', data);
-        return data as CouponWithCompany;
+        // ✅ Fix: Get company data separately if needed
+        let companyData = null;
+        if (data && data.company_id) {
+          try {
+            const { data: company, error: companyError } = await supabase
+              .from('companies')
+              .select('id, name, logo, discount_percentage')
+              .eq('id', data.company_id)
+              .single();
+            
+            if (!companyError && company) {
+              companyData = company;
+            }
+          } catch (companyError) {
+            console.warn('🔍 Could not fetch company data:', companyError);
+            // Don't fail the whole request if company data fails
+          }
+        }
+        
+        // Combine coupon and company data
+        const couponWithCompany = {
+          ...data,
+          company: companyData
+        };
+        
+        console.log('🔍 useCoupon returning data:', couponWithCompany);
+        return couponWithCompany as CouponWithCompany;
       } catch (error) {
         console.error('🔍 useCoupon error:', error);
         throw error;

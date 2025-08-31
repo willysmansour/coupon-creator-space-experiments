@@ -40,17 +40,25 @@ const Coupon = () => {
                             error.message?.includes('fetch') ||
                             error.message?.includes('network');
       
+      // Check if it's a database/permission error
+      const isDatabaseError = error.message?.includes('Database error') ||
+                             error.message?.includes('permission') ||
+                             error.message?.includes('RLS');
+      
       return (
         <div className="min-h-screen bg-background flex items-center justify-center p-4">
           <Card className="w-full max-w-md">
             <CardContent className="p-6 text-center">
               <AlertCircle className="w-12 h-12 mx-auto text-destructive mb-4" />
               <h1 className="text-xl font-semibold mb-2">
-                {isNetworkError ? 'Network Error' : 'Coupon Error'}
+                {isNetworkError ? 'Network Error' : 
+                 isDatabaseError ? 'Access Error' : 'Coupon Error'}
               </h1>
               <p className="text-muted-foreground mb-4">
                 {isNetworkError 
                   ? 'Please check your internet connection and try again.'
+                  : isDatabaseError
+                  ? 'Unable to access coupon data. Please try again later.'
                   : error.message || 'An error occurred while loading the coupon.'
                 }
               </p>
@@ -88,6 +96,11 @@ const Coupon = () => {
   const isExpired = new Date() > new Date(coupon.expires_at);
   const isActive = !coupon.is_used && !isExpired;
   const isUsed = coupon.is_used;
+
+  // ✅ Fix: Fallback för saknad företagsdata
+  const companyName = coupon.company?.name || 'Company';
+  const companyLogo = coupon.company?.logo;
+  const discountPercentage = coupon.company?.discount_percentage || 0;
 
   const getStatusInfo = () => {
     if (isUsed) {
