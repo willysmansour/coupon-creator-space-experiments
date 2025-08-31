@@ -62,9 +62,13 @@ export const useUpsertProfile = () => {
 
       const payload = { ...profile, user_id: user.id };
 
+      // Try to insert first, if it fails due to conflict, then update
       const { data, error } = await supabase
         .from("profiles")
-        .upsert(payload)
+        .upsert(payload, { 
+          onConflict: 'user_id',
+          ignoreDuplicates: false 
+        })
         .select()
         .single();
 

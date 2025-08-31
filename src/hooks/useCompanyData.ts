@@ -38,7 +38,7 @@ export const useUpdateCompany = () => {
         if (error) throw error;
         return data;
       } else {
-        // Create new company
+        // Create new company - user will automatically become company_admin
         const { data: authData } = await supabase.auth.getUser();
         const user = authData?.user;
         if (!user) throw new Error("Du är inte inloggad.");
@@ -55,6 +55,7 @@ export const useUpdateCompany = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["companies"] });
+      queryClient.invalidateQueries({ queryKey: ["company-aware-companies"] });
     },
   });
 };
