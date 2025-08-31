@@ -9,12 +9,39 @@ if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
   throw new Error('Missing Supabase environment variables. Please check your .env file.');
 }
 
+// ✅ Fix: Enforce HTTPS for Supabase in production
+const getSecureSupabaseUrl = (url: string) => {
+  if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
+    // Force HTTPS for production
+    return url.replace('http://', 'https://');
+  }
+  return url;
+};
+
+const secureSupabaseUrl = getSecureSupabaseUrl(SUPABASE_URL);
+
+// ✅ Fix: Better mobile storage handling
+const getStorage = () => {
+  if (typeof window === 'undefined') return undefined;
+  
+  try {
+    // Try localStorage first, fallback to sessionStorage
+    if (window.localStorage) return window.localStorage;
+    if (window.sessionStorage) return window.sessionStorage;
+  } catch (error) {
+    console.warn('Storage not available, falling back to sessionStorage');
+    return window.sessionStorage;
+  }
+  
+  return undefined;
+};
+
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+export const supabase = createClient<Database>(secureSupabaseUrl, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
-    storage: typeof window !== 'undefined' ? (localStorage || sessionStorage) : undefined,
+    storage: getStorage(),
     persistSession: typeof window !== 'undefined',
     autoRefreshToken: typeof window !== 'undefined',
   }

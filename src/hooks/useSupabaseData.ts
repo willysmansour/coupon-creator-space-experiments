@@ -1,18 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { getNetworkInfo } from '@/lib/utils';
 import { toast } from 'sonner';
-import { 
-  Company, 
-  Upload, 
-  Coupon, 
-  UserRole, 
-  Customer, 
-  Campaign, 
+import type {
+  Upload,
+  Coupon,
   CouponWithCompany,
+  Company,
+  Customer,
+  Profile,
+  ProfileUpdateData,
+  UserRole,
+  Campaign,
   CompanyAwareCompany,
   RoleAssignmentData,
-  CompanyUpdateData,
-  ProfileUpdateData
+  CompanyUpdateData
 } from '@/types';
 
 // Optimized query options for better performance
@@ -155,10 +157,19 @@ export const useCouponByUpload = (uploadId: string) => {
 export const useCoupon = (id: string) => {
   console.log('🔍 useCoupon called with ID:', id);
   
+  // ✅ Fix: Log network info for mobile debugging
+  const networkInfo = getNetworkInfo();
+  console.log('🔍 Network info:', networkInfo);
+  
   return useQuery({
     queryKey: ['coupon', id],
     queryFn: async () => {
       console.log('🔍 useCoupon queryFn executing for ID:', id);
+      
+      // ✅ Fix: Check network status before making request
+      if (!networkInfo.isOnline) {
+        throw new Error('No internet connection - please check your network');
+      }
       
       // ✅ Fix: Add timeout for mobile compatibility
       const timeoutPromise = new Promise((_, reject) => {
@@ -187,7 +198,17 @@ export const useCoupon = (id: string) => {
         
         if (error) {
           console.error('🔍 useCoupon Supabase error:', error);
-          throw error;
+          
+          // ✅ Fix: Better error messages for mobile
+          if (error.code === 'PGRST116') {
+            throw new Error('Coupon not found');
+          } else if (error.message?.includes('fetch')) {
+            throw new Error('Network error - please check your connection');
+          } else if (error.message?.includes('timeout')) {
+            throw new Error('Request timeout - please try again');
+          } else {
+            throw new Error(`Database error: ${error.message}`);
+          }
         }
         
         console.log('🔍 useCoupon returning data:', data);

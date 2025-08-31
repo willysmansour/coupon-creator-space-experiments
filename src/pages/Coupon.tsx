@@ -31,6 +31,44 @@ const Coupon = () => {
   }
 
   if (!coupon) {
+    // ✅ Fix: Better error handling for mobile
+    if (error) {
+      console.error('🔍 Coupon error details:', error);
+      
+      // Check if it's a network/timeout error
+      const isNetworkError = error.message?.includes('timeout') || 
+                            error.message?.includes('fetch') ||
+                            error.message?.includes('network');
+      
+      return (
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+          <Card className="w-full max-w-md">
+            <CardContent className="p-6 text-center">
+              <AlertCircle className="w-12 h-12 mx-auto text-destructive mb-4" />
+              <h1 className="text-xl font-semibold mb-2">
+                {isNetworkError ? 'Network Error' : 'Coupon Error'}
+              </h1>
+              <p className="text-muted-foreground mb-4">
+                {isNetworkError 
+                  ? 'Please check your internet connection and try again.'
+                  : error.message || 'An error occurred while loading the coupon.'
+                }
+              </p>
+              <div className="space-y-2">
+                <Button onClick={() => window.location.reload()} className="w-full">
+                  Try Again
+                </Button>
+                <Button onClick={() => navigate('/')} variant="outline" className="w-full">
+                  Back to Home
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+    
+    // No error but no coupon - show "not found"
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
