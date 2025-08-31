@@ -3,8 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Plus, Search, Bell, User, Building2 } from "lucide-react";
 import { useUserRole } from "@/hooks/useAuth";
+import { useCurrentProfile } from "@/hooks/useProfileData";
+import { useCompanyAwareCompanies } from "@/hooks/useCompanyAwareData";
 import { CompanySelector } from "@/components/CompanySelector";
 
 interface ModernHeaderProps {
@@ -14,6 +17,10 @@ interface ModernHeaderProps {
 
 export const ModernHeader = React.memo(({ selectedCompanyId, onCompanyChange }: ModernHeaderProps = {}) => {
   const { data: userRole } = useUserRole();
+  const { data: currentProfile } = useCurrentProfile();
+  const { data: companies = [] } = useCompanyAwareCompanies();
+  
+  const company = companies[0]; // Get the user's company
 
   const getRoleDisplay = () => {
     switch (userRole?.role) {
@@ -28,16 +35,40 @@ export const ModernHeader = React.memo(({ selectedCompanyId, onCompanyChange }: 
 
   const roleDisplay = getRoleDisplay();
 
+  // Get user's display name
+  const getUserDisplayName = () => {
+    if (currentProfile?.first_name && currentProfile?.last_name) {
+      return `${currentProfile.first_name} ${currentProfile.last_name}`;
+    } else if (currentProfile?.first_name) {
+      return currentProfile.first_name;
+    } else if (currentProfile?.last_name) {
+      return currentProfile.last_name;
+    }
+    return userRole?.email?.split('@')[0] || 'User';
+  };
+
+  // Get user's initials for avatar fallback
+  const getUserInitials = () => {
+    if (currentProfile?.first_name && currentProfile?.last_name) {
+      return `${currentProfile.first_name[0]}${currentProfile.last_name[0]}`.toUpperCase();
+    } else if (currentProfile?.first_name) {
+      return currentProfile.first_name[0]?.toUpperCase() || 'U';
+    } else if (currentProfile?.last_name) {
+      return currentProfile.last_name[0]?.toUpperCase() || 'U';
+    }
+    return userRole?.email?.[0]?.toUpperCase() || 'U';
+  };
+
   return (
     <header className="h-16 sticky top-0 z-30 bg-card/80 backdrop-blur supports-[backdrop-filter]:bg-card/60 border-b flex items-center justify-between px-6">
       <div className="flex items-center gap-6">
         <SidebarTrigger />
         <div>
           <h1 className="text-xl font-semibold text-foreground">Dashboard</h1>
-          {userRole?.company_name && (
+          {company?.name && (
             <p className="text-sm text-muted-foreground flex items-center gap-1">
               <Building2 className="h-3 w-3" />
-              {userRole.company_name}
+              {company.name}
             </p>
           )}
         </div>
@@ -66,11 +97,14 @@ export const ModernHeader = React.memo(({ selectedCompanyId, onCompanyChange }: 
         
         {userRole ? (
           <Button variant="ghost" size="sm" className="gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
-              {userRole.email?.[0]?.toUpperCase() || 'U'}
-            </div>
+            <Avatar className="w-8 h-8">
+              <AvatarImage src={currentProfile?.avatar_url} alt={getUserDisplayName()} />
+              <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
+                {getUserInitials()}
+              </AvatarFallback>
+            </Avatar>
             <div className="text-left">
-              <p className="text-sm font-medium">{userRole.email}</p>
+              <p className="text-sm font-medium">{getUserDisplayName()}</p>
               <div className="flex items-center gap-2">
                 <Badge variant={roleDisplay.variant} className="text-xs">
                   {roleDisplay.label}

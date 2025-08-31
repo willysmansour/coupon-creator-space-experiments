@@ -10,10 +10,12 @@ import {
   HelpCircle,
   LogOut,
   Home,
-  Shield
+  Shield,
+  Building2
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useUserRole } from "@/hooks/useAuth";
+import { useCompanyAwareCompanies } from "@/hooks/useCompanyAwareData";
 
 import {
   Sidebar,
@@ -57,6 +59,9 @@ export const ModernSidebar = React.memo(() => {
   const currentPath = location.pathname;
   const collapsed = state === "collapsed";
   const { data: userRole } = useUserRole();
+  const { data: companies = [] } = useCompanyAwareCompanies();
+  
+  const company = companies[0]; // Get the user's company
 
   const menuItems = getMenuItems(userRole?.role);
   const isActive = (path: string) => currentPath === path;
@@ -68,11 +73,19 @@ export const ModernSidebar = React.memo(() => {
       <SidebarContent className="px-4 py-6 bg-card border-r shadow-[inset_-1px_0_0_hsl(var(--border))]">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <Gift className="h-4 w-4 text-primary-foreground" />
-            </div>
+            {company?.logo ? (
+              <img 
+                src={company.logo} 
+                alt={company.name} 
+                className="w-8 h-8 rounded-lg object-cover"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+                <Gift className="h-4 w-4 text-primary-foreground" />
+              </div>
+            )}
             {!collapsed && (
-              <h2 className="font-bold text-lg text-foreground">Donezo</h2>
+              <h2 className="font-bold text-lg text-foreground">{company?.name || 'Donezo'}</h2>
             )}
           </div>
         </div>
