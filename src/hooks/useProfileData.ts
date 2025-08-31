@@ -75,9 +75,13 @@ export const useUpsertProfile = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["profiles"] });
       queryClient.invalidateQueries({ queryKey: ["current-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["user-role"] });
+      
+      // Update cache directly for immediate UI update
+      queryClient.setQueryData(["current-profile"], data);
     },
   });
 };

@@ -53,9 +53,20 @@ export const useUpdateCompany = () => {
         return data;
       }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["companies"] });
       queryClient.invalidateQueries({ queryKey: ["company-aware-companies"] });
+      queryClient.invalidateQueries({ queryKey: ["user-role"] });
+      
+      // Update cache directly for immediate UI update
+      queryClient.setQueryData(["companies"], (oldData: any) => {
+        if (oldData) {
+          return oldData.map((company: any) => 
+            company.id === data.id ? data : company
+          );
+        }
+        return [data];
+      });
     },
   });
 };

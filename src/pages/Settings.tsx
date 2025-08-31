@@ -108,13 +108,25 @@ const Settings = () => {
       // Save company data if there are changes or create default company
       if (companyName && companyName.trim()) {
         try {
-          await updateCompany.mutateAsync({
+          const result = await updateCompany.mutateAsync({
             id: company?.id,
             name: companyName.trim(),
             logo: logoPreview,
           });
           companySaved = true;
-          // Company saved successfully
+          
+          // If this is a new company, show success message
+          if (!company?.id && result) {
+            toast({
+              title: "Company created",
+              description: `Your company "${companyName.trim()}" was created successfully!`,
+            });
+          } else {
+            toast({
+              title: "Company updated",
+              description: "Your company information was updated successfully.",
+            });
+          }
         } catch (companyError) {
           console.error('Error saving company:', companyError);
           toast({
@@ -125,6 +137,14 @@ const Settings = () => {
           setIsLoading(false);
           return;
         }
+      }
+
+      // Force refresh of all related data after company save
+      if (companySaved) {
+        // Wait a moment for the database to update
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       }
 
       // Success message
