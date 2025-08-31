@@ -202,8 +202,8 @@ const Auth = () => {
           )}
           <Tabs value={mode} onValueChange={(value) => setMode(value as "signin" | "company")} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="company">Get started</TabsTrigger>
               <TabsTrigger value="signin">Sign in</TabsTrigger>
+              <TabsTrigger value="company">Get started</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin" className="space-y-4">
