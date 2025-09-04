@@ -78,7 +78,23 @@ const Admin = () => {
           };
         });
 
-        return combined;
+        // 5) Filtrera bort roller som inte ska synas (endast company_admin & super_admin)
+        const allowedRoles = new Set(['company_admin', 'super_admin']);
+        const filtered = combined.filter((u) => allowedRoles.has(u.role));
+
+        // 6) Deduplicera per user_id (prioritera super_admin över company_admin)
+        const rank = (r: string) => (r === 'super_admin' ? 2 : r === 'company_admin' ? 1 : 0);
+        const uniqueByUser = new Map<string, typeof filtered[number]>();
+        for (const u of filtered) {
+          if (!u.user_id) continue;
+          const key = String(u.user_id);
+          const existing = uniqueByUser.get(key);
+          if (!existing || rank(u.role) > rank(existing.role)) {
+            uniqueByUser.set(key, u);
+          }
+        }
+
+        return Array.from(uniqueByUser.values());
       } catch (error) {
         console.error('Error fetching admin users:', error);
         return [];
