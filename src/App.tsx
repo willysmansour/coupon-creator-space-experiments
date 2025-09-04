@@ -1,7 +1,8 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { createQueryClient } from "@/lib/query-config";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppProvider } from "@/contexts/AppContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -27,25 +28,7 @@ const Auth = lazy(() => import("./pages/Auth"));
 const Admin = lazy(() => import("./pages/Admin"));
 const TestEmail = lazy(() => import("./pages/TestEmail"));
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      // Consistent with useSupabaseData.ts
-      retry: (failureCount, error: any) => {
-        // Always retry for mobile compatibility
-        if (failureCount >= 3) return false;
-        return true;
-      },
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      refetchOnWindowFocus: false,
-      refetchOnMount: true, // Always refetch on mount
-      refetchOnReconnect: true, // Refetch on reconnect
-    },
-    mutations: {
-      retry: false,
-    },
-  },
-});
+const queryClient = createQueryClient();
 
 // Loading fallback component
 const PageLoader = () => <LoadingPage message="Loading page..." />;

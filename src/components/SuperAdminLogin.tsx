@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Shield, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { SUPERADMIN_EMAIL } from "@/config/constants";
+import { handleError } from "@/lib/error-handler";
+import { useSecureAdminSession } from "@/domains/auth/hooks/useSecureAdminSession";
 
 interface SuperAdminLoginProps {
   onLoginSuccess: () => void;
@@ -16,6 +17,7 @@ export function SuperAdminLogin({ onLoginSuccess }: SuperAdminLoginProps) {
   const [email, setEmail] = useState(SUPERADMIN_EMAIL); // Pre-fill from config
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const { login, isLoading: sessionLoading } = useSecureAdminSession();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -23,32 +25,16 @@ export function SuperAdminLogin({ onLoginSuccess }: SuperAdminLoginProps) {
     setIsLoading(true);
 
     try {
-      // Proactively sign out any existing session to avoid account mix-ups
-      await supabase.auth.signOut();
-      // Authenticate with Supabase
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      if (data.user) {
-        // Direkt kontroll för superadmin email - ingen useUserRole dependency
-        if (email.toLowerCase() === SUPERADMIN_EMAIL.toLowerCase()) {
-          localStorage.setItem("superadmin_session", "true");
-          toast.success("Logged in as Super Admin");
-          onLoginSuccess();
-        } else {
-          toast.error(`Only ${SUPERADMIN_EMAIL} can access this panel`);
-          await supabase.auth.signOut();
-        }
+      const success = await login(email, password);
+      
+      if (success) {
+        toast.success("Logged in as Super Admin");
+        onLoginSuccess();
+      } else {
+        toast.error(`Only ${SUPERADMIN_EMAIL} can access this panel`);
       }
     } catch (error: any) {
-      console.error("Login error:", error);
-      toast.error("Incorrect email or password");
+      handleError(error, { context: 'SuperAdminLogin', email });
     }
     
     setIsLoading(false);

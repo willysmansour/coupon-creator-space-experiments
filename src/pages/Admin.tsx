@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useUserRole, useAssignRole } from "@/hooks/useAuth";
 import { useCompanies } from "@/hooks/useSupabaseData";
 import { supabase } from "@/integrations/supabase/client";
+import { useSecureAdminSession } from "@/domains/auth/hooks/useSecureAdminSession";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,13 +18,13 @@ import type { UserRole } from "@/hooks/useAuth";
 import { SuperAdminLogin } from "@/components/SuperAdminLogin";
 
 const Admin = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState("");
   const [selectedRole, setSelectedRole] = useState<UserRole>("company_admin");
   const [selectedCompany, setSelectedCompany] = useState("");
 
   // ALL HOOKS MUST BE CALLED AT THE TOP - BEFORE ANY CONDITIONAL LOGIC
   const queryClient = useQueryClient();
+  const { isAuthenticated, logout: secureLogout, userEmail } = useSecureAdminSession();
   const { data: companies, refetch: refetchCompanies, isLoading: companiesLoading } = useCompanies();
   const assignRole = useAssignRole();
   
@@ -49,24 +50,14 @@ const Admin = () => {
     enabled: isAuthenticated // Only fetch when authenticated
   });
 
-  // Check for existing session on mount
-  useEffect(() => {
-    const session = localStorage.getItem("superadmin_session");
-    if (session === "true") {
-      setIsAuthenticated(true);
-    }
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("superadmin_session");
-    setIsAuthenticated(false);
+  const handleLogout = async () => {
+    await secureLogout();
     toast.success("Utloggad från Super Admin");
   };
 
   const handleLoginSuccess = () => {
     // Clear all cache when admin logs in to ensure fresh data
     queryClient.clear();
-    setIsAuthenticated(true);
     toast.success("Inloggad som Super Admin - data uppdaterad");
   };
 
