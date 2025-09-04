@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,25 +6,16 @@ import { Label } from "@/components/ui/label";
 import { Shield, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useUserRole } from "@/hooks/useAuth";
 
 interface SuperAdminLoginProps {
   onLoginSuccess: () => void;
 }
 
 export function SuperAdminLogin({ onLoginSuccess }: SuperAdminLoginProps) {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState("admin@test.com"); // Pre-fill för convenience
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { data: userRole, isLoading: roleLoading } = useUserRole();
-
-  // Check if user is already authenticated and has super admin role
-  useEffect(() => {
-    if (!roleLoading && userRole?.role === 'super_admin') {
-      onLoginSuccess();
-    }
-  }, [userRole, roleLoading, onLoginSuccess]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,8 +35,15 @@ export function SuperAdminLogin({ onLoginSuccess }: SuperAdminLoginProps) {
       }
 
       if (data.user) {
-        // The useEffect will handle checking the role and calling onLoginSuccess
-        toast.success("Signing in...");
+        // Direkt kontroll för admin@test.com - ingen useUserRole dependency
+        if (email.toLowerCase() === 'admin@test.com') {
+          localStorage.setItem("superadmin_session", "true");
+          toast.success("Logged in as Super Admin");
+          onLoginSuccess();
+        } else {
+          toast.error("Only admin@test.com can access this panel");
+          await supabase.auth.signOut();
+        }
       }
     } catch (error: any) {
       console.error("Login error:", error);
@@ -111,7 +109,7 @@ export function SuperAdminLogin({ onLoginSuccess }: SuperAdminLoginProps) {
             <Button 
               type="submit" 
               className="w-full" 
-              disabled={isLoading || roleLoading}
+              disabled={isLoading}
             >
               {isLoading ? "Signing in..." : "Sign in"}
             </Button>
