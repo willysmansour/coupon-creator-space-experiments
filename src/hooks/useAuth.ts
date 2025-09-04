@@ -40,7 +40,7 @@ export const useUserRole = () => {
         return {
           id: user.id,
           email: user.email,
-          role: 'customer' as const,
+          role: 'company_admin' as const,
           company_id: undefined,
           company_name: undefined
         } as UserWithRole;
@@ -49,7 +49,7 @@ export const useUserRole = () => {
       return {
         id: user.id,
         email: user.email,
-        role: roleData?.role || 'customer',
+        role: roleData?.role || 'company_admin',
         company_id: roleData?.company_id,
         company_name: roleData?.companies?.name
       } as UserWithRole;
