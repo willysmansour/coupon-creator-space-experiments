@@ -250,23 +250,23 @@ const Auth = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="first-name">Förnamn</Label>
+                    <Label htmlFor="first-name">First name</Label>
                     <Input 
                       id="first-name" 
                       type="text" 
                       value={firstName} 
                       onChange={(e) => setFirstName(e.target.value)}
-                      placeholder="Ditt förnamn"
+                      placeholder="Your first name"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="last-name">Efternamn</Label>
+                    <Label htmlFor="last-name">Last name</Label>
                     <Input 
                       id="last-name" 
                       type="text" 
                       value={lastName} 
                       onChange={(e) => setLastName(e.target.value)}
-                      placeholder="Ditt efternamn"
+                      placeholder="Your last name"
                     />
                   </div>
                 </div>
