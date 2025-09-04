@@ -10,9 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Building2, Users, UserPlus, LogOut, Trash2, AlertTriangle } from "lucide-react";
+import { Shield, Building2, Users, UserPlus, LogOut, Trash2, AlertTriangle, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UserRole } from "@/hooks/useAuth";
 import { SuperAdminLogin } from "@/components/SuperAdminLogin";
 
@@ -23,7 +23,8 @@ const Admin = () => {
   const [selectedCompany, setSelectedCompany] = useState("");
 
   // ALL HOOKS MUST BE CALLED AT THE TOP - BEFORE ANY CONDITIONAL LOGIC
-  const { data: companies } = useCompanies();
+  const queryClient = useQueryClient();
+  const { data: companies, refetch: refetchCompanies, isLoading: companiesLoading } = useCompanies();
   const assignRole = useAssignRole();
   
   // Fetch all users with their roles - ALWAYS call this hook
@@ -63,7 +64,10 @@ const Admin = () => {
   };
 
   const handleLoginSuccess = () => {
+    // Clear all cache when admin logs in to ensure fresh data
+    queryClient.clear();
     setIsAuthenticated(true);
+    toast.success("Inloggad som Super Admin - data uppdaterad");
   };
 
   // Show login form if not authenticated
@@ -258,8 +262,23 @@ const Admin = () => {
                   <Building2 className="h-5 w-5" />
                   <h2 className="text-xl font-semibold">Alla Företag ({companies?.length || 0})</h2>
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  Visar alla företag i systemet
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      refetchCompanies();
+                      toast.success("Data uppdaterad från databasen");
+                    }}
+                    disabled={companiesLoading}
+                    className="gap-2"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${companiesLoading ? 'animate-spin' : ''}`} />
+                    {companiesLoading ? 'Laddar...' : 'Uppdatera'}
+                  </Button>
+                  <div className="text-sm text-muted-foreground">
+                    Visar alla företag i systemet
+                  </div>
                 </div>
               </div>
 
