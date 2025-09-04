@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useUserRole, useAssignRole } from "@/hooks/useAuth";
+import { useAssignRole } from "@/hooks/useAuth";
 import { useCompanies } from "@/hooks/useSupabaseData";
 import { supabase } from "@/integrations/supabase/client";
 import { useSecureAdminSession } from "@/domains/auth/hooks/useSecureAdminSession";
@@ -33,31 +33,25 @@ const Admin = () => {
     queryKey: ['admin-users'],
     queryFn: async () => {
       try {
-        // Get user_roles first
-        const { data: userRoles, error: rolesError } = await supabase
-          .from('user_roles')
-          .select(`
-            id,
-            user_id,
-            role,
-            company_id,
-            created_at
-          `)
-          .order('created_at', { ascending: false });
-
-        if (rolesError) throw rolesError;
-
-        // Get profiles separately
+        // 1) Hämta alla profiler (alla användare bör ha profil via trigger)
         const { data: profiles, error: profilesError } = await supabase
           .from('profiles')
-          .select('user_id, email, first_name, last_name');
+          .select('user_id, email, first_name, last_name, company_id, created_at')
+          .order('created_at', { ascending: false });
 
-        if (profilesError) {
-          console.warn('Could not fetch profiles:', profilesError);
+        if (profilesError) throw profilesError;
+
+        // 2) Hämta roller separat (kan saknas för vissa användare)
+        const { data: userRoles, error: rolesError } = await supabase
+          .from('user_roles')
+          .select('user_id, role, company_id');
+
+        if (rolesError) {
+          console.warn('Could not fetch user roles:', rolesError);
         }
 
-        // Get companies separately  
-        const { data: companies, error: companiesError } = await supabase
+        // 3) Hämta företag separat för att visa namn
+        const { data: companiesList, error: companiesError } = await supabase
           .from('companies')
           .select('id, name');
 
@@ -65,25 +59,26 @@ const Admin = () => {
           console.warn('Could not fetch companies:', companiesError);
         }
 
-        // Combine data manually
-        const combinedData = userRoles?.map(role => {
-          const profile = profiles?.find(p => p.user_id === role.user_id);
-          const company = companies?.find(c => c.id === role.company_id);
-          
-          return {
-            id: role.id,
-            user_id: role.user_id,
-            email: profile?.email || 'Ingen email',
-            first_name: profile?.first_name,
-            last_name: profile?.last_name,
-            role: role.role,
-            company_id: role.company_id,
-            company_name: company?.name,
-            created_at: role.created_at
-          };
-        }) || [];
+        // 4) Kombinera: basera på profiler (så att användare utan roll också syns)
+        const combined = (profiles || []).map((profile) => {
+          const roleMatch = userRoles?.find((r) => r.user_id === profile.user_id);
+          const resolvedCompanyId = roleMatch?.company_id || profile.company_id || null;
+          const company = companiesList?.find((c) => c.id === resolvedCompanyId);
 
-        return combinedData;
+          return {
+            id: profile.user_id,
+            user_id: profile.user_id,
+            email: profile.email || 'Ingen email',
+            first_name: profile.first_name || undefined,
+            last_name: profile.last_name || undefined,
+            role: roleMatch?.role || 'Saknar roll',
+            company_id: resolvedCompanyId || undefined,
+            company_name: company?.name || undefined,
+            created_at: profile.created_at,
+          };
+        });
+
+        return combined;
       } catch (error) {
         console.error('Error fetching admin users:', error);
         return [];
@@ -114,38 +109,40 @@ const Admin = () => {
       return;
     }
 
-    if (selectedRole === 'company_admin' && !selectedCompany) {
-      toast.error("Välj ett företag för företagsadmin");
-      return;
-    }
-
     try {
-      // First, try to get the user by email using a more specific query
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .limit(1)
+      // Hämta användarens profil via e-post (case-insensitive om kolumnen är CITEXT)
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('user_id, company_id')
+        .eq('email', newUserEmail)
         .maybeSingle();
-        
-      if (error) {
-        // Cannot access user data - no permission
-        toast.error("Kan inte tilldela roll - kontrollera att användaren finns");
+
+      if (profileError || !profile) {
+        toast.error("Kunde inte hitta användare med den e-posten");
         return;
       }
 
-      // For demo purposes, we'll use a simplified approach
-      // In production, you'd need proper user management
-      const demoUserId = crypto.randomUUID();
-      
+      // Bestäm company_id
+      const resolvedCompanyId = selectedRole === 'company_admin'
+        ? (selectedCompany || profile.company_id || undefined)
+        : undefined;
+
+      if (!profile.user_id) {
+        toast.error('Profil saknar user_id');
+        return;
+      }
+
       await assignRole.mutateAsync({
-        userId: demoUserId,
+        userId: profile.user_id as string,
         role: selectedRole,
-        companyId: selectedRole === 'company_admin' ? selectedCompany : undefined
+        companyId: resolvedCompanyId
       });
 
+      toast.success('Roll tilldelad');
       setNewUserEmail("");
       setSelectedRole("company_admin");
       setSelectedCompany("");
+      refetchUsers();
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Could not assign role";
       toast.error(errorMessage);
