@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Building2, Users, UserPlus, LogOut, Trash2, AlertTriangle, RefreshCw } from "lucide-react";
+import { Shield, Building2, Users, UserPlus, LogOut, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UserRole } from "@/hooks/useAuth";
@@ -84,7 +84,9 @@ const Admin = () => {
         return [];
       }
     },
-    enabled: isAuthenticated // Only fetch when authenticated
+    enabled: isAuthenticated, // Only fetch when authenticated
+    retry: 1,
+    refetchOnWindowFocus: false
   });
 
   const handleLogout = async () => {
@@ -295,22 +297,6 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="companies" className="space-y-6">
-            {/* Cleanup Section */}
-            <Card className="p-6 border-orange-200 bg-orange-50">
-              <div className="flex items-center gap-3 mb-4">
-                <AlertTriangle className="h-5 w-5 text-orange-600" />
-                <h2 className="text-xl font-semibold text-orange-800">Database Cleanup</h2>
-              </div>
-              <p className="text-orange-700 mb-4">
-                Det finns dubbletter av företag som behöver städas bort. Kör SQL cleanup för att ta bort dubbletter.
-              </p>
-              <div className="bg-orange-100 p-4 rounded-lg">
-                <p className="font-mono text-sm text-orange-800">
-                  Dubbletter: "test" (5st), "New Company" (4st), "Conta" (2st)
-                </p>
-              </div>
-            </Card>
-
             <Card className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
