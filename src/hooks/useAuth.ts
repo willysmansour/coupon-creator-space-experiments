@@ -175,19 +175,28 @@ export const useRegisterCompany = () => {
       email,
       password,
       companyName,
+      firstName,
+      lastName,
       logo
     }: {
       email: string;
       password: string;
       companyName: string;
+      firstName?: string;
+      lastName?: string;
       logo?: string;
     }) => {
-      // Create the auth user
+      // Create the auth user with metadata
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/`
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            company_name: companyName,
+            first_name: firstName || companyName, // Använd angivet förnamn eller företagsnamn
+            last_name: lastName || 'Admin'
+          }
         }
       });
 

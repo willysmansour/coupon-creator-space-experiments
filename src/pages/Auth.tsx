@@ -17,6 +17,8 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [companyName, setCompanyName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [loading, setLoading] = useState(false);
   const [showQRCode, setShowQRCode] = useState(false);
   const [qrCodeData, setQrCodeData] = useState<{ companyId: string; companyName: string; qrUrl: string } | null>(null);
@@ -100,7 +102,9 @@ const Auth = () => {
       const result = await registerCompany.mutateAsync({
         email,
         password,
-        companyName
+        companyName,
+        firstName,
+        lastName
       });
       
       // Show QR code after successful registration
@@ -243,6 +247,28 @@ const Auth = () => {
                 <div className="space-y-2">
                   <Label htmlFor="company-name">Company name</Label>
                   <Input id="company-name" type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="first-name">Förnamn</Label>
+                    <Input 
+                      id="first-name" 
+                      type="text" 
+                      value={firstName} 
+                      onChange={(e) => setFirstName(e.target.value)}
+                      placeholder="Ditt förnamn"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="last-name">Efternamn</Label>
+                    <Input 
+                      id="last-name" 
+                      type="text" 
+                      value={lastName} 
+                      onChange={(e) => setLastName(e.target.value)}
+                      placeholder="Ditt efternamn"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="company-email">Email</Label>
