@@ -6,13 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Shield, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { SUPERADMIN_EMAIL } from "@/config/constants";
 
 interface SuperAdminLoginProps {
   onLoginSuccess: () => void;
 }
 
 export function SuperAdminLogin({ onLoginSuccess }: SuperAdminLoginProps) {
-  const [email, setEmail] = useState("admin@test.com"); // Pre-fill för convenience
+  const [email, setEmail] = useState(SUPERADMIN_EMAIL); // Pre-fill from config
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -35,13 +36,13 @@ export function SuperAdminLogin({ onLoginSuccess }: SuperAdminLoginProps) {
       }
 
       if (data.user) {
-        // Direkt kontroll för admin@test.com - ingen useUserRole dependency
-        if (email.toLowerCase() === 'admin@test.com') {
+        // Direkt kontroll för superadmin email - ingen useUserRole dependency
+        if (email.toLowerCase() === SUPERADMIN_EMAIL.toLowerCase()) {
           localStorage.setItem("superadmin_session", "true");
           toast.success("Logged in as Super Admin");
           onLoginSuccess();
         } else {
-          toast.error("Only admin@test.com can access this panel");
+          toast.error(`Only ${SUPERADMIN_EMAIL} can access this panel`);
           await supabase.auth.signOut();
         }
       }

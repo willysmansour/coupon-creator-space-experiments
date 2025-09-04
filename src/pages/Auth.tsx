@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { useRegisterCompany } from "@/hooks/useAuth";
 import QRCode from 'react-qr-code';
 import { useMobile } from "@/hooks/use-mobile";
+import { z } from "zod";
+import { loginSchema, companyRegistrationSchema, type LoginFormData, type CompanyRegistrationFormData } from "@/lib/validations";
 
 const Auth = () => {
   const [mode, setMode] = useState<"signin" | "company">("signin");
@@ -62,14 +64,21 @@ const Auth = () => {
   const onSignIn = async () => {
     setLoading(true);
     try {
+      // Validate input data
+      const validatedData = loginSchema.parse({ email, password });
+      
       // Ensure no stale session keeps you logged into a different account
       await supabase.auth.signOut();
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword(validatedData);
       if (error) throw error;
       toast.success("Signed in successfully");
     } catch (e: unknown) {
-      const errorMessage = e instanceof Error ? e.message : "Could not sign in";
-      toast.error(errorMessage);
+      if (e instanceof z.ZodError) {
+        toast.error(e.errors[0].message);
+      } else {
+        const errorMessage = e instanceof Error ? e.message : "Could not sign in";
+        toast.error(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -99,13 +108,16 @@ const Auth = () => {
   const onCompanyRegister = async () => {
     setLoading(true);
     try {
-      const result = await registerCompany.mutateAsync({
+      // Validate input data
+      const validatedData = companyRegistrationSchema.parse({
         email,
         password,
         companyName,
-        firstName,
-        lastName
+        firstName: firstName || undefined,
+        lastName: lastName || undefined
       });
+      
+      const result = await registerCompany.mutateAsync(validatedData);
       
       // Show QR code after successful registration
       if (result.company && result.qrCodeUrl) {
@@ -117,8 +129,12 @@ const Auth = () => {
         setShowQRCode(true);
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Could not register company";
-      toast.error(errorMessage);
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+      } else {
+        const errorMessage = error instanceof Error ? error.message : "Could not register company";
+        toast.error(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
