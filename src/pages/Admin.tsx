@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Building2, Users, UserPlus, LogOut } from "lucide-react";
+import { Shield, Building2, Users, UserPlus, LogOut, Trash2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import type { UserRole } from "@/hooks/useAuth";
@@ -236,30 +236,77 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="companies" className="space-y-6">
-            <Card className="p-6">
+            {/* Cleanup Section */}
+            <Card className="p-6 border-orange-200 bg-orange-50">
               <div className="flex items-center gap-3 mb-4">
-                <Building2 className="h-5 w-5" />
-                <h2 className="text-xl font-semibold">Alla Företag</h2>
+                <AlertTriangle className="h-5 w-5 text-orange-600" />
+                <h2 className="text-xl font-semibold text-orange-800">Database Cleanup</h2>
+              </div>
+              <p className="text-orange-700 mb-4">
+                Det finns dubbletter av företag som behöver städas bort. Kör SQL cleanup för att ta bort dubbletter.
+              </p>
+              <div className="bg-orange-100 p-4 rounded-lg">
+                <p className="font-mono text-sm text-orange-800">
+                  Dubbletter: "test" (5st), "New Company" (4st), "Conta" (2st)
+                </p>
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <Building2 className="h-5 w-5" />
+                  <h2 className="text-xl font-semibold">Alla Företag ({companies?.length || 0})</h2>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Visar alla företag i systemet
+                </div>
               </div>
 
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Namn</TableHead>
+                    <TableHead>Ägare</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Rabatt</TableHead>
                     <TableHead>Skapad</TableHead>
+                    <TableHead className="w-20">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {companies?.map((company) => (
                     <TableRow key={company.id}>
-                      <TableCell className="font-medium">{company.name}</TableCell>
+                      <TableCell className="font-medium">
+                        {company.name}
+                        {companies?.filter(c => c.name === company.name).length > 1 && (
+                          <Badge variant="destructive" className="ml-2 text-xs">DUBLETT</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {company.owner_user_id ? company.owner_user_id.slice(0, 8) + '...' : '-'}
+                      </TableCell>
                       <TableCell>
-                        <Badge variant="outline">Aktiv</Badge>
+                        <Badge variant="outline">
+                          {company.is_active ? 'Aktiv' : 'Inaktiv'}
+                        </Badge>
                       </TableCell>
                       <TableCell>{company.discount_percentage || 10}%</TableCell>
                       <TableCell>{new Date(company.created_at).toLocaleDateString('sv-SE')}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                          onClick={() => {
+                            if (confirm(`Är du säker på att du vill ta bort företaget "${company.name}"?`)) {
+                              toast.error("Delete-funktionen är inte implementerad ännu");
+                            }
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
