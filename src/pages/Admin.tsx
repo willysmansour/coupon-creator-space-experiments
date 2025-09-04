@@ -32,41 +32,62 @@ const Admin = () => {
   const { data: allUsers, refetch: refetchUsers, isLoading: usersLoading } = useQuery({
     queryKey: ['admin-users'],
     queryFn: async () => {
-      // Get all users from auth.users and their roles
-      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
-      if (authError) throw authError;
+      try {
+        // Get user_roles first
+        const { data: userRoles, error: rolesError } = await supabase
+          .from('user_roles')
+          .select(`
+            id,
+            user_id,
+            role,
+            company_id,
+            created_at
+          `)
+          .order('created_at', { ascending: false });
 
-      // Get all user roles
-      const { data: userRoles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select(`
-          user_id,
-          role,
-          company_id,
-          companies(name),
-          created_at
-        `);
+        if (rolesError) throw rolesError;
 
-      if (rolesError) throw rolesError;
+        // Get profiles separately
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('user_id, email, first_name, last_name');
 
-      // Combine auth users with their roles
-      const combinedData = authUsers.users.map(user => {
-        const role = userRoles?.find(r => r.user_id === user.id);
-        return {
-          id: user.id,
-          user_id: user.id,
-          email: user.email,
-          role: role?.role || 'no_role',
-          company_id: role?.company_id,
-          company_name: role?.companies?.name,
-          created_at: role?.created_at || user.created_at,
-          auth_created_at: user.created_at
-        };
-      });
+        if (profilesError) {
+          console.warn('Could not fetch profiles:', profilesError);
+        }
 
-      return combinedData.sort((a, b) => 
-        new Date(b.auth_created_at).getTime() - new Date(a.auth_created_at).getTime()
-      );
+        // Get companies separately  
+        const { data: companies, error: companiesError } = await supabase
+          .from('companies')
+          .select('id, name');
+
+        if (companiesError) {
+          console.warn('Could not fetch companies:', companiesError);
+        }
+
+        // Combine data manually
+        const combinedData = userRoles?.map(role => {
+          const profile = profiles?.find(p => p.user_id === role.user_id);
+          const company = companies?.find(c => c.id === role.company_id);
+          
+          return {
+            id: role.id,
+            user_id: role.user_id,
+            email: profile?.email || 'Ingen email',
+            first_name: profile?.first_name,
+            last_name: profile?.last_name,
+            role: role.role,
+            company_id: role.company_id,
+            company_name: company?.name,
+            created_at: role.created_at
+          };
+        }) || [];
+
+        return combinedData;
+      } catch (error) {
+        console.error('Error fetching admin users:', error);
+        return [];
+      }
     },
     enabled: isAuthenticated // Only fetch when authenticated
   });
@@ -218,34 +239,59 @@ const Admin = () => {
             </Card>
 
             <Card className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <Users className="h-5 w-5" />
-                <h2 className="text-xl font-semibold">Alla Användare</h2>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <Users className="h-5 w-5" />
+                  <h2 className="text-xl font-semibold">Alla Användare ({allUsers?.length || 0})</h2>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    refetchUsers();
+                    toast.success("Användardata uppdaterad");
+                  }}
+                  disabled={usersLoading}
+                  className="gap-2"
+                >
+                  <RefreshCw className={`h-4 w-4 ${usersLoading ? 'animate-spin' : ''}`} />
+                  {usersLoading ? 'Laddar...' : 'Uppdatera'}
+                </Button>
               </div>
 
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Användare ID</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Namn</TableHead>
                     <TableHead>Roll</TableHead>
                     <TableHead>Företag</TableHead>
                     <TableHead>Skapad</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {allUsers?.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-mono text-sm">{user.user_id.slice(0, 8)}...</TableCell>
-                      <TableCell>
-                        <Badge variant={user.role === 'super_admin' ? 'destructive' : 'default'}>
-                          {user.role === 'super_admin' ? 'Super Admin' : 
-                           user.role === 'company_admin' ? 'Företag Admin' : 'Kund'}
-                        </Badge>
+                  {allUsers && allUsers.length > 0 ? (
+                    allUsers.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell className="font-medium">{user.email}</TableCell>
+                        <TableCell>{user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : '-'}</TableCell>
+                        <TableCell>
+                          <Badge variant={user.role === 'super_admin' ? 'destructive' : 'default'}>
+                            {user.role === 'super_admin' ? 'Super Admin' : 
+                             user.role === 'company_admin' ? 'Företag Admin' : 'Kund'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{user.company_name || '-'}</TableCell>
+                        <TableCell>{new Date(user.created_at).toLocaleDateString('sv-SE')}</TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                        {usersLoading ? 'Laddar användare...' : 'Inga användare hittades'}
                       </TableCell>
-                      <TableCell>{user.company_name || '-'}</TableCell>
-                      <TableCell>{new Date(user.created_at).toLocaleDateString('sv-SE')}</TableCell>
                     </TableRow>
-                  ))}
+                  )}
                 </TableBody>
               </Table>
             </Card>
