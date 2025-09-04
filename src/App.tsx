@@ -7,6 +7,7 @@ import { AppProvider } from "@/contexts/AppContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Suspense, lazy } from "react";
 import { LoadingPage } from "@/components/ui/loading";
+import { RequireAuth } from "@/components/auth/RequireAuth";
 
 // Lazy load heavy pages for better performance
 const Index = lazy(() => import("./pages/Index"));
@@ -60,59 +61,81 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={
-                <Suspense fallback={<PageLoader />}>
-                  <Index />
-                </Suspense>
+                <RequireAuth>
+                  <Suspense fallback={<PageLoader />}>
+                    <Index />
+                  </Suspense>
+                </RequireAuth>
               } />
               <Route path="/campaigns" element={
-                <Suspense fallback={<PageLoader />}>
-                  <DiscountSettings />
-                </Suspense>
+                <RequireAuth>
+                  <Suspense fallback={<PageLoader />}>
+                    <DiscountSettings />
+                  </Suspense>
+                </RequireAuth>
               } />
               <Route path="/uploads" element={
-                <Suspense fallback={<PageLoader />}>
-                  <Uploads />
-                </Suspense>
+                <RequireAuth>
+                  <Suspense fallback={<PageLoader />}>
+                    <Uploads />
+                  </Suspense>
+                </RequireAuth>
               } />
               <Route path="/coupons" element={
-                <Suspense fallback={<PageLoader />}>
-                  <Coupons />
-                </Suspense>
+                <RequireAuth>
+                  <Suspense fallback={<PageLoader />}>
+                    <Coupons />
+                  </Suspense>
+                </RequireAuth>
               } />
               <Route path="/analytics" element={
-                <Suspense fallback={<PageLoader />}>
-                  <Analytics />
-                </Suspense>
+                <RequireAuth>
+                  <Suspense fallback={<PageLoader />}>
+                    <Analytics />
+                  </Suspense>
+                </RequireAuth>
               } />
               <Route path="/customers" element={
-                <Suspense fallback={<PageLoader />}>
-                  <Customers />
-                </Suspense>
+                <RequireAuth>
+                  <Suspense fallback={<PageLoader />}>
+                    <Customers />
+                  </Suspense>
+                </RequireAuth>
               } />
               <Route path="/settings" element={
-                <Suspense fallback={<PageLoader />}>
-                  <Settings />
-                </Suspense>
+                <RequireAuth>
+                  <Suspense fallback={<PageLoader />}>
+                    <Settings />
+                  </Suspense>
+                </RequireAuth>
               } />
               <Route path="/help" element={
-                <Suspense fallback={<PageLoader />}>
-                  <Help />
-                </Suspense>
+                <RequireAuth>
+                  <Suspense fallback={<PageLoader />}>
+                    <Help />
+                  </Suspense>
+                </RequireAuth>
               } />
               <Route path="/logout" element={
-                <Suspense fallback={<PageLoader />}>
-                  <Logout />
-                </Suspense>
+                <RequireAuth>
+                  <Suspense fallback={<PageLoader />}>
+                    <Logout />
+                  </Suspense>
+                </RequireAuth>
               } />
               <Route path="/admin" element={
-                <Suspense fallback={<PageLoader />}>
-                  <Admin />
-                </Suspense>
+                <RequireAuth>
+                  <Suspense fallback={<PageLoader />}>
+                    <Admin />
+                  </Suspense>
+                </RequireAuth>
               } />
               <Route path="/test-email" element={
-                <Suspense fallback={<PageLoader />}>
-                  <TestEmail />
-                </Suspense>
+                <RequireAuth>
+                  <Suspense fallback={<PageLoader />}>
+                    <TestEmail />
+                  </Suspense>
+                </RequireAuth>
               } />
               <Route path="/auth" element={
                 <Suspense fallback={<PageLoader />}>
