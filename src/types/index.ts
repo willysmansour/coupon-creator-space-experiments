@@ -8,6 +8,10 @@ export interface Company {
   content_description?: string;
   discount_active?: boolean;
   discount_expires_at?: string;
+  is_active?: boolean;
+  owner_user_id?: string;
+  qr_code_url?: string;
+  qr_code_created_at?: string;
   created_at: string;
   updated_at: string;
 }
