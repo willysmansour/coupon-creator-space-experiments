@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback } from "react";
+import { Link } from "react-router-dom";
 import { useFilteredUploads } from "@/hooks/useFilteredSupabaseData";
 import { useUserRole } from "@/hooks/useAuth";
 import { useDeleteUpload } from "@/hooks/useSupabaseData";
@@ -107,6 +108,9 @@ export const FilteredImageGallery = React.memo(({ selectedCompanyId }: FilteredI
           <p className="text-muted-foreground">
             Images will appear here once customers upload receipts and they are approved.
           </p>
+          <Button asChild className="mt-4">
+            <Link to="/uploads">Upload images</Link>
+          </Button>
         </CardContent>
       </Card>
     );
