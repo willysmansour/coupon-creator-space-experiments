@@ -203,36 +203,19 @@ export const useRegisterCompany = () => {
       if (authError) throw authError;
       if (!authData.user) throw new Error('User creation failed');
 
-      // Create the company
+      // Wait a moment for the database trigger to create the company
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Get the company that was created by the database trigger
       const { data: companyData, error: companyError } = await supabase
         .from('companies')
-        .insert({
-          name: companyName,
-          logo,
-          owner_user_id: authData.user.id
-        })
-        .select()
+        .select('*')
+        .eq('owner_user_id', authData.user.id)
         .single();
 
       if (companyError) throw companyError;
 
-      // Delete existing customer role first (if exists)
-      await supabase
-        .from('user_roles')
-        .delete()
-        .eq('user_id', authData.user.id)
-        .eq('role', 'customer');
-
-      // Assign company admin role
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .insert({
-          user_id: authData.user.id,
-          role: 'company_admin',
-          company_id: companyData.id
-        });
-
-      if (roleError) throw roleError;
+      // Role assignment is handled by the database trigger automatically
 
       // Create QR code data for the company
       const qrUrl = `${window.location.origin}/company/${companyData.id}`;
