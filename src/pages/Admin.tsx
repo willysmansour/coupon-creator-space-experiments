@@ -29,23 +29,44 @@ const Admin = () => {
   const assignRole = useAssignRole();
   
   // Fetch all users with their roles - ALWAYS call this hook
-  const { data: allUsers } = useQuery({
+  const { data: allUsers, refetch: refetchUsers, isLoading: usersLoading } = useQuery({
     queryKey: ['admin-users'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Get all users from auth.users and their roles
+      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+      if (authError) throw authError;
+
+      // Get all user roles
+      const { data: userRoles, error: rolesError } = await supabase
         .from('user_roles')
         .select(`
-          id,
           user_id,
           role,
           company_id,
           companies(name),
           created_at
-        `)
-        .order('created_at', { ascending: false });
+        `);
 
-      if (error) throw error;
-      return data;
+      if (rolesError) throw rolesError;
+
+      // Combine auth users with their roles
+      const combinedData = authUsers.users.map(user => {
+        const role = userRoles?.find(r => r.user_id === user.id);
+        return {
+          id: user.id,
+          user_id: user.id,
+          email: user.email,
+          role: role?.role || 'no_role',
+          company_id: role?.company_id,
+          company_name: role?.companies?.name,
+          created_at: role?.created_at || user.created_at,
+          auth_created_at: user.created_at
+        };
+      });
+
+      return combinedData.sort((a, b) => 
+        new Date(b.auth_created_at).getTime() - new Date(a.auth_created_at).getTime()
+      );
     },
     enabled: isAuthenticated // Only fetch when authenticated
   });
@@ -221,7 +242,7 @@ const Admin = () => {
                            user.role === 'company_admin' ? 'Företag Admin' : 'Kund'}
                         </Badge>
                       </TableCell>
-                      <TableCell>{user.companies?.name || '-'}</TableCell>
+                      <TableCell>{user.company_name || '-'}</TableCell>
                       <TableCell>{new Date(user.created_at).toLocaleDateString('sv-SE')}</TableCell>
                     </TableRow>
                   ))}
