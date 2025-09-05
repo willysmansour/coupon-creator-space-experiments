@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppProvider } from "@/contexts/AppContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Suspense, lazy } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { LoadingPage } from "@/components/ui/loading";
 
 // Lazy load heavy pages for better performance
@@ -33,6 +34,13 @@ const queryClient = createQueryClient();
 // Loading fallback component
 const PageLoader = () => <LoadingPage message="Loading page..." />;
 
+// Global auth gate to avoid app-wide flash on initial auth resolving
+const AuthGate = ({ children }: { children: React.ReactNode }) => {
+  const { loading } = useAuth();
+  if (loading) return <PageLoader />;
+  return <>{children}</>;
+};
+
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
@@ -44,42 +52,58 @@ const App = () => (
             <Routes>
               <Route path="/" element={
                 <Suspense fallback={<PageLoader />}>
-                  <Index />
+                  <AuthGate>
+                    <Index />
+                  </AuthGate>
                 </Suspense>
               } />
               <Route path="/campaigns" element={
                 <Suspense fallback={<PageLoader />}>
-                  <DiscountSettings />
+                  <AuthGate>
+                    <DiscountSettings />
+                  </AuthGate>
                 </Suspense>
               } />
               <Route path="/uploads" element={
                 <Suspense fallback={<PageLoader />}>
-                  <Uploads />
+                  <AuthGate>
+                    <Uploads />
+                  </AuthGate>
                 </Suspense>
               } />
               <Route path="/coupons" element={
                 <Suspense fallback={<PageLoader />}>
-                  <Coupons />
+                  <AuthGate>
+                    <Coupons />
+                  </AuthGate>
                 </Suspense>
               } />
               <Route path="/analytics" element={
                 <Suspense fallback={<PageLoader />}>
-                  <Analytics />
+                  <AuthGate>
+                    <Analytics />
+                  </AuthGate>
                 </Suspense>
               } />
               <Route path="/customers" element={
                 <Suspense fallback={<PageLoader />}>
-                  <Customers />
+                  <AuthGate>
+                    <Customers />
+                  </AuthGate>
                 </Suspense>
               } />
               <Route path="/settings" element={
                 <Suspense fallback={<PageLoader />}>
-                  <Settings />
+                  <AuthGate>
+                    <Settings />
+                  </AuthGate>
                 </Suspense>
               } />
               <Route path="/help" element={
                 <Suspense fallback={<PageLoader />}>
-                  <Help />
+                  <AuthGate>
+                    <Help />
+                  </AuthGate>
                 </Suspense>
               } />
               <Route path="/logout" element={
