@@ -1,6 +1,6 @@
-import { ModernSidebar } from "@/components/ModernSidebar";
-import { ModernHeader } from "@/components/ModernHeader";
-import { FilteredImageGallery } from "@/components/FilteredImageGallery";
+import { ModernSidebar } from "@/components/layout/ModernSidebar";
+import { ModernHeader } from "@/components/layout/ModernHeader";
+import { FilteredImageGallery } from "@/components/gallery/FilteredImageGallery";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { DashboardAuth } from "@/components/auth/DashboardAuth";
 import { useState } from "react";

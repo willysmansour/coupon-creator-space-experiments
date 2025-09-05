@@ -5,6 +5,7 @@ export enum ErrorType {
   VALIDATION = 'validation',
   AUTHENTICATION = 'authentication',
   AUTHORIZATION = 'authorization',
+  PERMISSION = 'permission',
   NETWORK = 'network',
   DATABASE = 'database',
   UNKNOWN = 'unknown'
@@ -46,28 +47,39 @@ export class ErrorHandler {
   private static categorizeError(error: any, context?: Record<string, any>): StructuredError {
     const timestamp = Date.now();
     
-    // Supabase auth errors
-    if (error?.message?.includes('Invalid login credentials')) {
+    // Authentication errors
+    if (error?.code === 'invalid_credentials' || error?.message?.includes('Invalid login credentials')) {
       return {
         type: ErrorType.AUTHENTICATION,
-        message: 'Felaktiga inloggningsuppgifter',
+        message: error.message || 'Felaktiga inloggningsuppgifter',
         originalError: error,
         context,
         timestamp
       };
     }
     
-    if (error?.message?.includes('Email already registered')) {
+    // Validation errors
+    if (error?.code === 'validation_error' || error?.message?.includes('Email already registered')) {
       return {
         type: ErrorType.VALIDATION,
-        message: 'Ett konto med denna email finns redan',
+        message: error.message || 'Ett konto med denna email finns redan',
         originalError: error,
         context,
         timestamp
       };
     }
     
-    // Database/RLS errors
+    // Permission/Authorization errors
+    if (error?.code === '42501' || error?.message?.includes('Permission denied')) {
+      return {
+        type: ErrorType.PERMISSION,
+        message: 'Du har inte behörighet för denna åtgärd',
+        originalError: error,
+        context,
+        timestamp
+      };
+    }
+    
     if (error?.code === 'PGRST301' || error?.message?.includes('RLS')) {
       return {
         type: ErrorType.AUTHORIZATION,
@@ -79,7 +91,7 @@ export class ErrorHandler {
     }
     
     // Network errors
-    if (error?.message?.includes('fetch') || error?.message?.includes('network')) {
+    if (error?.message?.includes('fetch') || error?.message?.includes('Failed to fetch') || error?.message?.includes('network')) {
       return {
         type: ErrorType.NETWORK,
         message: 'Nätverksfel - försök igen',
@@ -90,7 +102,7 @@ export class ErrorHandler {
     }
     
     // Database errors
-    if (error?.code?.startsWith('23') || error?.message?.includes('constraint')) {
+    if (error?.code === '23505' || error?.code?.startsWith('23') || error?.message?.includes('constraint') || error?.message?.includes('duplicate key')) {
       return {
         type: ErrorType.DATABASE,
         message: 'Databasfel - kontakta support',
@@ -103,7 +115,7 @@ export class ErrorHandler {
     // Unknown errors
     return {
       type: ErrorType.UNKNOWN,
-      message: error?.message || 'Ett oväntat fel uppstod',
+      message: 'Ett oväntat fel uppstod',
       originalError: error,
       context,
       timestamp
@@ -113,27 +125,43 @@ export class ErrorHandler {
   private static showUserMessage(error: StructuredError) {
     switch (error.type) {
       case ErrorType.VALIDATION:
+        toast.warning('Valideringsfel', {
+          description: error.message
+        });
+        break;
       case ErrorType.AUTHENTICATION:
-        toast.error(error.message);
+        toast.error('Autentiseringsfel', {
+          description: error.message
+        });
         break;
       case ErrorType.AUTHORIZATION:
         toast.error(error.message, { duration: 5000 });
         break;
+      case ErrorType.PERMISSION:
+        toast.error('Behörighetsfel', {
+          description: 'Du har inte behörighet för denna åtgärd'
+        });
+        break;
       case ErrorType.NETWORK:
-        toast.error(error.message, { 
-          duration: 4000,
-          action: {
-            label: "Försök igen",
-            onClick: () => window.location.reload()
-          }
+        toast.error('Nätverksfel', {
+          description: 'Kontrollera din anslutning och försök igen'
         });
         break;
       case ErrorType.DATABASE:
-        toast.error(error.message, { duration: 6000 });
+        toast.error('Databasfel', {
+          description: 'Denna data finns redan eller är ogiltig'
+        });
         break;
+      case ErrorType.UNKNOWN:
       default:
-        toast.error(error.message);
+        toast.error('Oväntat fel', {
+          description: 'Ett oväntat fel uppstod. Försök igen senare.'
+        });
     }
+  }
+
+  static getErrors(): StructuredError[] {
+    return this.errors;
   }
 
   static getRecentErrors(limit = 10): StructuredError[] {

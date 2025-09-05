@@ -1,6 +1,6 @@
-import { ModernSidebar } from "@/components/ModernSidebar";
-import { ModernHeader } from "@/components/ModernHeader";
-import { ModernMetricCard } from "@/components/ModernMetricCard";
+import { ModernSidebar } from "@/components/layout/ModernSidebar";
+import { ModernHeader } from "@/components/layout/ModernHeader";
+import { ModernMetricCard } from "@/components/dashboard/ModernMetricCard";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

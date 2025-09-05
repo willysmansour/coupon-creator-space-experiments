@@ -178,7 +178,12 @@ const ThankYou = () => {
                   />
                 </div>
               )}
-              <p className="text-sm">{upload.message}</p>
+              {upload.message && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Your Review:</p>
+                  <p className="text-sm">{upload.message}</p>
+                </div>
+              )}
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <span>Submitted:</span>
                 <span>{new Date(upload.submitted_at).toLocaleString('en-GB')}</span>

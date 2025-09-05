@@ -1,5 +1,5 @@
-import { ModernSidebar } from "@/components/ModernSidebar";
-import { ModernHeader } from "@/components/ModernHeader";
+import { ModernSidebar } from "@/components/layout/ModernSidebar";
+import { ModernHeader } from "@/components/layout/ModernHeader";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import { useCompanyAwareCompanies } from "@/hooks/useCompanyAwareData";
 import { useCurrentProfile, useUpsertProfile, uploadProfileImage } from "@/hooks/useProfileData";
 import { useUpdateCompany, uploadCompanyLogo } from "@/hooks/useCompanyData";
 import { useState, useRef, useEffect } from "react";
-import { QRCodeGenerator } from "@/components/QRCodeGenerator";
+import { QRCodeGenerator } from "@/components/common/QRCodeGenerator";
 import { useMobile } from "@/hooks/use-mobile";
 
 const Settings = () => {

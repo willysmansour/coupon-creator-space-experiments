@@ -21,7 +21,7 @@ serve(async (req) => {
     const companyId = formData.get('companyId') as string
     const customerName = formData.get('customerName') as string
     const customerEmail = formData.get('customerEmail') as string
-    const message = formData.get('message') as string
+    const review = formData.get('review') as string
 
     if (!file || !companyId || !customerName || !customerEmail) {
       return new Response(
@@ -62,7 +62,7 @@ serve(async (req) => {
         customer_name: customerName,
         customer_email: customerEmail,
         image_url: publicUrl,
-        message: message || 'Uploaded content',
+        message: review || '',
         status: 'pending'
       })
       .select()

@@ -8,7 +8,7 @@ import { Plus, Search, Bell, User, Building2, Menu } from "lucide-react";
 import { useUserRole } from "@/hooks/useAuth";
 import { useCurrentProfile } from "@/hooks/useProfileData";
 import { useCompanyAwareCompanies } from "@/hooks/useCompanyAwareData";
-import { CompanySelector } from "@/components/CompanySelector";
+import { CompanySelector } from "@/components/common/CompanySelector";
 import { useMobile } from "@/hooks/use-mobile";
 
 interface ModernHeaderProps {

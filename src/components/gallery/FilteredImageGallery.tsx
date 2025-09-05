@@ -196,7 +196,7 @@ export const FilteredImageGallery = React.memo(({ selectedCompanyId }: FilteredI
                 {upload.message && (
                   <div className="flex items-start gap-2 text-sm text-muted-foreground">
                     <MessageSquare className="h-3 w-3 mt-0.5 flex-shrink-0" />
-                    <p className="line-clamp-2">{upload.message}</p>
+                    <p className="line-clamp-2" title="Customer Review">{upload.message}</p>
                   </div>
                 )}
               </div>

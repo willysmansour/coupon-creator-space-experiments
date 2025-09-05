@@ -1,5 +1,5 @@
-import { ModernSidebar } from "@/components/ModernSidebar";
-import { ModernHeader } from "@/components/ModernHeader";
+import { ModernSidebar } from "@/components/layout/ModernSidebar";
+import { ModernHeader } from "@/components/layout/ModernHeader";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Card } from "@/components/ui/card";
 import { BarChart3, TrendingUp, Users, DollarSign } from "lucide-react";

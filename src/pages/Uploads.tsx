@@ -1,6 +1,6 @@
-import { ModernSidebar } from "@/components/ModernSidebar";
-import { ModernHeader } from "@/components/ModernHeader";
-import { ModernMetricCard } from "@/components/ModernMetricCard";
+import { ModernSidebar } from "@/components/layout/ModernSidebar";
+import { ModernHeader } from "@/components/layout/ModernHeader";
+import { ModernMetricCard } from "@/components/dashboard/ModernMetricCard";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -213,9 +213,12 @@ const Uploads = () => {
                         </p>
                         
                         {submission.message && (
-                          <p className="text-sm text-foreground mb-3 line-clamp-2">
-                            "{submission.message}"
-                          </p>
+                          <div className="mb-3">
+                            <p className="text-xs text-muted-foreground mb-1">Customer Review:</p>
+                            <p className="text-sm text-foreground line-clamp-2">
+                              "{submission.message}"
+                            </p>
+                          </div>
                         )}
                         
                         {submission.status === "pending" && (

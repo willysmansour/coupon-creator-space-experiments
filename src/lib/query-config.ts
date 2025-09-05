@@ -31,9 +31,6 @@ export const createQueryClient = () => new QueryClient({
       refetchOnWindowFocus: false,
       refetchOnMount: true,
       refetchOnReconnect: true,
-      keepPreviousData: true,
-      // Keep previous data on screen while refetching to avoid UI flash
-      placeholderData: (prev) => prev,
       retry: smartRetry,
       retryDelay: getRetryDelay,
       throwOnError: false, // Handle errors gracefully

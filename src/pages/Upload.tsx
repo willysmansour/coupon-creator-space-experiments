@@ -19,7 +19,7 @@ const Upload = () => {
   const createUpload = useCreateUpload();
 
   const [file, setFile] = useState<File | null>(null);
-  const [message, setMessage] = useState('');
+  const [review, setReview] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [customerName, setCustomerName] = useState('');
@@ -139,7 +139,7 @@ const Upload = () => {
       formData.append('companyId', company.id);
       formData.append('customerName', customerName.trim());
       formData.append('customerEmail', customerEmail.trim().toLowerCase());
-      formData.append('message', message || 'Uploaded content');
+      formData.append('review', review || '');
 
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/secure-upload`, {
         method: 'POST',
@@ -374,16 +374,16 @@ const Upload = () => {
             </div>
           </div>
 
-          {/* Optional message */}
+          {/* Optional review */}
           <div>
-            <Label htmlFor="message" className="text-sm font-medium">
-              Message (optional)
+            <Label htmlFor="review" className="text-sm font-medium">
+              Review (optional)
             </Label>
             <Textarea
-              id="message"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Tell us something about your submission..."
+              id="review"
+              value={review}
+              onChange={(e) => setReview(e.target.value)}
+              placeholder="Share your experience with this company..."
               className="mt-1"
             />
           </div>
