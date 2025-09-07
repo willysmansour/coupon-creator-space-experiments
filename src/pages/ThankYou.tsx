@@ -8,7 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CheckCircle, Clock, Gift } from 'lucide-react';
-import { toast } from 'sonner';
+import { notify } from '@/lib/notify';
+import { ErrorHandler } from '@/lib/error-handler';
 
 const ThankYou = () => {
   const { uploadId } = useParams<{ uploadId: string }>();
@@ -178,10 +179,10 @@ const ThankYou = () => {
                   />
                 </div>
               )}
-              {upload.message && (
+              {upload.message && upload.message.trim() !== 'Uploaded content' && (
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Your Review:</p>
-                  <p className="text-sm">{upload.message}</p>
+                  <p className="text-sm whitespace-pre-wrap">{upload.message}</p>
                 </div>
               )}
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -229,7 +230,7 @@ const ThankYou = () => {
               <Button
                 onClick={async () => {
                   if (!customerName.trim() || !email.trim()) {
-                    toast.error('Please fill in both name and email');
+                    notify.error('Please fill in both name and email');
                     return;
                   }
                   
@@ -255,20 +256,20 @@ const ThankYou = () => {
                     });
 
                     if (emailError || !emailResult?.success) {
-                      console.error('Email error:', emailError || emailResult);
+                      ErrorHandler.handle(emailError || emailResult, { scope: 'thankyou-send-email' });
                       if (emailResult?.needsApproval) {
                         setShowForm(false);
-                        toast.success('Details saved! You will receive a coupon when your submission is approved.');
+                        notify.success('Details saved! You will receive a coupon when your submission is approved.');
                       } else {
-                        toast.error('Details saved but the email failed to send');
+                        notify.error('Details saved but the email failed to send');
                       }
                     } else {
                       setShowForm(false);
-                      toast.success('Details saved! Your coupon will be sent to your email shortly.');
+                      notify.success('Details saved! Your coupon will be sent to your email shortly.');
                     }
                   } catch (error) {
-                    console.error('Error:', error);
-                    toast.error('Failed to save details');
+                    ErrorHandler.handle(error, { scope: 'thankyou-save-details' });
+                    notify.error('Failed to save details');
                   } finally {
                     setIsSubmitting(false);
                   }

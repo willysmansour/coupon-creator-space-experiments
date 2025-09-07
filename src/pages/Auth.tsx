@@ -7,11 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { toast } from "sonner";
-import { useRegisterCompany } from "@/hooks/useAuth";
+import { notify, notifyFromError } from "@/lib/notify";
+import { useRegisterCompany } from "@/domains/companies";
 import QRCode from 'react-qr-code';
 import { useMobile } from "@/hooks/use-mobile";
 import { z } from "zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { loginSchema, companyRegistrationSchema, type LoginFormData, type CompanyRegistrationFormData } from "@/lib/validations";
 
 const Auth = () => {
@@ -28,6 +29,7 @@ const Auth = () => {
   const [search] = useSearchParams();
   const navigate = useNavigate();
   const registerCompany = useRegisterCompany();
+  const queryClient = useQueryClient();
   const { isMobile } = useMobile();
 
   const redirectTo = useMemo(() => search.get("redirect") || "/", [search]);
@@ -37,15 +39,61 @@ const Auth = () => {
   useEffect(() => {
     document.title = mode === "signin" ? "Sign in" : "Get started with your company";
 
+    const prefetchCoreData = async (session: any) => {
+      try {
+        // Prefetch user role
+        const { data: roleData, error: roleErr } = await supabase
+          .from('user_roles')
+          .select(`role, company_id, companies!left(name)`) 
+          .eq('user_id', session.user.id)
+          .order('role', { ascending: true })
+          .limit(1)
+          .maybeSingle();
+
+        const userWithRole = {
+          id: session.user.id,
+          email: session.user.email,
+          role: roleData?.role || 'company_admin',
+          company_id: roleData?.company_id,
+          company_name: roleData?.companies?.name,
+        };
+        queryClient.setQueryData(['user-role'], userWithRole);
+
+        // Prefetch companies (company-aware key)
+        if (userWithRole.role === 'company_admin' && userWithRole.company_id) {
+          const { data: company, error: compErr } = await supabase
+            .from('companies')
+            .select('*')
+            .eq('id', userWithRole.company_id)
+            .single();
+          if (!compErr && company) {
+            queryClient.setQueryData(['companies', userWithRole.role, userWithRole.company_id], [company]);
+          }
+        } else {
+          const { data: companies, error: compsErr } = await supabase
+            .from('companies')
+            .select('*')
+            .order('created_at', { ascending: false });
+          if (!compsErr && companies) {
+            queryClient.setQueryData(['companies', userWithRole.role, userWithRole.company_id], companies);
+          }
+        }
+      } catch { /* ignore prefetch errors */ }
+    };
+
     const { data: listener } = supabase.auth.onAuthStateChange((_, session) => {
       if (session?.user) {
-        // Try bootstrap admin for first user
-        fetch(`https://${"mbpghmizndwixvuqrvmu"}.supabase.co/functions/v1/bootstrap-admin`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: session.user.id }),
-        }).catch(() => {});
-        
+        // Bootstrap admin using Supabase Functions client bound to current env
+        supabase.functions
+          .invoke('bootstrap-admin', {
+            body: { userId: session.user.id },
+            headers: { 'x-app-origin': window.location.origin },
+          })
+          .catch(() => { /* ignore bootstrap errors */ });
+
+        // Prefetch core queries to avoid dashboard spinners
+        prefetchCoreData(session);
+
         // Don't auto-navigate if we're showing QR code
         if (!showQRCode) {
           navigate(redirectTo, { replace: true });
@@ -71,13 +119,13 @@ const Auth = () => {
       await supabase.auth.signOut();
       const { error } = await supabase.auth.signInWithPassword(validatedData);
       if (error) throw error;
-      toast.success("Signed in successfully");
+      notify.success("Signed in successfully");
     } catch (e: unknown) {
       if (e instanceof z.ZodError) {
-        toast.error(e.errors[0].message);
+        notify.error(e.errors[0].message);
       } else {
         const errorMessage = e instanceof Error ? e.message : "Could not sign in";
-        toast.error(errorMessage);
+        notify.error(errorMessage);
       }
     } finally {
       setLoading(false);
@@ -96,10 +144,10 @@ const Auth = () => {
         options: { emailRedirectTo: redirectUrl },
       });
       if (error) throw error;
-      toast.success("Admin account created. Check your email for confirmation.");
+      notify.success("Admin account created. Check your email for confirmation.");
     } catch (e: unknown) {
       const errorMessage = e instanceof Error ? e.message : "Could not create admin account";
-      toast.error(errorMessage);
+      notify.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -130,10 +178,10 @@ const Auth = () => {
       }
     } catch (error: unknown) {
       if (error instanceof z.ZodError) {
-        toast.error(error.errors[0].message);
+        notify.error(error.errors[0].message);
       } else {
         const errorMessage = error instanceof Error ? error.message : "Could not register company";
-        toast.error(errorMessage);
+        notify.error(errorMessage);
       }
     } finally {
       setLoading(false);

@@ -21,10 +21,10 @@ export function CompanySelector({ selectedCompanyId, onCompanyChange, className 
         disabled={isLoading}
       >
         <SelectTrigger className="w-48 bg-input border-0 focus:ring-2 focus:ring-primary/20">
-          <SelectValue placeholder={isLoading ? "Laddar..." : "Alla företag"} />
+          <SelectValue placeholder={isLoading ? "Loading..." : "All companies"} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">Alla företag</SelectItem>
+          <SelectItem value="all">All companies</SelectItem>
           {companies.map((company) => (
             <SelectItem key={company.id} value={company.id}>
               {company.name}

@@ -5,7 +5,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Plus, Search, Bell, User, Building2, Menu } from "lucide-react";
-import { useUserRole } from "@/hooks/useAuth";
+import { useUserRole } from "@/domains/auth";
 import { useCurrentProfile } from "@/hooks/useProfileData";
 import { useCompanyAwareCompanies } from "@/hooks/useCompanyAwareData";
 import { CompanySelector } from "@/components/common/CompanySelector";

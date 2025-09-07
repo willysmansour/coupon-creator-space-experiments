@@ -15,7 +15,7 @@ import {
   Mail
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
-import { useUserRole } from "@/hooks/useAuth";
+import { useUserRole } from "@/domains/auth";
 import { useCompanyAwareCompanies } from "@/hooks/useCompanyAwareData";
 import { useMobile } from "@/hooks/use-mobile";
 

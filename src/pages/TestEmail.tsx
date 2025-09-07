@@ -3,8 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from 'sonner';
+import { notify } from '@/lib/notify';
 import { supabase } from '@/integrations/supabase/client';
+import { ErrorHandler } from '@/lib/error-handler';
 
 const TestEmail = () => {
   const [email, setEmail] = useState('');
@@ -12,7 +13,7 @@ const TestEmail = () => {
 
   const testEmail = async () => {
     if (!email.trim()) {
-      toast.error('Ange en e-postadress');
+      notify.error('Ange en e-postadress');
       return;
     }
 
@@ -23,18 +24,18 @@ const TestEmail = () => {
       });
 
       if (error) {
-        console.error('Test email error:', error);
-        toast.error(`E-post-test misslyckades: ${error.message}`);
+        ErrorHandler.handle(error, { scope: 'test-email' });
+        notify.error(`E-post-test misslyckades: ${error.message}`);
       } else if (data?.success) {
-        toast.success('Test-e-post skickad! Kolla din inkorg.');
+        notify.success('Test-e-post skickad! Kolla din inkorg.');
         console.log('Test email result:', data);
       } else {
-        toast.error('E-post-test misslyckades');
+        notify.error('E-post-test misslyckades');
         console.log('Test email result:', data);
       }
     } catch (err) {
-      console.error('Test email exception:', err);
-      toast.error('E-post-test misslyckades');
+      ErrorHandler.handle(err, { scope: 'test-email-exception' });
+      notify.error('E-post-test misslyckades');
     } finally {
       setIsLoading(false);
     }

@@ -7,8 +7,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Upload as UploadIcon, ImageIcon, VideoIcon, Gift, User, Mail, Check } from 'lucide-react';
-import { toast } from 'sonner';
+import { notify } from '@/lib/notify';
 import { useMobile } from '@/hooks/use-mobile';
+import { UPLOAD_LIMITS } from '@/config/constants';
+import { ErrorHandler } from '@/lib/error-handler';
 
 const Upload = () => {
   const { companyId } = useParams<{ companyId?: string }>();
@@ -74,16 +76,16 @@ const Upload = () => {
   };
 
   const validateFile = (file: File): boolean => {
-    const validTypes = ['image/jpeg', 'image/png', 'video/mp4'];
-    const maxSize = 20 * 1024 * 1024; // 20MB
+    const validTypes = Array.from(UPLOAD_LIMITS.ALLOWED_MIME);
+    const maxSize = UPLOAD_LIMITS.UPLOAD_MAX_MB * 1024 * 1024;
 
     if (!validTypes.includes(file.type)) {
-      toast.error("Only JPG, PNG and MP4 files are allowed.");
+      notify.error("Only JPG, PNG, WEBP or MP4 files are allowed.");
       return false;
     }
 
     if (file.size > maxSize) {
-      toast.error("File must be at most 20MB.");
+      notify.error(`File must be at most ${UPLOAD_LIMITS.UPLOAD_MAX_MB}MB.`);
       return false;
     }
 
@@ -92,22 +94,22 @@ const Upload = () => {
 
   const validateForm = (): boolean => {
     if (!customerName.trim()) {
-      toast.error('Please enter your name.');
+      notify.error('Please enter your name.');
       return false;
     }
     
     if (!customerEmail.trim()) {
-      toast.error('Please enter your email.');
+      notify.error('Please enter your email.');
       return false;
     }
     
     if (!emailRegex.test(customerEmail)) {
-      toast.error('Please enter a valid email address.');
+      notify.error('Please enter a valid email address.');
       return false;
     }
     
     if (!file) {
-      toast.error('Please choose an image or video to upload.');
+      notify.error('Please choose an image or video to upload.');
       return false;
     }
     
@@ -139,7 +141,9 @@ const Upload = () => {
       formData.append('companyId', company.id);
       formData.append('customerName', customerName.trim());
       formData.append('customerEmail', customerEmail.trim().toLowerCase());
+      // Send review under both keys for maximum compatibility with Edge Functions
       formData.append('review', review || '');
+      formData.append('message', review || '');
 
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/secure-upload`, {
         method: 'POST',
@@ -158,8 +162,8 @@ const Upload = () => {
         throw new Error(result.error || 'Upload failed');
       }
     } catch (error) {
-      toast.error('An error occurred while submitting your upload.');
-      console.error('Upload error:', error);
+      ErrorHandler.handle(error, { scope: 'secure-upload' });
+      notify.error('An error occurred while submitting your upload.');
     } finally {
       setIsLoading(false);
     }

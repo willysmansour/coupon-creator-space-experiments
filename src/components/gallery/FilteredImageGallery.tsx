@@ -1,12 +1,12 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { useFilteredUploads } from "@/hooks/useFilteredSupabaseData";
-import { useUserRole } from "@/hooks/useAuth";
+import { useUserRole } from "@/domains/auth";
 import { useDeleteUpload } from "@/hooks/useSupabaseData";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Download, Trash2, Eye, User, Calendar, MessageSquare } from "lucide-react";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import { LoadingSection } from "@/components/ui/loading";
 
 interface FilteredImageGalleryProps {
@@ -65,10 +65,10 @@ export const FilteredImageGallery = React.memo(({ selectedCompanyId }: FilteredI
       // Clean up blob URL
       URL.revokeObjectURL(blobUrl);
       
-      toast.success('Image downloaded successfully');
+      notify.success('Image downloaded successfully');
     } catch (error) {
       console.error('Download error:', error);
-      toast.error('Failed to download image');
+      notify.error('Failed to download image');
     }
   }, []);
 
@@ -76,9 +76,9 @@ export const FilteredImageGallery = React.memo(({ selectedCompanyId }: FilteredI
   const handleDelete = useCallback(async (uploadId: string, customerName: string) => {
     try {
       await deleteUpload.mutateAsync(uploadId);
-      toast.success(`Image from ${customerName} has been removed`);
+      notify.success(`Image from ${customerName} has been removed`);
     } catch (error) {
-      toast.error('Failed to remove image');
+      notify.error('Failed to remove image');
     }
   }, [deleteUpload]);
 
@@ -193,7 +193,7 @@ export const FilteredImageGallery = React.memo(({ selectedCompanyId }: FilteredI
                   <span>{new Date(upload.submitted_at).toLocaleDateString('en-GB')}</span>
                 </div>
                 
-                {upload.message && (
+                {upload.message && upload.message.trim() !== 'Uploaded content' && (
                   <div className="flex items-start gap-2 text-sm text-muted-foreground">
                     <MessageSquare className="h-3 w-3 mt-0.5 flex-shrink-0" />
                     <p className="line-clamp-2" title="Customer Review">{upload.message}</p>

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Shield, Eye, EyeOff } from "lucide-react";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import { SUPERADMIN_EMAIL } from "@/config/constants";
 import { handleError } from "@/lib/error-handler";
 import { useSecureAdminSession } from "@/domains/auth/hooks/useSecureAdminSession";
@@ -28,10 +28,10 @@ export function SuperAdminLogin({ onLoginSuccess }: SuperAdminLoginProps) {
       const success = await login(email, password);
       
       if (success) {
-        toast.success("Logged in as Super Admin");
+        notify.success("Logged in as Super Admin");
         onLoginSuccess();
       } else {
-        toast.error(`Only ${SUPERADMIN_EMAIL} can access this panel`);
+        notify.error(`Only ${SUPERADMIN_EMAIL} can access this panel`);
       }
     } catch (error: any) {
       handleError(error, { context: 'SuperAdminLogin', email });

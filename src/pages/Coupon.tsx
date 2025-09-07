@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Gift, CheckCircle, AlertCircle, Clock, Copy } from 'lucide-react';
-import { toast } from 'sonner';
+import { notify } from '@/lib/notify';
+import { ErrorHandler } from '@/lib/error-handler';
 
 const Coupon = () => {
   const { couponId } = useParams<{ couponId: string }>();
@@ -132,7 +133,7 @@ const Coupon = () => {
 
   const handleCopyCouponCode = () => {
     navigator.clipboard.writeText(coupon.code);
-    toast.success("Coupon code copied to clipboard.");
+    notify.success("Coupon code copied to clipboard.");
   };
 
   const handleRedeem = async () => {
@@ -142,10 +143,10 @@ const Coupon = () => {
     
     try {
       await redeemCoupon.mutateAsync(coupon.code);
-      toast.success('🎉 Thank you! Your discount has been applied.');
+      notify.success('🎉 Thank you! Your discount has been applied.');
     } catch (error) {
-      console.error('Redeem error:', error);
-      toast.error('Could not redeem the coupon. Please try again.');
+      ErrorHandler.handle(error, { scope: 'redeem-coupon' });
+      notify.error('Could not redeem the coupon. Please try again.');
     } finally {
       setIsRedeeming(false);
     }

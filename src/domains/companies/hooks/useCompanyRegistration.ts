@@ -1,20 +1,20 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 
 // Get user-friendly error messages
 const getErrorMessage = (error: any): string => {
-  if (!error?.message) return "Ett oväntat fel uppstod vid registreringen";
+  if (!error?.message) return "An unexpected error occurred during registration";
   
   if (error.message.includes('duplicate key') || error.message.includes('already exists')) {
-    return "Ett konto med denna e-postadress finns redan";
+    return "An account with this email already exists";
   }
   
   if (error.message.includes('invalid email')) {
-    return "Ogiltig e-postadress";
+    return "Invalid email address";
   }
 
-  return error?.message || "Ett oväntat fel uppstod vid registreringen";
+  return error?.message || "An unexpected error occurred during registration";
 };
 
 // Create company and assign admin (for company registration)
@@ -86,14 +86,14 @@ export const useRegisterCompany = () => {
       queryClient.invalidateQueries({ queryKey: ['user-role'] });
       queryClient.invalidateQueries({ queryKey: ['company-aware-companies'] });
       
-      toast.success(`Company registered successfully! Your QR code is ready at: ${data.qrCodeUrl}`);
-      toast.info('Your QR code has been automatically generated and is ready to use!', {
+      notify.success(`Company registered successfully! Your QR code is ready at: ${data.qrCodeUrl}`);
+      notify.info('Your QR code has been automatically generated and is ready to use!', {
         duration: 5000,
       });
     },
     onError: (error: any) => {
       const message = getErrorMessage(error);
-      toast.error('Registration failed: ' + message);
+      notify.error('Registration failed: ' + message);
     }
   });
 };

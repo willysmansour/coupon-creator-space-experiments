@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Gift, Save, Settings, Image, Video } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { notify } from "@/lib/notify";
 import { useCompanyAwareCompanies } from "@/hooks/useCompanyAwareData";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -18,7 +18,7 @@ const DiscountSettings = () => {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | undefined>();
   const { data: companies = [], refetch, isLoading: companiesLoading, error: companiesError } = useCompanyAwareCompanies();
   const company = companies[0]; // Get first company
-  const { toast } = useToast();
+  
 
   const [discountPercentage, setDiscountPercentage] = useState(
     company?.discount_percentage?.toString() || '10'
@@ -39,11 +39,7 @@ const DiscountSettings = () => {
 
   const handleSave = async () => {
     if (!company) {
-      toast({
-        title: "Error",
-        description: "You must create a company first in Settings.",
-        variant: "destructive"
-      });
+      notify.error("Error", { description: "You must create a company first in Settings." });
       return;
     }
 
@@ -68,17 +64,10 @@ const DiscountSettings = () => {
       // Refetch the companies data
       await refetch();
 
-      toast({
-        title: "Saved!",
-        description: "Your discount settings have been updated."
-      });
+      notify.success("Saved!", { description: "Your discount settings have been updated." });
     } catch (error) {
       console.error('Error saving discount settings:', error);
-      toast({
-        title: "Error",
-        description: "Could not save settings.",
-        variant: "destructive"
-      });
+      notify.error("Error", { description: "Could not save settings." });
     } finally {
       setIsLoading(false);
     }

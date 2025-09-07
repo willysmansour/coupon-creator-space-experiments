@@ -2,11 +2,11 @@ import QRCode from 'react-qr-code';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Download, QrCode } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { notify } from '@/lib/notify';
 import { useCompanyAwareCompanies } from '@/hooks/useCompanyAwareData';
 
 export const QRCodeGenerator = () => {
-  const { toast } = useToast();
+  
   const { data: companies = [], isLoading } = useCompanyAwareCompanies();
   
   if (isLoading) {
@@ -75,10 +75,7 @@ export const QRCodeGenerator = () => {
       link.href = canvas.toDataURL('image/png');
       link.click();
       
-      toast({
-        title: "QR code downloaded",
-        description: "The QR code has been saved as a PNG file.",
-      });
+      notify.success("QR code downloaded", { description: "The QR code has been saved as a PNG file." });
     };
     
     const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });

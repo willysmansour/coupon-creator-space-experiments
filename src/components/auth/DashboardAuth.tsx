@@ -1,5 +1,5 @@
 import { ReactNode, useEffect } from "react";
-import { useAuth, useUserRole } from "@/hooks/useAuth";
+import { useAuth, useUserRole } from "@/domains/auth";
 import { useNavigate, useLocation } from "react-router-dom";
 
 interface DashboardAuthProps {

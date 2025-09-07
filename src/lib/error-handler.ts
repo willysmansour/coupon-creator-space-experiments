@@ -1,4 +1,4 @@
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 
 // Error types for better categorization
 export enum ErrorType {
@@ -51,7 +51,7 @@ export class ErrorHandler {
     if (error?.code === 'invalid_credentials' || error?.message?.includes('Invalid login credentials')) {
       return {
         type: ErrorType.AUTHENTICATION,
-        message: error.message || 'Felaktiga inloggningsuppgifter',
+        message: error.message || 'Invalid login credentials',
         originalError: error,
         context,
         timestamp
@@ -62,7 +62,7 @@ export class ErrorHandler {
     if (error?.code === 'validation_error' || error?.message?.includes('Email already registered')) {
       return {
         type: ErrorType.VALIDATION,
-        message: error.message || 'Ett konto med denna email finns redan',
+        message: error.message || 'An account with this email already exists',
         originalError: error,
         context,
         timestamp
@@ -73,7 +73,7 @@ export class ErrorHandler {
     if (error?.code === '42501' || error?.message?.includes('Permission denied')) {
       return {
         type: ErrorType.PERMISSION,
-        message: 'Du har inte behörighet för denna åtgärd',
+        message: 'You do not have permission for this action',
         originalError: error,
         context,
         timestamp
@@ -83,7 +83,7 @@ export class ErrorHandler {
     if (error?.code === 'PGRST301' || error?.message?.includes('RLS')) {
       return {
         type: ErrorType.AUTHORIZATION,
-        message: 'Du har inte behörighet för denna åtgärd',
+        message: 'You do not have permission for this action',
         originalError: error,
         context,
         timestamp
@@ -94,7 +94,7 @@ export class ErrorHandler {
     if (error?.message?.includes('fetch') || error?.message?.includes('Failed to fetch') || error?.message?.includes('network')) {
       return {
         type: ErrorType.NETWORK,
-        message: 'Nätverksfel - försök igen',
+        message: 'Network error - please try again',
         originalError: error,
         context,
         timestamp
@@ -105,7 +105,7 @@ export class ErrorHandler {
     if (error?.code === '23505' || error?.code?.startsWith('23') || error?.message?.includes('constraint') || error?.message?.includes('duplicate key')) {
       return {
         type: ErrorType.DATABASE,
-        message: 'Databasfel - kontakta support',
+        message: 'Database error - contact support',
         originalError: error,
         context,
         timestamp
@@ -115,7 +115,7 @@ export class ErrorHandler {
     // Unknown errors
     return {
       type: ErrorType.UNKNOWN,
-      message: 'Ett oväntat fel uppstod',
+      message: 'An unexpected error occurred',
       originalError: error,
       context,
       timestamp
@@ -125,38 +125,26 @@ export class ErrorHandler {
   private static showUserMessage(error: StructuredError) {
     switch (error.type) {
       case ErrorType.VALIDATION:
-        toast.warning('Valideringsfel', {
-          description: error.message
-        });
+        notify.warning('Validation error', { description: error.message });
         break;
       case ErrorType.AUTHENTICATION:
-        toast.error('Autentiseringsfel', {
-          description: error.message
-        });
+        notify.error('Authentication error', { description: error.message });
         break;
       case ErrorType.AUTHORIZATION:
-        toast.error(error.message, { duration: 5000 });
+        notify.error(error.message, { duration: 5000 });
         break;
       case ErrorType.PERMISSION:
-        toast.error('Behörighetsfel', {
-          description: 'Du har inte behörighet för denna åtgärd'
-        });
+        notify.error('Permission error', { description: 'You do not have permission to perform this action' });
         break;
       case ErrorType.NETWORK:
-        toast.error('Nätverksfel', {
-          description: 'Kontrollera din anslutning och försök igen'
-        });
+        notify.error('Network error', { description: 'Check your connection and try again' });
         break;
       case ErrorType.DATABASE:
-        toast.error('Databasfel', {
-          description: 'Denna data finns redan eller är ogiltig'
-        });
+        notify.error('Database error', { description: 'This data already exists or is invalid' });
         break;
       case ErrorType.UNKNOWN:
       default:
-        toast.error('Oväntat fel', {
-          description: 'Ett oväntat fel uppstod. Försök igen senare.'
-        });
+        notify.error('Unexpected error', { description: 'An unexpected error occurred. Please try again later.' });
     }
   }
 

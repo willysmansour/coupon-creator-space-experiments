@@ -20,3 +20,12 @@ export const VALIDATION = {
   MAX_COMPANY_NAME_LENGTH: 100,
   MIN_PASSWORD_LENGTH: 6,
 } as const;
+
+// Upload configuration (shared client defaults)
+export const UPLOAD_LIMITS = {
+  UPLOAD_MAX_MB: 20,
+  LOGO_MAX_MB: 5,
+  PROFILE_IMG_MAX_MB: 2,
+  // Keep images + MP4 for client-side acceptance
+  ALLOWED_MIME: ['image/jpeg', 'image/png', 'image/webp', 'video/mp4'] as const,
+} as const;

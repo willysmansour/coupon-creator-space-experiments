@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/table'
 import { Trash2, Shield, User, Building } from 'lucide-react'
 import { format } from 'date-fns'
-import { sv } from 'date-fns/locale'
+import { enGB } from 'date-fns/locale'
 
 interface UserData {
   id: string
@@ -29,8 +29,8 @@ interface UserManagementTableProps {
 }
 
 /**
- * Tabell för användarhantering i admin-panelen
- * Visar alla användare med möjlighet att ta bort och hantera roller
+ * User management table for admin panel
+ * Shows all users with ability to delete and manage roles
  */
 export const UserManagementTable: React.FC<UserManagementTableProps> = ({
   users,
@@ -51,14 +51,14 @@ export const UserManagementTable: React.FC<UserManagementTableProps> = ({
         return (
           <Badge variant="default" className="flex items-center gap-1">
             <Building className="h-3 w-3" />
-            Företagsadmin
+            Company Admin
           </Badge>
         )
       default:
         return (
           <Badge variant="secondary" className="flex items-center gap-1">
             <User className="h-3 w-3" />
-            Kund
+            Customer
           </Badge>
         )
     }
@@ -67,7 +67,7 @@ export const UserManagementTable: React.FC<UserManagementTableProps> = ({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-muted-foreground">Laddar användare...</div>
+        <div className="text-muted-foreground">Loading users...</div>
       </div>
     )
   }
@@ -75,7 +75,7 @@ export const UserManagementTable: React.FC<UserManagementTableProps> = ({
   if (!users || users.length === 0) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-muted-foreground">Inga användare hittades</div>
+        <div className="text-muted-foreground">No users found</div>
       </div>
     )
   }
@@ -85,11 +85,11 @@ export const UserManagementTable: React.FC<UserManagementTableProps> = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>E-post</TableHead>
-            <TableHead>Roll</TableHead>
-            <TableHead>Företag</TableHead>
-            <TableHead>Registrerad</TableHead>
-            <TableHead className="text-right">Åtgärder</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead>Company</TableHead>
+            <TableHead>Registered</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -99,7 +99,7 @@ export const UserManagementTable: React.FC<UserManagementTableProps> = ({
               <TableCell>{getRoleBadge(user.role)}</TableCell>
               <TableCell>{user.company_name || '-'}</TableCell>
               <TableCell>
-                {format(new Date(user.created_at), 'PPP', { locale: sv })}
+                {format(new Date(user.created_at), 'PPP', { locale: enGB })}
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex items-center justify-end gap-2">
@@ -108,7 +108,7 @@ export const UserManagementTable: React.FC<UserManagementTableProps> = ({
                       variant="outline"
                       size="sm"
                       onClick={() => onToggleSuperAdmin(user.id, false)}
-                      title="Gör till Super Admin"
+                      title="Make Super Admin"
                     >
                       <Shield className="h-4 w-4" />
                     </Button>
@@ -118,7 +118,7 @@ export const UserManagementTable: React.FC<UserManagementTableProps> = ({
                       variant="outline"
                       size="sm"
                       onClick={() => onToggleSuperAdmin(user.id, true)}
-                      title="Ta bort Super Admin"
+                      title="Remove Super Admin"
                     >
                       <User className="h-4 w-4" />
                     </Button>
@@ -128,7 +128,7 @@ export const UserManagementTable: React.FC<UserManagementTableProps> = ({
                       variant="destructive"
                       size="sm"
                       onClick={() => {
-                        if (window.confirm(`Är du säker på att du vill ta bort ${user.email}?`)) {
+                        if (window.confirm(`Are you sure you want to delete ${user.email}?`)) {
                           onDeleteUser(user.id)
                         }
                       }}
@@ -137,7 +137,7 @@ export const UserManagementTable: React.FC<UserManagementTableProps> = ({
                     </Button>
                   )}
                   {user.email === 'admin@test.com' && (
-                    <span className="text-xs text-muted-foreground">Skyddad</span>
+                    <span className="text-xs text-muted-foreground">Protected</span>
                   )}
                 </div>
               </TableCell>

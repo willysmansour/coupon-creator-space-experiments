@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { notify } from '@/lib/notify';
 import type {
   Upload,
   Coupon,
@@ -264,10 +264,10 @@ export const useCreateUpload = () => {
     onSuccess: () => {
       // Optimize cache invalidation
       queryClient.invalidateQueries({ queryKey: ['uploads'] });
-      toast.success('Upload submitted successfully!');
+      notify.success('Upload submitted successfully!');
     },
     onError: (error) => {
-      toast.error('Failed to submit upload: ' + error.message);
+      notify.error('Failed to submit upload: ' + error.message);
     }
   });
 };
@@ -297,10 +297,10 @@ export const useUpdateUploadStatus = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['uploads'] });
       queryClient.invalidateQueries({ queryKey: ['filtered-uploads'] });
-      toast.success('Upload status updated successfully!');
+      notify.success('Upload status updated successfully!');
     },
     onError: (error) => {
-      toast.error('Failed to update upload status: ' + error.message);
+      notify.error('Failed to update upload status: ' + error.message);
     }
   });
 };
@@ -321,10 +321,10 @@ export const useDeleteUpload = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['uploads'] });
       queryClient.invalidateQueries({ queryKey: ['filtered-uploads'] });
-      toast.success('Upload deleted successfully!');
+      notify.success('Upload deleted successfully!');
     },
     onError: (error) => {
-      toast.error('Failed to delete upload: ' + error.message);
+      notify.error('Failed to delete upload: ' + error.message);
     }
   });
 };
@@ -410,7 +410,7 @@ export const useUpsertProfile = () => {
       queryClient.setQueryData(["current-profile"], data);
     },
     onError: (error) => {
-      toast.error('Failed to update profile: ' + error.message);
+      notify.error('Failed to update profile: ' + error.message);
     }
   });
 };
@@ -446,7 +446,7 @@ export const useUpdateCompany = () => {
       });
     },
     onError: (error) => {
-      toast.error('Failed to update company: ' + error.message);
+      notify.error('Failed to update company: ' + error.message);
     }
   });
 };
@@ -474,10 +474,10 @@ export const useUpdateUploadWithCustomer = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['uploads'] });
       queryClient.invalidateQueries({ queryKey: ['upload', data.id] });
-      toast.success('Customer details updated successfully!');
+      notify.success('Customer details updated successfully!');
     },
     onError: (error) => {
-      toast.error('Failed to update customer details: ' + error.message);
+      notify.error('Failed to update customer details: ' + error.message);
     }
   });
 };
@@ -519,10 +519,10 @@ export const useRedeemCoupon = () => {
       if (data?.id) {
         queryClient.invalidateQueries({ queryKey: ['coupon', data.id] });
       }
-      toast.success('Thank you! Your coupon has been redeemed.');
+      notify.success('Thank you! Your coupon has been redeemed.');
     },
     onError: (error) => {
-      toast.error('Could not redeem the coupon: ' + error.message);
+      notify.error('Could not redeem the coupon: ' + error.message);
     }
   });
 };

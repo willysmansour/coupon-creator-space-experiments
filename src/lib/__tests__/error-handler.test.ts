@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ErrorHandler, ErrorType } from '../error-handler'
-import { toast } from 'sonner'
+import { notify } from '@/lib/notify'
 
-// Mock sonner toast
-vi.mock('sonner', () => ({
-  toast: {
+// Mock notify wrapper
+vi.mock('@/lib/notify', () => ({
+  notify: {
     error: vi.fn(),
     warning: vi.fn(),
     info: vi.fn()
@@ -28,8 +28,8 @@ describe('ErrorHandler', () => {
 
     expect(result.type).toBe(ErrorType.AUTHENTICATION)
     expect(result.message).toBe('Invalid credentials')
-    expect(toast.error).toHaveBeenCalledWith(
-      'Autentiseringsfel',
+    expect((notify as any).error).toHaveBeenCalledWith(
+      'Authentication error',
       expect.objectContaining({
         description: 'Invalid credentials'
       })
@@ -42,11 +42,11 @@ describe('ErrorHandler', () => {
     const result = ErrorHandler.handle(networkError)
 
     expect(result.type).toBe(ErrorType.NETWORK)
-    expect(result.message).toBe('Nätverksfel - försök igen')
-    expect(toast.error).toHaveBeenCalledWith(
-      'Nätverksfel',
+    expect(result.message).toBe('Network error - please try again')
+    expect((notify as any).error).toHaveBeenCalledWith(
+      'Network error',
       expect.objectContaining({
-        description: expect.stringContaining('anslutning')
+        description: expect.stringContaining('Check your connection')
       })
     )
   })
@@ -61,8 +61,8 @@ describe('ErrorHandler', () => {
 
     expect(result.type).toBe(ErrorType.VALIDATION)
     expect(result.message).toBe('Email is required')
-    expect(toast.warning).toHaveBeenCalledWith(
-      'Valideringsfel',
+    expect((notify as any).warning).toHaveBeenCalledWith(
+      'Validation error',
       expect.objectContaining({
         description: 'Email is required'
       })
@@ -78,10 +78,10 @@ describe('ErrorHandler', () => {
     const result = ErrorHandler.handle(permissionError)
 
     expect(result.type).toBe(ErrorType.PERMISSION)
-    expect(toast.error).toHaveBeenCalledWith(
-      'Behörighetsfel',
+    expect((notify as any).error).toHaveBeenCalledWith(
+      'Permission error',
       expect.objectContaining({
-        description: expect.stringContaining('behörighet')
+        description: expect.stringContaining('permission')
       })
     )
   })
@@ -95,10 +95,10 @@ describe('ErrorHandler', () => {
     const result = ErrorHandler.handle(dbError)
 
     expect(result.type).toBe(ErrorType.DATABASE)
-    expect(toast.error).toHaveBeenCalledWith(
-      'Databasfel',
+    expect((notify as any).error).toHaveBeenCalledWith(
+      'Database error',
       expect.objectContaining({
-        description: expect.stringContaining('redan')
+        description: expect.stringContaining('already exists')
       })
     )
   })
@@ -109,10 +109,10 @@ describe('ErrorHandler', () => {
     const result = ErrorHandler.handle(unknownError)
 
     expect(result.type).toBe(ErrorType.UNKNOWN)
-    expect(toast.error).toHaveBeenCalledWith(
-      'Oväntat fel',
+    expect((notify as any).error).toHaveBeenCalledWith(
+      'Unexpected error',
       expect.objectContaining({
-        description: expect.stringContaining('oväntat')
+        description: expect.stringContaining('unexpected')
       })
     )
   })
@@ -125,9 +125,9 @@ describe('ErrorHandler', () => {
     const errors = ErrorHandler.getErrors()
     
     expect(errors).toHaveLength(3)
-    expect(errors[0].message).toBe('Ett oväntat fel uppstod')
-    expect(errors[1].message).toBe('Ett oväntat fel uppstod')
-    expect(errors[2].message).toBe('Ett oväntat fel uppstod')
+    expect(errors[0].message).toBe('An unexpected error occurred')
+    expect(errors[1].message).toBe('An unexpected error occurred')
+    expect(errors[2].message).toBe('An unexpected error occurred')
   })
 
   it('should clear error history', () => {

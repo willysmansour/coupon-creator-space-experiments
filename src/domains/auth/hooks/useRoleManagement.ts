@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import { UserRole } from "./useUserRole";
 
 // Assign role to user (super admin only)
@@ -32,10 +32,10 @@ export const useAssignRole = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-role'] });
-      toast.success('Role assigned successfully');
+      notify.success('Role assigned successfully');
     },
     onError: (error: any) => {
-      toast.error('Failed to assign role: ' + error.message);
+      notify.error('Failed to assign role: ' + error.message);
     }
   });
 };

@@ -10,18 +10,15 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, MessageCircle, Mail, Phone, FileText, Video } from "lucide-react";
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { notify } from "@/lib/notify";
 
 const Help = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const { toast } = useToast();
+  
 
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Message sent",
-      description: "We will get back to you within 24 hours.",
-    });
+    notify.success("Message sent", { description: "We will get back to you within 24 hours." });
   };
 
   const faqItems = [

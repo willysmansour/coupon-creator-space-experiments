@@ -21,7 +21,13 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { company_id, customer_name, customer_email, path, message } = await req.json();
+    const payload = await req.json();
+    const company_id = payload.company_id as string;
+    const customer_name = payload.customer_name as string;
+    const customer_email = payload.customer_email as string;
+    const path = payload.path as string;
+    // Support both `message` and `review` keys; trim and default to empty string
+    const text = ((payload.review ?? payload.message) ?? '').toString().trim();
     if (!company_id || !customer_name || !customer_email || !path) {
       return new Response(JSON.stringify({ error: 'Missing fields' }), { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } });
     }
@@ -35,7 +41,7 @@ const handler = async (req: Request): Promise<Response> => {
         customer_name,
         customer_email,
         image_url: publicUrl,
-        message: message || 'Uploaded content',
+        message: text,
         status: 'pending',
         submitted_at: new Date().toISOString()
       })
@@ -53,5 +59,4 @@ const handler = async (req: Request): Promise<Response> => {
 }
 
 serve(handler)
-
 

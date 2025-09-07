@@ -41,7 +41,7 @@ export const useUpdateCompany = () => {
         // Create new company - user will automatically become company_admin
         const { data: authData } = await supabase.auth.getUser();
         const user = authData?.user;
-        if (!user) throw new Error("Du är inte inloggad.");
+        if (!user) throw new Error("You are not signed in.");
 
         const { data, error } = await supabase
           .from("companies")

@@ -1,109 +1,124 @@
-# Welcome to your Lovable project
+README – UGC Plattform
 
-## Project info
+🌟 Översikt
 
-**URL**: https://lovable.dev/projects/df5289f0-8e73-4575-87cf-e111381883d0
+Detta är en UGC‑plattform (User Generated Content) där företag kan skapa kampanjer som belönar sina kunder med rabatter eller kuponger i utbyte mot att kunderna laddar upp bilder, videos och korta recensioner.
 
-## How can I edit this code?
+Målet är att företag ska få autentiskt marknadsföringsmaterial från riktiga kunder, samtidigt som kunderna får en belöning för sitt engagemang.
 
-There are several ways of editing your application.
+Roller i systemet:
+- Företag: restauranger, butiker, gym, frisörer m.fl.
+- Kunder: slutanvändare som deltar via QR‑koder eller delade länkar.
+- Superadmin: plattformens ägare med full kontroll över alla företag och data.
 
-**Use Lovable**
+⚙️ Funktionalitet
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/df5289f0-8e73-4575-87cf-e111381883d0) and start prompting.
+Företagsdashboard
+- Skapa kampanjer: titel, villkor (rabatt %, belöning), giltighetstid.
+- Dela QR‑kod eller länk för kundflödet.
+- Hantera uppladdningar: se inkomna bilder/videos + kundens text, godkänn/avvisa (i nuläget manuell granskning som standard).
+- Kuponghantering: skapade kuponger, status, samt inlösta kuponger (markeras som “✅ redan använd”).
+- Statistik: antal uppladdningar, utdelade kuponger, inlösta kuponger.
+- Recensioner: kunden kan lämna kort recension; företaget kan spara dessa för sociala medier/hemsidan.
 
-Changes made via Lovable will be committed automatically to this repo.
+Kundflöde (ingen inloggning krävs)
+1) Kunden skannar en QR‑kod eller öppnar en länk i butik/restaurang.
+2) Laddar upp bild/video och kan skriva en kort recension.
+3) Efter godkännande (eller auto‑approval i framtiden) skickas en kupong via e‑post.
+4) Kupongen visas i mobilen och löses in på plats – kan bara användas en gång.
 
-**Use your preferred IDE**
+Superadmin
+- Se alla företag, kampanjer, uppladdningar, kunder och kuponger.
+- Hantera användare och företagskonton.
+- Underlag för prissättning/abonnemang (t.ex. 999 NOK/månad).
+- Överblick av global statistik.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+🔐 Roller och säkerhet
+- Superadmin: globalt konto för plattformens ägare.
+- Företag: användare kopplas till ett företag (auth → company i databasen).
+- Kund: inga konton, endast engångsinteraktion via QR‑länk.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+📲 Flöde (end‑to‑end)
+1. Företag: registrerar konto → företagsprofil skapas automatiskt. Skapar kampanj → QR‑kod genereras.
+2. Kund: skannar QR‑kod → laddar upp bild/video + text → systemet väntar på granskning (standard) → kupong skickas via e‑post när godkänd.
+3. Företag: ser uppladdningen i dashboard, kan ladda ner media och använda i marknadsföring. Statistik uppdateras.
+4. Inlösen: kunden visar kupongen i kassan → personalen trycker “Lös in nu” → kupongen markeras som förbrukad.
 
-Follow these steps:
+💰 Affärsmodell (exempel)
+- Företag betalar månadsavgift (t.ex. 999 NOK/månad).
+- Premiumfunktioner: AI‑moderering, avancerad statistik (ROI/segmentering), publicering till sociala medier.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+📊 Fördelar
+För företag
+- Gratis/organiskt marknadsföringsmaterial från riktiga kunder.
+- Ökad försäljning via kuponger och (framtida) klippkort/lojalitet.
+- Autentiska recensioner/testimonials.
+- Lägre kostnad än traditionell annonsering.
+- Enkelt att använda (QR‑kod och tydlig dashboard).
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+För kunder
+- Får rabatt/belöning för något de redan gör (t.ex. ta en bild).
+- Enkel process utan konto.
+- Mer engagerande än klassiska kuponger.
 
-# Step 3: Install the necessary dependencies.
+🛠️ Teknikstack
+- Frontend: React + Vite + TypeScript + Tailwind + shadcn‑ui.
+- State: @tanstack/react‑query.
+- Backend: Supabase (Auth, Database, Storage).
+- Edge Functions (Deno): säker uppladdning, kupong‑mail, inlösen, m.m.
+- Test: Vitest + Testing Library.
+
+Viktiga rutter
+- Företagsflöde (kund): `/company/:companyId` → `/company/:companyId/upload` → `/thank-you/:uploadId` → ev. `/coupon/:couponId`.
+- Företagsdashboard: flera sidor under huvudappen (t.ex. `/uploads`, `/coupons`, `/analytics`).
+- Superadmin: `/admin` (skyddad).
+
+Snabbstart
+1) Krav: Node.js och npm (rekommenderat via nvm).
+2) Installera beroenden:
+```bash
 npm i
-
-# Step 4: Set up environment variables
+```
+3) Miljövariabler:
+```bash
 cp env.example .env
-# Edit .env file with your Supabase credentials
-
-# Step 5: Start the development server with auto-reloading and an instant preview.
+# Fyll i VITE_SUPABASE_URL och VITE_SUPABASE_ANON_KEY
+```
+4) Starta utvecklingsserver:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Deploy av Edge Functions
+- Lokalt (kräver Supabase CLI och länkning):
+```bash
+# engångs: supabase login && supabase link --project-ref <PROJECT_REF>
+SUPABASE_PROJECT_REF=<PROJECT_REF> npm run deploy:functions
+```
+- GitHub Actions: Lägg in följande repository‑secrets och kör workflow “Deploy Supabase Functions”:
+  - `SUPABASE_ACCESS_TOKEN` – personlig access token från Supabase
+  - `SUPABASE_PROJECT_REF` – projektets ref (Settings → General)
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Miljövariabler
+- `VITE_SUPABASE_URL` – projektets URL från Supabase.
+- `VITE_SUPABASE_ANON_KEY` – public anon‑nyckel (använd aldrig service_role i frontend).
+ - Edge Functions (i Supabase → Project Settings → Functions → Secrets):
+   - `APP_ALLOWED_ORIGINS` – exempel: `http://localhost:5173,https://din-domän.se`
+   - `APP_BASE_URL` – exempel: `http://localhost:5173` (används i mejllänkar)
+   - `RESEND_API_KEY` – om e‑post ska skickas via Resend
 
-**Use GitHub Codespaces**
+Arkitekturöversikt (kort)
+- React‑app för dashboard och kundflöde.
+- Supabase tabeller: företag, kampanjer, uploads, coupons, user_roles m.fl.
+- Edge Functions:
+  - `secure-upload`: tar emot FormData (fil + metadata), laddar upp till Storage och skapar upload‑post.
+  - `send-coupon-email`: skapar/levererar kupong till kund.
+  - `redeem-coupon`: markerar kupong som använd.
+  - `bootstrap-admin`: ser till att admin‑roll sätts upp för nyckelanvändare.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Nuvarande moderering
+- Nyligen uppladdat innehåll får status `pending` och granskas i dashboarden på sidan “Uploads”.
+- När en upload godkänns skickas kupong per e‑post om kundens uppgifter finns.
 
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-- Supabase (Authentication & Database)
-- React Query (State Management)
-
-## Code Quality Improvements
-
-This codebase has been optimized with:
-
-### Security
-- ✅ Environment variables for sensitive data (Supabase keys)
-- ✅ Proper .gitignore configuration
-- ✅ Type-safe configuration
-
-### TypeScript
-- ✅ Strict TypeScript configuration enabled
-- ✅ Enhanced type checking rules
-- ✅ Better null checking
-
-### Code Quality
-- ✅ Improved ESLint rules
-- ✅ Unused variable detection
-- ✅ Console log warnings
-- ✅ Prefer const enforcement
-
-### Error Handling
-- ✅ Error Boundary component for graceful error handling
-- ✅ Better loading states with dedicated components
-- ✅ Improved authentication flow with error handling
-
-### User Experience
-- ✅ Loading spinners and states
-- ✅ Better feedback during authentication
-- ✅ Graceful error recovery options
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/df5289f0-8e73-4575-87cf-e111381883d0) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Support / vidareutveckling
+- Auto‑approval per kampanj, klippkort/lojalitet, AI‑moderering och fler kanaler (SMS) kan läggas till efter behov.

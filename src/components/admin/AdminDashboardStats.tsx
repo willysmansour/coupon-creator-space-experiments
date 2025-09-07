@@ -14,34 +14,34 @@ interface AdminDashboardStatsProps {
 }
 
 /**
- * Statistik-kort för admin-dashboard
- * Visar översikt över användare, företag och kuponger
+ * Admin dashboard stat cards
+ * Shows overview of users, companies and coupons
  */
 export const AdminDashboardStats: React.FC<AdminDashboardStatsProps> = ({ stats }) => {
   const statCards = [
     {
-      title: 'Totalt antal användare',
+      title: 'Total users',
       value: stats.totalUsers,
       icon: Users,
       color: 'text-blue-600',
       bgColor: 'bg-blue-100'
     },
     {
-      title: 'Registrerade företag',
+      title: 'Registered companies',
       value: stats.totalCompanies,
       icon: Building,
       color: 'text-green-600',
       bgColor: 'bg-green-100'
     },
     {
-      title: 'Aktiva företag',
+      title: 'Active companies',
       value: stats.activeCompanies,
       icon: TrendingUp,
       color: 'text-purple-600',
       bgColor: 'bg-purple-100'
     },
     {
-      title: 'Totalt antal kuponger',
+      title: 'Total coupons',
       value: stats.totalCoupons,
       icon: ShoppingBag,
       color: 'text-orange-600',

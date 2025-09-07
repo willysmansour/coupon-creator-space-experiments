@@ -10,7 +10,8 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, Shield, Bell, Key, Palette, Save, Building2, Upload, X } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { notify } from "@/lib/notify";
+import { UPLOAD_LIMITS } from "@/config/constants";
 import { useCompanyAwareCompanies } from "@/hooks/useCompanyAwareData";
 import { useCurrentProfile, useUpsertProfile, uploadProfileImage } from "@/hooks/useProfileData";
 import { useUpdateCompany, uploadCompanyLogo } from "@/hooks/useCompanyData";
@@ -19,7 +20,7 @@ import { QRCodeGenerator } from "@/components/common/QRCodeGenerator";
 import { useMobile } from "@/hooks/use-mobile";
 
 const Settings = () => {
-  const { toast } = useToast();
+  
   const { data: companies = [] } = useCompanyAwareCompanies();
   const { data: currentProfile } = useCurrentProfile();
   const upsertProfile = useUpsertProfile();
@@ -73,11 +74,7 @@ const Settings = () => {
     try {
       // Validate company name
       if (companyName && companyName.trim().length < 2) {
-        toast({
-          title: "Invalid company name",
-          description: "Company name must be at least 2 characters.",
-          variant: "destructive",
-        });
+        notify.error("Invalid company name", { description: `Company name must be at least ${UPLOAD_LIMITS ? 2 : 2} characters.` });
         setIsLoading(false);
         return;
       }
@@ -98,11 +95,7 @@ const Settings = () => {
         // Profile saved successfully
       } catch (profileError) {
         console.error('Error saving profile:', profileError);
-        toast({
-          title: "Error saving profile",
-          description: `Could not save profile information: ${profileError instanceof Error ? profileError.message : 'Unknown error'}`,
-          variant: "destructive",
-        });
+        notify.error("Error saving profile", { description: `Could not save profile information: ${profileError instanceof Error ? profileError.message : 'Unknown error'}` });
         setIsLoading(false);
         return;
       }
@@ -119,23 +112,13 @@ const Settings = () => {
           
           // If this is a new company, show success message
           if (!company?.id && result) {
-            toast({
-              title: "Company created",
-              description: `Your company "${companyName.trim()}" was created successfully!`,
-            });
+            notify.success("Company created", { description: `Your company "${companyName.trim()}" was created successfully!` });
           } else {
-            toast({
-              title: "Company updated",
-              description: "Your company information was updated successfully.",
-            });
+            notify.success("Company updated", { description: "Your company information was updated successfully." });
           }
         } catch (companyError) {
           console.error('Error saving company:', companyError);
-          toast({
-            title: "Error saving company",
-            description: `Could not save company information: ${companyError instanceof Error ? companyError.message : 'Unknown error'}`,
-            variant: "destructive",
-          });
+          notify.error("Error saving company", { description: `Could not save company information: ${companyError instanceof Error ? companyError.message : 'Unknown error'}` });
           setIsLoading(false);
           return;
         }
@@ -154,17 +137,10 @@ const Settings = () => {
       if (profileSaved) savedItems.push('profile');
       if (companySaved) savedItems.push('company');
       
-      toast({
-        title: "Settings saved",
-        description: `Your changes for ${savedItems.join(' and ')} were saved successfully.`,
-      });
+      notify.success("Settings saved", { description: `Your changes for ${savedItems.join(' and ')} were saved successfully.` });
     } catch (error) {
       console.error('Unexpected error saving settings:', error);
-      toast({
-        title: "Unexpected error",
-        description: `An unexpected error occurred: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`,
-        variant: "destructive",
-      });
+      notify.error("Unexpected error", { description: `An unexpected error occurred: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.` });
     } finally {
       setIsLoading(false);
     }
@@ -173,21 +149,13 @@ const Settings = () => {
   const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        toast({
-          title: "File too large",
-          description: "Logo must be at most 5MB.",
-          variant: "destructive"
-        });
+      if (file.size > UPLOAD_LIMITS.LOGO_MAX_MB * 1024 * 1024) {
+        notify.error("File too large", { description: `Logo must be at most ${UPLOAD_LIMITS.LOGO_MAX_MB}MB.` });
         return;
       }
 
       if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Invalid file format",
-          description: "Only image files are allowed.",
-          variant: "destructive"
-        });
+        notify.error("Invalid file format", { description: "Only image files are allowed." });
         return;
       }
 
@@ -196,17 +164,10 @@ const Settings = () => {
         const logoUrl = await uploadCompanyLogo(file);
         setLogoPreview(logoUrl);
         
-        toast({
-          title: "Logo uploaded",
-          description: "The logo has been uploaded. Remember to save to keep the changes.",
-        });
+        notify.success("Logo uploaded", { description: "The logo has been uploaded. Remember to save to keep the changes." });
       } catch (error) {
         console.error('Error uploading logo:', error);
-        toast({
-          title: "Upload error",
-          description: "Failed to upload logo. Please try again.",
-          variant: "destructive",
-        });
+        notify.error("Upload error", { description: "Failed to upload logo. Please try again." });
       } finally {
         setIsLoading(false);
       }
@@ -216,21 +177,13 @@ const Settings = () => {
   const handleProfileImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) { // 2MB limit for profile images
-        toast({
-          title: "File too large",
-          description: "Profile image must be at most 2MB.",
-          variant: "destructive"
-        });
+      if (file.size > UPLOAD_LIMITS.PROFILE_IMG_MAX_MB * 1024 * 1024) {
+        notify.error("File too large", { description: `Profile image must be at most ${UPLOAD_LIMITS.PROFILE_IMG_MAX_MB}MB.` });
         return;
       }
 
       if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Invalid file format",
-          description: "Only image files are allowed.",
-          variant: "destructive"
-        });
+        notify.error("Invalid file format", { description: "Only image files are allowed." });
         return;
       }
 
@@ -239,17 +192,10 @@ const Settings = () => {
         const imageUrl = await uploadProfileImage(file);
         setProfileImagePreview(imageUrl);
         
-        toast({
-          title: "Profile image uploaded",
-          description: "Profile image uploaded. Remember to save to keep the changes.",
-        });
+        notify.success("Profile image uploaded", { description: "Profile image uploaded. Remember to save to keep the changes." });
       } catch (error) {
         console.error('Error uploading profile image:', error);
-        toast({
-          title: "Upload error",
-          description: "Failed to upload profile image. Please try again.",
-          variant: "destructive",
-        });
+        notify.error("Upload error", { description: "Failed to upload profile image. Please try again." });
       } finally {
         setIsLoading(false);
       }

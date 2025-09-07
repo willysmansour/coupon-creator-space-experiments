@@ -22,7 +22,7 @@ import {
   AlertDialogTitle, 
   AlertDialogTrigger 
 } from "@/components/ui/alert-dialog";
-import { toast } from 'sonner';
+import { notify } from '@/lib/notify';
 import { useState } from 'react';
 import { LoadingSection } from "@/components/ui/loading";
 
@@ -54,19 +54,19 @@ const Uploads = () => {
             
             if (emailError || !emailResult?.success) {
               console.error('Email error:', emailError || emailResult);
-              toast.success(`${upload.customer_name} was approved but the email failed to send.`);
+              notify.success(`${upload.customer_name} was approved but the email failed to send.`);
             } else {
-              toast.success(`${upload.customer_name} was approved and the coupon email was sent!`);
+              notify.success(`${upload.customer_name} was approved and the coupon email was sent!`);
             }
           } catch (emailError) {
             console.error('Email error:', emailError);
-            toast.success(`${upload.customer_name} was approved but the email failed to send.`);
+            notify.success(`${upload.customer_name} was approved but the email failed to send.`);
           }
         } else {
-          toast.success(`Upload approved. A coupon will be created when the customer provides details.`);
+          notify.success(`Upload approved. A coupon will be created when the customer provides details.`);
         }
       } catch (error) {
-        toast.error('Failed to approve upload');
+        notify.error('Failed to approve upload');
       }
     }
   };
@@ -76,9 +76,9 @@ const Uploads = () => {
     if (upload) {
       try {
         await updateUploadStatus.mutateAsync({ id, status: 'rejected' });
-        toast.success(`${upload.customer_name || 'Upload'} was rejected.`);
+        notify.success(`${upload.customer_name || 'Upload'} was rejected.`);
       } catch (error) {
-        toast.error('Failed to reject upload');
+        notify.error('Failed to reject upload');
       }
     }
   };
@@ -88,9 +88,9 @@ const Uploads = () => {
     if (upload) {
       try {
         await deleteUpload.mutateAsync(id);
-        toast.success(`Upload from ${upload.customer_name || 'unknown customer'} was removed`);
+        notify.success(`Upload from ${upload.customer_name || 'unknown customer'} was removed`);
       } catch (error) {
-        toast.error('Failed to delete upload');
+        notify.error('Failed to delete upload');
       }
     }
   };
@@ -212,10 +212,10 @@ const Uploads = () => {
                           {new Date(submission.submitted_at).toLocaleDateString('en-GB')}
                         </p>
                         
-                        {submission.message && (
+                        {submission.message && submission.message.trim() !== 'Uploaded content' && (
                           <div className="mb-3">
                             <p className="text-xs text-muted-foreground mb-1">Customer Review:</p>
-                            <p className="text-sm text-foreground line-clamp-2">
+                            <p className="text-sm text-foreground whitespace-pre-wrap">
                               "{submission.message}"
                             </p>
                           </div>
@@ -263,6 +263,14 @@ const Uploads = () => {
                                 alt={`Image from ${submission.customer_name || 'customer'}`}
                                 className="w-full h-auto max-h-[80vh] object-contain"
                               />
+                              {submission.message && submission.message.trim() !== 'Uploaded content' && (
+                                <div className="mt-4">
+                                  <p className="text-xs text-muted-foreground mb-1">Customer Review:</p>
+                                  <p className="text-sm text-foreground whitespace-pre-wrap">
+                                    "{submission.message}"
+                                  </p>
+                                </div>
+                              )}
                             </DialogContent>
                           </Dialog>
 

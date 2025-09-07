@@ -1,5 +1,5 @@
 // Error handling utilities to replace console statements
-import { toast } from 'sonner';
+import { notify } from '@/lib/notify';
 
 export interface ErrorWithMessage {
   message: string;
@@ -50,7 +50,7 @@ export function handleError(error: unknown, userMessage: string): void {
   logError(userMessage, error);
   
   // Show user-friendly message
-  toast.error(userMessage);
+  notify.error(userMessage);
 }
 
 // API error handling
@@ -61,7 +61,7 @@ export function handleApiError(error: unknown, operation: string): void {
   logError(`API Error in ${operation}`, error);
   
   // Show user-friendly message
-  toast.error(`Failed to ${operation}. Please try again.`);
+  notify.error(`Failed to ${operation}. Please try again.`);
 }
 
 // Validation error handling
@@ -72,7 +72,7 @@ export function handleValidationError(error: unknown, field: string): void {
   logError(`Validation Error in ${field}`, error);
   
   // Show user-friendly message
-  toast.error(`Please check your ${field} and try again.`);
+  notify.error(`Please check your ${field} and try again.`);
 }
 
 // Upload error handling
@@ -83,7 +83,7 @@ export function handleUploadError(error: unknown, fileType: string): void {
   logError(`Upload Error for ${fileType}`, error);
   
   // Show user-friendly message
-  toast.error(`Failed to upload ${fileType}. Please try again.`);
+  notify.error(`Failed to upload ${fileType}. Please try again.`);
 }
 
 // Authentication error handling
@@ -94,5 +94,5 @@ export function handleAuthError(error: unknown, operation: string): void {
   logError(`Auth Error in ${operation}`, error);
   
   // Show user-friendly message
-  toast.error(`Authentication failed. Please try again.`);
+  notify.error(`Authentication failed. Please try again.`);
 }

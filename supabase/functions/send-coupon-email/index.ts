@@ -6,12 +6,17 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.56.0'
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-app-origin",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+const allowedOrigins = (Deno.env.get('APP_ALLOWED_ORIGINS') || '').split(',').map(o => o.trim()).filter(Boolean)
+const getCorsHeaders = (origin?: string) => ({
+  'Access-Control-Allow-Origin': origin && (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) ? origin : '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-app-origin',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+})
+const isOriginAllowed = (req: Request) => {
+  if (allowedOrigins.length === 0) return true
+  const origin = req.headers.get('origin') || req.headers.get('x-app-origin') || ''
+  return !!origin && allowedOrigins.includes(origin)
+}
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL') ?? '',
@@ -24,13 +29,30 @@ interface EmailRequest {
   customerEmail: string;
 }
 
+function randomUppercase(len: number) {
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+  const bytes = new Uint8Array(len)
+  crypto.getRandomValues(bytes)
+  let out = ''
+  for (let i = 0; i < len; i++) {
+    out += alphabet[bytes[i] % alphabet.length]
+  }
+  return out
+}
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    const origin = req.headers.get('origin') || req.headers.get('x-app-origin') || '*'
+    return new Response(null, { headers: getCorsHeaders(origin) });
   }
 
   try {
+    if (!isOriginAllowed(req)) {
+      const origin = req.headers.get('origin') || req.headers.get('x-app-origin') || ''
+      return new Response(JSON.stringify({ error: 'Origin not allowed' }), { status: 403, headers: { ...getCorsHeaders(origin), 'Content-Type': 'application/json' } })
+    }
+
     const { uploadId, customerName, customerEmail }: EmailRequest = await req.json();
     
     console.log('Processing email request for upload:', uploadId);
@@ -67,8 +89,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Create coupon if it doesn't exist and upload is approved
     if (!existingCoupon && upload.status === 'approved') {
-      // Generate unique coupon code
-      const couponCode = `SAVE${company.discount_percentage || 15}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+      // Generate stronger, non-guessable coupon code
+      const couponCode = `SAVE${company.discount_percentage || 15}-${randomUppercase(8)}`;
       
       // Set expiration date (30 days from now)
       const expiresAt = new Date();
@@ -98,12 +120,13 @@ const handler = async (req: Request): Promise<Response> => {
     // Don't send email if upload is not approved yet
     if (upload.status !== 'approved' || !existingCoupon) {
       console.log('Upload not approved or no coupon, skipping email');
+      const origin = req.headers.get('origin') || req.headers.get('x-app-origin') || '*'
       return new Response(JSON.stringify({ 
         message: 'Upload not approved yet, email will be sent when approved',
         needsApproval: true 
       }), {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
+        headers: { "Content-Type": "application/json", ...getCorsHeaders(origin) },
       });
     }
 
@@ -196,22 +219,24 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Email sent successfully:", emailResponse);
 
+    const origin = req.headers.get('origin') || req.headers.get('x-app-origin') || '*'
     return new Response(JSON.stringify({ 
       success: true, 
       couponId: existingCoupon.id,
       emailId: emailResponse.id
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
+      headers: { "Content-Type": "application/json", ...getCorsHeaders(origin) },
     });
 
   } catch (error: any) {
     console.error("Error in send-coupon-email function:", error);
+    const origin = req.headers.get('origin') || req.headers.get('x-app-origin') || '*'
     return new Response(
       JSON.stringify({ error: error.message }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
+        headers: { "Content-Type": "application/json", ...getCorsHeaders(origin) },
       }
     );
   }

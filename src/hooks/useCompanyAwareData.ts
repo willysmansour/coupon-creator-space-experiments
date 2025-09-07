@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useUserRole } from './useAuth';
+import { useUserRole } from '@/domains/auth';
 import type { Campaign, Upload, Coupon, Company } from '@/types';
 
 // Company-aware data hooks that filter based on user role and company

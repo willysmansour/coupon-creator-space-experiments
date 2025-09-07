@@ -15,7 +15,7 @@ import {
 import { Download, Eye, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useUploads, useDeleteUpload } from "@/hooks/useSupabaseData";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import { LoadingSection } from "@/components/ui/loading";
 
 export const ImageGallery = () => {
@@ -32,7 +32,7 @@ export const ImageGallery = () => {
       // Fetch image as blob
       const response = await fetch(imageUrl);
       if (!response.ok) {
-        throw new Error('Kunde inte hämta bilden');
+        throw new Error('Could not fetch image');
       }
       
       const blob = await response.blob();
@@ -57,19 +57,19 @@ export const ImageGallery = () => {
       // Revoke blob URL
       URL.revokeObjectURL(blobUrl);
       
-      toast.success('Image downloaded successfully');
+      notify.success('Image downloaded successfully');
     } catch (error) {
       console.error('Download error:', error);
-      toast.error('Failed to download image');
+      notify.error('Failed to download image');
     }
   };
 
   const handleDelete = async (uploadId: string, customerName: string) => {
     try {
       await deleteUpload.mutateAsync(uploadId);
-      toast.success(`Image from ${customerName} has been removed`);
+      notify.success(`Image from ${customerName} has been removed`);
     } catch (error) {
-      toast.error('Failed to remove image');
+      notify.error('Failed to remove image');
     }
   };
 
@@ -168,7 +168,7 @@ export const ImageGallery = () => {
                            <AlertDialogFooter>
                              <AlertDialogCancel>Cancel</AlertDialogCancel>
                              <AlertDialogAction
-                               onClick={() => handleDelete(image.id, image.customer_name || 'okänd kund')}
+                               onClick={() => handleDelete(image.id, image.customer_name || 'unknown customer')}
                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                              >
                                Delete
@@ -189,7 +189,7 @@ export const ImageGallery = () => {
                         <p className="text-xs text-muted-foreground mb-2">
                           {new Date(image.submitted_at).toLocaleDateString('en-GB')}
                         </p>
-                        {image.message && (
+                        {image.message && image.message.trim() !== 'Uploaded content' && (
                           <p className="text-xs text-muted-foreground italic">
                             "{image.message}"
                           </p>

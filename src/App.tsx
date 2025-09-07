@@ -1,4 +1,3 @@
-import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -7,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppProvider } from "@/contexts/AppContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Suspense, lazy } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/domains/auth";
 import { LoadingPage } from "@/components/ui/loading";
 
 // Lazy load heavy pages for better performance
@@ -46,7 +45,6 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AppProvider>
-          <Toaster />
           <Sonner />
           <BrowserRouter>
             <Routes>

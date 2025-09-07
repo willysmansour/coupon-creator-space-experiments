@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LogOut, ArrowLeft } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { notify } from "@/lib/notify";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 
 const Logout = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  
   const queryClient = useQueryClient();
 
   const handleLogout = async () => {
@@ -19,11 +19,7 @@ const Logout = () => {
       
       if (error) {
         console.error('Logout error:', error);
-        toast({
-          title: "Logout error",
-          description: "Failed to sign out properly. Please try again.",
-          variant: "destructive",
-        });
+        notify.error("Logout error", { description: "Failed to sign out properly. Please try again." });
         return;
       }
 
@@ -34,20 +30,13 @@ const Logout = () => {
       localStorage.clear();
       sessionStorage.clear();
       
-      toast({
-        title: "Signed out",
-        description: "You have been signed out of your account.",
-      });
+      notify.success("Signed out", { description: "You have been signed out of your account." });
       
       // Redirect to home page
       navigate("/");
     } catch (error) {
       console.error('Unexpected logout error:', error);
-      toast({
-        title: "Unexpected error",
-        description: "An unexpected error occurred during logout.",
-        variant: "destructive",
-      });
+      notify.error("Unexpected error", { description: "An unexpected error occurred during logout." });
     }
   };
 

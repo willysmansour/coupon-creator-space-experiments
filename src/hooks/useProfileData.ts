@@ -57,7 +57,7 @@ export const useUpsertProfile = () => {
     mutationFn: async (profile: Partial<Profile>) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        throw new Error("Du är inte inloggad.");
+        throw new Error("You are not signed in.");
       }
 
       const payload = { ...profile, user_id: user.id };
